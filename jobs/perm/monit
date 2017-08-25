@@ -1,0 +1,5 @@
+check process perm
+  with pidfile /var/vcap/sys/run/bpm/perm/perm.pid
+  start program "/var/vcap/packages/bpm/bin/bpm start perm"
+  stop program "/var/vcap/packages/bpm/bin/bpm stop perm"
+  group vcap

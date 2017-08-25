@@ -1,0 +1,6 @@
+---
+name: perm
+dependencies:
+- golang
+files:
+- perm/**/*.go

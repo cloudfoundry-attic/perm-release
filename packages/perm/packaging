@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eux
+
+export GOPATH="$BOSH_INSTALL_TARGET"
+
+mkdir -p "${GOPATH}/src"
+cp -a * "${GOPATH}/src"
+
+/var/vcap/packages/golang/bin/go install perm/cmd/perm
+
+rm -rf "${BOSH_INSTALL_TARGET}/src" "${BOSH_INSTALL_TARGET}/pkg"

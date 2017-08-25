@@ -1,0 +1,7 @@
+---
+name: perm
+templates:
+  perm.yml.erb: config/bpm/perm.yml
+packages:
+- perm
+properties: {}
