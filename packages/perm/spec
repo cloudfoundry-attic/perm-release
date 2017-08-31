@@ -3,4 +3,4 @@ name: perm
 dependencies:
 - golang
 files:
-- perm/**/*.go
+- code.cloudfoundry.org/perm/**/*.go
