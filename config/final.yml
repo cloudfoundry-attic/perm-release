@@ -1,1 +1,4 @@
-name: perm
+blobstore:
+  provider: gcs
+  options:
+    bucket_name: perm-release-blobs
