@@ -1,4 +1,5 @@
 blobstore:
   provider: gcs
   options:
+    credentials_source: none
     bucket_name: perm-release-blobs
