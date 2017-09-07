@@ -1,3 +1,4 @@
+name: perm
 blobstore:
   provider: gcs
   options:
