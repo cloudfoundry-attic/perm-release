@@ -1,0 +1,20 @@
+processes:
+  perm:
+    executable: /var/vcap/packages/perm/bin/perm
+
+    args:
+    - --listen-hostname
+    - <%= p('listen_hostname') %>
+    - --listen-port
+    - <%= p('listen_port') %>
+
+    env: []
+
+    limits:
+      memory: 256M
+      processes: 10
+      open_files: 100
+
+    volumes: []
+
+    hooks: {}

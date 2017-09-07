@@ -1,7 +1,13 @@
 ---
 name: perm
 templates:
-  perm.yml.erb: config/bpm/perm.yml
+  bpm.yml.erb: config/bpm.yml
 packages:
 - perm
-properties: {}
+properties:
+  listen_hostname:
+    description: Hostname on which to listen for gRPC traffic
+    default: 0.0.0.0
+  listen_port:
+    description: Port on which to listen for gRPC traffic
+    default: 6283
