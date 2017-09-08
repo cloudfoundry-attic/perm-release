@@ -4,6 +4,13 @@ templates:
   bpm.yml.erb: config/bpm.yml
 packages:
 - perm
+
+provides:
+- name: perm
+  type: perm
+  properties:
+  - listen_port
+
 properties:
   listen_hostname:
     description: Hostname on which to listen for gRPC traffic
