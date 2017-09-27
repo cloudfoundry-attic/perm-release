@@ -18,3 +18,6 @@ properties:
   listen_port:
     description: Port on which to listen for gRPC traffic
     default: 6283
+  log_level:
+    description: The log level for the Perm server.
+    default: info
