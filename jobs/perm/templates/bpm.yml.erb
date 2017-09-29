@@ -9,6 +9,10 @@ processes:
     - <%= p('listen_port') %>
     - --log-level
     - <%= p('log_level') %>
+    - --tls-certificate
+    - /var/vcap/jobs/perm/config/certs/tls.crt
+    - --tls-key
+    - /var/vcap/jobs/perm/config/certs/tls.key
 
     env: []
 
