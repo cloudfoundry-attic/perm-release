@@ -3,6 +3,9 @@ name: perm
 templates:
   bpm.yml.erb: config/bpm.yml
   dns_health_check.erb: bin/dns_health_check
+  tls-ca.crt.erb: config/certs/tls-ca.crt
+  tls.crt.erb: config/certs/tls.crt
+  tls.key.erb: config/certs/tls.key
 packages:
 - perm
 
@@ -22,3 +25,19 @@ properties:
   log_level:
     description: The log level for the Perm server.
     default: info
+  tls:
+    description: Certificate and private key for TLS connection to Perm server
+    type: certificate
+    example: |
+      ca: |
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+      certificate: |
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+      private_key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        ...
+        -----END RSA PRIVATE KEY-----
