@@ -1,0 +1,8 @@
+#!/bin/bash
+
+LISTEN_PORT="<%= p("listen_port") %>"
+
+# https://www.consul.io/docs/agent/checks.html#check-scripts
+if ! lsof -i ":${LISTEN_PORT}" -s TCP:LISTEN; then
+  exit 2 # Exit higher than 1 to ensure service is registered as 'failing'
+fi
