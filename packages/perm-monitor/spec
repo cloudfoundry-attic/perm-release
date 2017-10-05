@@ -1,0 +1,6 @@
+---
+name: perm-monitor
+dependencies:
+- golang
+files:
+- code.cloudfoundry.org/perm/**/*.go

@@ -1,0 +1,28 @@
+processes:
+  perm:
+    executable: /var/vcap/packages/perm-monitor/bin/perm-monitor
+
+    args:
+    - --log-level
+    - <%= p('log_level') %>
+    - --perm-hostname
+    - <%= p('perm.hostname') %>
+    - --perm-port
+    - <%= link('perm').p('listening_port')
+    - --perm-ca-certificate
+    - /var/vcap/jobs/perm-monitor/config/certs/perm_ca.crt
+    - --statsd-hostname
+    - <%= p('statsd.hostname') %>
+    - --statsd-port
+    - <%= p('statsd.port') %>
+
+    env: []
+
+    limits:
+      memory: 256M
+      processes: 100
+      open_files: 524
+
+    volumes: []
+
+    hooks: {}

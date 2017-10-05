@@ -1,0 +1,5 @@
+check process perm-monitor
+  with pidfile /var/vcap/sys/run/bpm/perm-monitor/perm-monitor.pid
+  start program "/var/vcap/packages/bpm/bin/bpm start perm-monitor"
+  stop program "/var/vcap/packages/bpm/bin/bpm stop perm-monitor"
+  group vcap

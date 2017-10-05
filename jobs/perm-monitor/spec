@@ -1,0 +1,27 @@
+---
+name: perm-monitor
+templates:
+  bpm.yml.erb: config/bpm.yml
+  perm_ca.crt.erb: config/certs/perm_ca.crt
+
+packages:
+- perm-monitor
+
+consumes:
+- name: perm
+  type: perm
+
+properties:
+  perm.hostname:
+    description: "Hostname used to resolve the address of Perm"
+    default: "perm.service.cf.internal"
+  perm.ca_certs:
+    description: "An array of certificate authorities being used by Perm. Allows multiple in case of rotation."
+    default: []
+
+  statsd.hostname:
+    description: "Hostname used to connect to StatsD server"
+    default: "localhost"
+  statsd.port:
+    description: "Port used to connect to StatsD server"
+    default: 8125
