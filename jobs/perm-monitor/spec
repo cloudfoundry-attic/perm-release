@@ -12,6 +12,10 @@ consumes:
   type: perm
 
 properties:
+  log_level:
+    description: The log level for the Perm monitor.
+    default: info
+
   perm.hostname:
     description: "Hostname used to resolve the address of Perm"
     default: "perm.service.cf.internal"
