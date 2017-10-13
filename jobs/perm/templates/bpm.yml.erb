@@ -13,6 +13,18 @@ processes:
     - /var/vcap/jobs/perm/config/certs/tls.crt
     - --tls-key
     - /var/vcap/jobs/perm/config/certs/tls.key
+    - --sql-db-driver
+    - <%= p('sql.db.driver') %>
+    - --sql-db-host
+    - <%= p('sql.db.host') %>
+    - --sql-db-port
+    - <%= p('sql.db.port') %>
+    - --sql-db-schema
+    - <%= p('sql.db.schema') %>
+    - --sql-db-username
+    - <%= p('sql.db.username') %>
+    - --sql-db-password
+    - <%= p('sql.db.password') %>
 
     env: []
 
