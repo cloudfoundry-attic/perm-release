@@ -1,6 +1,6 @@
 processes:
   - name: perm-monitor
-    executable: /var/vcap/packages/perm-monitor/bin/perm-monitor
+    executable: /var/vcap/jobs/perm-monitor/bin/perm-monitor
 
     args:
     - --log-level
@@ -16,15 +16,7 @@ processes:
     - --statsd-port
     - <%= p('statsd.port') %>
 
-    env: {}
-
     limits:
       memory: 256M
       processes: 100
       open_files: 524
-
-    additional_volumes: []
-
-    hooks: {}
-
-    capabilities: []

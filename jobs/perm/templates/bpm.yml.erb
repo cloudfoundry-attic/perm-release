@@ -1,6 +1,6 @@
 processes:
   - name: perm
-    executable: /var/vcap/packages/perm/bin/perm
+    executable: /var/vcap/jobs/perm/bin/perm
 
     args:
     - serve
@@ -27,15 +27,7 @@ processes:
     - --sql-db-password
     - <%= p('sql.db.password') %>
 
-    env: {}
-
     limits:
       memory: 256M
       processes: 100
       open_files: 524
-
-    additional_volumes: []
-
-    hooks: {}
-
-    capabilities: []

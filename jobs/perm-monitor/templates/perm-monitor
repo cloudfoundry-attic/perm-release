@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/var/vcap/packages/perm-monitor/bin/perm-monitor "$@"
