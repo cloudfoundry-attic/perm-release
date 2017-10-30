@@ -1,6 +1,6 @@
 ---
 name: perm
 dependencies:
-- golang
+- golang-1.9-linux
 files:
 - code.cloudfoundry.org/perm/**/*.go

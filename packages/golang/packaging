@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -eu
-
-goversion=1.9.1
-
-tar -zxf "golang/go${goversion}.linux-amd64.tar.gz"
-cp -R go/* "$BOSH_INSTALL_TARGET"
