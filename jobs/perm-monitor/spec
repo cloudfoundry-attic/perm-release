@@ -3,6 +3,7 @@ name: perm-monitor
 templates:
   bpm.yml.erb: config/bpm.yml
   perm_ca.crt.erb: config/certs/perm_ca.crt
+  perm-monitor: bin/perm-monitor
 
 packages:
 - perm-monitor
