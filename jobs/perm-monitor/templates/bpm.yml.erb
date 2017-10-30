@@ -16,13 +16,15 @@ processes:
     - --statsd-port
     - <%= p('statsd.port') %>
 
-    env: []
+    env: {}
 
     limits:
       memory: 256M
       processes: 100
       open_files: 524
 
-    volumes: []
+    additional_volumes: []
 
     hooks: {}
+
+    capabilities: []

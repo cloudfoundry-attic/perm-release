@@ -27,13 +27,15 @@ processes:
     - --sql-db-password
     - <%= p('sql.db.password') %>
 
-    env: []
+    env: {}
 
     limits:
       memory: 256M
       processes: 100
       open_files: 524
 
-    volumes: []
+    additional_volumes: []
 
     hooks: {}
+
+    capabilities: []
