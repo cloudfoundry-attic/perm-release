@@ -4,7 +4,7 @@ set -eu
 
 <% if spec.bootstrap %>
 /var/vcap/jobs/perm/bin/perm migrate \
-  --log-level <%= p('listen_port') %> \
+  --log-level <%= p('log_level') %> \
   --sql-db-driver <%= p('sql.db.driver') %> \
   --sql-db-host <%= p('sql.db.host') %> \
   --sql-db-port <%= p('sql.db.port') %> \
