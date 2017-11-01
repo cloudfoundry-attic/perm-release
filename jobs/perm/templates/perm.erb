@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -e
 
 <% if spec.bootstrap %>
 /var/vcap/jobs/perm/bin/perm migrate up \
@@ -12,3 +12,5 @@ set -eu
   --sql-db-username <%= p('sql.db.username') %> \
   --sql-db-password <%= p('sql.db.password') %>
 <% end %>
+
+/var/vcap/packages/perm/bin/perm "$@"
