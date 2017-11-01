@@ -3,7 +3,7 @@
 set -e
 
 <% if spec.bootstrap %>
-/var/vcap/jobs/perm/bin/perm migrate up \
+/var/vcap/packages/perm/bin/perm migrate up \
   --log-level <%= p('log_level') %> \
   --sql-db-driver <%= p('sql.db.driver') %> \
   --sql-db-host <%= p('sql.db.host') %> \
