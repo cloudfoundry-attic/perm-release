@@ -20,9 +20,21 @@
   version = "v1.3.0"
 
 [[projects]]
+  name = "github.com/onsi/ginkgo"
+  packages = [".","config","internal/codelocation","internal/containernode","internal/failer","internal/leafnodes","internal/remote","internal/spec","internal/spec_iterator","internal/specrunner","internal/suite","internal/testingtproxy","internal/writer","reporters","reporters/stenographer","reporters/stenographer/support/go-colorable","reporters/stenographer/support/go-isatty","types"]
+  revision = "9eda700730cba42af70d53180f9dcce9266bc2bc"
+  version = "v1.4.0"
+
+[[projects]]
+  name = "github.com/onsi/gomega"
+  packages = [".","format","internal/assertion","internal/asyncassertion","internal/oraclematcher","internal/testingtsupport","matchers","matchers/support/goraph/bipartitegraph","matchers/support/goraph/edge","matchers/support/goraph/node","matchers/support/goraph/util","types"]
+  revision = "c893efa28eb45626cdaa76c9f653b62488858837"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp"]
+  packages = ["context","context/ctxhttp","html","html/atom","html/charset"]
   revision = "a337091b0525af65de94df2eb7e98bd9962dcbe2"
 
 [[projects]]
@@ -30,6 +42,18 @@
   name = "golang.org/x/oauth2"
   packages = [".","clientcredentials","internal"]
   revision = "9ff8ebcc8e241d46f52ecc5bff0e5a2f2dbef402"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "75813c647272dd855bda156405bf844a5414f5bf"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/text"
+  packages = ["encoding","encoding/charmap","encoding/htmlindex","encoding/internal","encoding/internal/identifier","encoding/japanese","encoding/korean","encoding/simplifiedchinese","encoding/traditionalchinese","encoding/unicode","internal/gen","internal/tag","internal/utf8internal","language","runes","transform","unicode/cldr"]
+  revision = "88f656faf3f37f690df1a32515b479415e1a6769"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -46,6 +70,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3afb797b8293bfb970bd71d915758797a5629a482bdfe8016c94e390211fdf93"
+  inputs-digest = "b6e8fd0c7e3bda1219d9cb4c831a5ce8b59ffac8f4b02d3a8653435f5b7c4001"
   solver-name = "gps-cdcl"
   solver-version = 1

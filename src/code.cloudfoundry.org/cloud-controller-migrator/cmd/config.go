@@ -10,15 +10,15 @@ import (
 )
 
 type Config struct {
-	Logger LagerConfig
+	Logger LagerConfig `yaml:",inline"`
 
 	UAA             uaaConfig `yaml:"uaa"`
 	CloudController ccConfig  `yaml:"cloud_controller"`
 }
 
 type uaaConfig struct {
-	URL        string `yaml:"url"`
-	CACertPath string `yaml:"ca_cert_path"`
+	URL        string           `yaml:"url"`
+	CACertPath FileOrStringFlag `yaml:"ca_cert_path"`
 }
 
 type ccConfig struct {

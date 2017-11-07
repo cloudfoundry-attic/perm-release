@@ -13,6 +13,12 @@ import (
 	"fmt"
 	"net/http/httputil"
 
+	"crypto/x509"
+
+	"errors"
+
+	"bytes"
+
 	"code.cloudfoundry.org/cloud-controller-migrator/cmd"
 	"code.cloudfoundry.org/lager"
 	flags "github.com/jessevdk/go-flags"
@@ -21,7 +27,7 @@ import (
 )
 
 type options struct {
-	ConfigFilePath string `long:"config-file-path" description:"Path to the config file for the CloudController migrator" required:"true"`
+	ConfigFilePath cmd.FileOrStringFlag `long:"config-file-path" description:"Path to the config file for the CloudController migrator" required:"true"`
 }
 
 func main() {
@@ -35,21 +41,36 @@ func main() {
 		os.Exit(1)
 	}
 
-	f, err := os.Open(parserOpts.ConfigFilePath)
+	configFileContents, err := parserOpts.ConfigFilePath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
 		panic(err)
 	}
-	defer f.Close()
 
-	config, err := cmd.NewConfig(f)
+	config, err := cmd.NewConfig(bytes.NewReader(configFileContents))
 	if err != nil {
 		panic(err)
 	}
 
 	logger, _ := config.Logger.Logger("cloud-controller-migrator")
 
+	uaaCACert, err := config.UAA.CACertPath.Bytes(cmd.OS, cmd.IOReader)
+	if err != nil {
+		logger.Error("failed-to-read-uaa-ca-cert", err)
+		panic(err)
+	}
+
+	caCertPool := x509.NewCertPool()
+	ok := caCertPool.AppendCertsFromPEM(uaaCACert)
+	if !ok {
+		logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"), lager.Data{
+			"path": config.UAA.CACertPath,
+		})
+	}
+
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{
+			RootCAs: caCertPool,
+		},
 	}
 	sslcli := &http.Client{Transport: tr}
 
