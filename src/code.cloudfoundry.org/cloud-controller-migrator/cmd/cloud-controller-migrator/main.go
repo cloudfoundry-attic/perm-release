@@ -8,11 +8,6 @@ import (
 
 	"net/http"
 
-	"net/url"
-
-	"fmt"
-	"net/http/httputil"
-
 	"crypto/x509"
 
 	"errors"
@@ -20,6 +15,7 @@ import (
 	"bytes"
 
 	"code.cloudfoundry.org/cloud-controller-migrator/cmd"
+	"code.cloudfoundry.org/cloud-controller-migrator/httpx"
 	"code.cloudfoundry.org/lager"
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/oauth2"
@@ -74,7 +70,7 @@ func main() {
 	}
 	sslcli := &http.Client{Transport: tr}
 
-	tokenURL, err := JoinURL(logger, config.UAA.URL, "/oauth/token")
+	tokenURL, err := httpx.JoinURL(logger, config.UAA.URL, "/oauth/token")
 	if err != nil {
 		panic(err)
 	}
@@ -90,48 +86,8 @@ func main() {
 
 	client := uaaConfig.Client(ctx)
 
-	infoURL, err := JoinURL(logger, config.CloudController.URL, "/v2/info")
+	err = cmd.IterateOverCloudControllerEntities(ctx, logger, os.Stdout, client, config.CloudController.URL)
 	if err != nil {
 		panic(err)
 	}
-
-	req, err := http.NewRequest("GET", infoURL.String(), nil)
-	if err != nil {
-		panic(err)
-	}
-
-	req.Header.Add("Accept", "application/json")
-
-	res, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-
-	b, err := httputil.DumpResponse(res, true)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(string(b))
-}
-
-func JoinURL(logger lager.Logger, base string, path string) (*url.URL, error) {
-	logger = logger.Session("join-url").WithData(lager.Data{
-		"base": base,
-		"path": path,
-	})
-
-	b, err := url.Parse(base)
-	if err != nil {
-		logger.Error("failed-to-parse-base", err)
-		return nil, err
-	}
-
-	p, err := url.Parse(path)
-	if err != nil {
-		logger.Error("failed-to-parse-path", err)
-		return nil, err
-	}
-
-	return b.ResolveReference(p), nil
 }
