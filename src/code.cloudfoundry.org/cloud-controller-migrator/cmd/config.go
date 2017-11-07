@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	LogLevel string `yaml:"log_level"`
+	Logger LagerConfig
 
 	UAA             uaaConfig `yaml:"uaa"`
 	CloudController ccConfig  `yaml:"cloud_controller"`
