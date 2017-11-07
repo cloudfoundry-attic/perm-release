@@ -41,7 +41,7 @@ func main() {
 
 	config, err := cmd.NewConfig(f)
 	if err != nil {
-		os.Exit(1)
+		panic(err)
 	}
 
 	tr := &http.Transport{
@@ -58,7 +58,7 @@ func main() {
 		ClientID:     config.CloudController.ClientID,
 		ClientSecret: config.CloudController.ClientSecret,
 		TokenURL:     tokenURL.String(),
-		Scopes:       []string{"cloud_controller.admin_read_only"},
+		Scopes:       config.CloudController.ClientScopes,
 	}
 
 	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, sslcli)
