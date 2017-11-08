@@ -14,20 +14,15 @@ import (
 	"code.cloudfoundry.org/lager"
 )
 
-func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger, w io.Writer, client *http.Client, url string) error {
+func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger, w io.Writer, client *http.Client, host string) error {
 	logger = logger.Session("iterate-over-cloud-controller-entities").WithData(lager.Data{
-		"url": url,
+		"host": host,
 	})
 
-	rg := cloudcontroller.NewRequestGenerator(url)
-
-	routerLogger := logger.WithData(lager.Data{
-		"routes": rg.Routes,
-	})
+	rg := cloudcontroller.NewRequestGenerator(host)
 
 	var (
 		route string
-		req   *http.Request
 		res   *http.Response
 		err   error
 	)
@@ -37,57 +32,44 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	)
 
 	// /v2/info - Equivalent to Ping
-	route = cloudcontroller.Info
-	routeLogger = routerLogger.WithData(lager.Data{
+	route = "/v2/info"
+	routeLogger = logger.WithData(lager.Data{
 		"route": route,
 	})
-	req, err = rg.CreateRequest(route, nil, nil)
+	res, err = makeAPIRequest(routeLogger, client, rg, route)
 	if err != nil {
-		routeLogger.Error(messages.FailedToCreateRequest, err)
-		return err
-	}
-
-	res, err = client.Do(req)
-	if err != nil {
-		routeLogger.Error(messages.FailedToPerformRequest, err)
-
-		return err
-	}
-
-	if res.StatusCode >= 400 {
-		err = fmt.Errorf("HTTP bad response: %d", res.StatusCode)
-		routeLogger.Error("failed-to-ping-cloudcontroller", err)
 		return err
 	}
 
 	// List Organizations
+	route = "/v2/organizations"
+
 	var organizations []OrganizationResource
 
-	route = cloudcontroller.ListOrganizations
-	routeLogger = routerLogger.WithData(lager.Data{
-		"route": route,
-	})
-	req, err = rg.CreateRequest(route, nil, nil)
-	if err != nil {
-		routeLogger.Error(messages.FailedToCreateRequest, err)
-		return err
+	for {
+		routeLogger = logger.WithData(lager.Data{
+			"route": route,
+		})
+
+		res, err = makeAPIRequest(routeLogger, client, rg, route)
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
+
+		var listOrganizationsResponse ListOrganizationsResponse
+		err = json.NewDecoder(res.Body).Decode(&listOrganizationsResponse)
+		if err != nil {
+			routeLogger.Error("failed-to-decode-response", err)
+		}
+
+		organizations = append(organizations, listOrganizationsResponse.Resources...)
+		if listOrganizationsResponse.NextURL == nil {
+			break
+		} else {
+			route = *listOrganizationsResponse.NextURL
+		}
 	}
-
-	res, err = client.Do(req)
-	if err != nil {
-		routeLogger.Error(messages.FailedToPerformRequest, err)
-		return err
-	}
-
-	defer res.Body.Close()
-
-	var listOrganizationsResponse ListOrganizationsResponse
-	err = json.NewDecoder(res.Body).Decode(&listOrganizationsResponse)
-	if err != nil {
-		routeLogger.Error("failed-to-decode-response", err)
-	}
-
-	organizations = append(organizations, listOrganizationsResponse.Resources...)
 
 	for _, organization := range organizations {
 		fmt.Fprintf(w, "%s: %s\n", organization.Metadata.GUID, organization.Entity.Name)
@@ -97,7 +79,9 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 }
 
 type ListOrganizationsResponse struct {
-	Resources []OrganizationResource `json:"resources"`
+	NextURL     *string                `json:"next_url"`
+	PreviousURL *string                `json:"prev_url"`
+	Resources   []OrganizationResource `json:"resources"`
 }
 
 type OrganizationResource struct {
@@ -113,4 +97,26 @@ type OrganizationResource struct {
 		BillingManagersURL string `json:"billing_managers_url"`
 		AuditorsURL        string `json:"auditors_url"`
 	} `json:"entity"`
+}
+
+func makeAPIRequest(logger lager.Logger, client *http.Client, rg *cloudcontroller.RequestGenerator, route string) (*http.Response, error) {
+	req, err := rg.NewGetRequest(logger.Session("new-get-request"), route)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Debug("making-request")
+	res, err := client.Do(req)
+	if err != nil {
+		logger.Error(messages.FailedToPerformRequest, err)
+		return nil, err
+	}
+
+	if res.StatusCode >= 400 {
+		err = fmt.Errorf("HTTP bad response: %d", res.StatusCode)
+		logger.Error("failed-to-ping-cloudcontroller", err)
+		return nil, err
+	}
+
+	return res, nil
 }

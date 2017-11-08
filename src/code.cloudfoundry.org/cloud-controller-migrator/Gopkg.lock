@@ -9,12 +9,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/bmizerany/pat"
-  packages = ["."]
-  revision = "6226ea591a40176dd3ff9cd8eff81ed6ca721a00"
-
-[[projects]]
-  branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9"
@@ -36,12 +30,6 @@
   packages = [".","format","internal/assertion","internal/asyncassertion","internal/oraclematcher","internal/testingtsupport","matchers","matchers/support/goraph/bipartitegraph","matchers/support/goraph/edge","matchers/support/goraph/node","matchers/support/goraph/util","types"]
   revision = "c893efa28eb45626cdaa76c9f653b62488858837"
   version = "v1.2.0"
-
-[[projects]]
-  name = "github.com/tedsuo/rata"
-  packages = ["."]
-  revision = "0649c23705dfb45a9693b668c4fc1c0666f485d9"
-  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -82,6 +70,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "022351ef13aeb1608e1b1d99b68293ed85cb1363dcc6e2306251e7fbd9bde899"
+  inputs-digest = "b6e8fd0c7e3bda1219d9cb4c831a5ce8b59ffac8f4b02d3a8653435f5b7c4001"
   solver-name = "gps-cdcl"
   solver-version = 1

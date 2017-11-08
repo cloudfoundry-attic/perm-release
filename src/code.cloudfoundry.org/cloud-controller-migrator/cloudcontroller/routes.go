@@ -3,57 +3,35 @@ package cloudcontroller
 import (
 	"net/http"
 
-	"github.com/tedsuo/rata"
-)
-
-var Routes = rata.Routes{
-	{Name: Info, Path: "/v2/info", Method: rata.GET},
-
-	{Name: ListOrganizations, Path: "/v2/organizations", Method: rata.GET},
-	{Name: ListOrganizationSpaces, Path: "/v2/organizations/:guid/spaces", Method: rata.GET},
-	{Name: ListOrganizationAuditors, Path: "/v2/organizations/:guid/auditors", Method: rata.GET},
-	{Name: ListOrganizationBillingManagers, Path: "/v2/organizations/:guid/billing_managers", Method: rata.GET},
-	{Name: ListOrganizationManagers, Path: "/v2/organizations/:guid/managers", Method: rata.GET},
-	{Name: ListOrganizationUsers, Path: "/v2/organizations/:guid/users", Method: rata.GET},
-
-	{Name: ListSpaceAuditors, Path: "/v2/spaces/:guid/auditors", Method: rata.GET},
-	{Name: ListSpaceDevelopers, Path: "/v2/spaces/:guid/developers", Method: rata.GET},
-	{Name: ListSpaceManagers, Path: "/v2/spaces/:guid/managers", Method: rata.GET},
-}
-
-const (
-	Info = "info"
-
-	ListOrganizations = "list_organizations"
-
-	ListOrganizationSpaces = "list_organization_spaces"
-
-	ListOrganizationAuditors        = "list_organization_auditors"
-	ListOrganizationBillingManagers = "list_organization_billing_managers"
-	ListOrganizationManagers        = "list_organization_managers"
-	ListOrganizationUsers           = "list_organization_users"
-
-	ListSpaceAuditors   = "list_space_auditors"
-	ListSpaceDevelopers = "list_space_developers"
-	ListSpaceManagers   = "list_space_managers"
+	"code.cloudfoundry.org/cloud-controller-migrator/httpx"
+	"code.cloudfoundry.org/cloud-controller-migrator/messages"
+	"code.cloudfoundry.org/lager"
 )
 
 type RequestGenerator struct {
-	*rata.RequestGenerator
-
-	Routes rata.Routes
+	Host string
 }
 
 func NewRequestGenerator(host string) *RequestGenerator {
-	rg := rata.NewRequestGenerator(host, Routes)
-
-	header := http.Header{}
-	header.Add("Accept", "application/json")
-
-	rg.Header = header
-
 	return &RequestGenerator{
-		RequestGenerator: rg,
-		Routes:           Routes,
+		Host: host,
 	}
+}
+
+func (rg *RequestGenerator) NewGetRequest(logger lager.Logger, route string) (*http.Request, error) {
+	u, err := httpx.JoinURL(logger.Session("join-url"), rg.Host, route)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		logger.Error(messages.FailedToCreateRequest, err)
+		return nil, err
+
+	}
+
+	req.Header.Add("Accept", "application/json")
+
+	return req, nil
 }
