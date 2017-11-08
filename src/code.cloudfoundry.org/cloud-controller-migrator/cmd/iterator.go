@@ -9,10 +9,7 @@ import (
 
 	"encoding/json"
 
-	"bytes"
-
 	"code.cloudfoundry.org/cloud-controller-migrator/cloudcontroller"
-	"code.cloudfoundry.org/cloud-controller-migrator/messages"
 	"code.cloudfoundry.org/lager"
 )
 
@@ -20,8 +17,6 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	logger = logger.Session("iterate-over-cloud-controller-entities").WithData(lager.Data{
 		"host": host,
 	})
-
-	rg := cloudcontroller.NewRequestGenerator(host)
 
 	var (
 		route string
@@ -33,7 +28,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 	var organizations []cloudcontroller.OrganizationResource
 
-	err = makePaginatedAPIRequest(logger, client, rg, route, func(logger lager.Logger, r io.Reader) error {
+	err = cloudcontroller.MakePaginatedGetRequest(ctx, logger, client, host, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
 		var listOrganizationsResponse cloudcontroller.ListOrganizationsResponse
 		err = json.NewDecoder(r).Decode(&listOrganizationsResponse)
 		if err != nil {
@@ -56,7 +51,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	for _, organization := range organizations {
 		route = organization.Entity.SpacesURL
 
-		err = makePaginatedAPIRequest(logger, client, rg, route, func(logger lager.Logger, r io.Reader) error {
+		err = cloudcontroller.MakePaginatedGetRequest(ctx, logger, client, host, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
 			var listOrganizationSpacesResponse cloudcontroller.ListSpacesResponse
 			err = json.NewDecoder(r).Decode(&listOrganizationSpacesResponse)
 			if err != nil {
@@ -88,7 +83,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		for _, roleRequest := range roleRequests {
 			route = roleRequest.Route
 
-			err = makePaginatedAPIRequest(logger, client, rg, route, func(logger lager.Logger, r io.Reader) error {
+			err = cloudcontroller.MakePaginatedGetRequest(ctx, logger, client, host, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
 				var listUsersResponse cloudcontroller.ListUsersResponse
 				err = json.NewDecoder(r).Decode(&listUsersResponse)
 				if err != nil {
@@ -130,7 +125,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		for _, roleRequest := range roleRequests {
 			route = roleRequest.Route
 
-			err = makePaginatedAPIRequest(logger, client, rg, route, func(logger lager.Logger, r io.Reader) error {
+			err = cloudcontroller.MakePaginatedGetRequest(ctx, logger, client, host, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
 				var listUsersResponse cloudcontroller.ListUsersResponse
 				err = json.NewDecoder(r).Decode(&listUsersResponse)
 				if err != nil {
@@ -161,74 +156,6 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	fmt.Fprintf(w, "Average role assignments per space: %f\n", float32(len(spaceRoleAssignments))/float32(len(spaces)))
 
 	return nil
-}
-
-func makePaginatedAPIRequest(logger lager.Logger, client *http.Client, rg *cloudcontroller.RequestGenerator, route string, bodyCallback func(lager.Logger, io.Reader) error) error {
-	var (
-		res *http.Response
-		err error
-
-		paginatedResponse cloudcontroller.PaginatedResponse
-
-		routeLogger lager.Logger
-	)
-
-	for {
-		routeLogger = logger.WithData(lager.Data{
-			"route": route,
-		})
-
-		res, err = makeAPIRequest(routeLogger.Session("make-api-request"), client, rg, route)
-		if err != nil {
-			return err
-		}
-
-		var body []byte
-		buf := bytes.NewBuffer(body)
-		r := io.TeeReader(res.Body, buf)
-
-		defer res.Body.Close()
-
-		err = json.NewDecoder(r).Decode(&paginatedResponse)
-		if err != nil {
-			return err
-		}
-
-		err = bodyCallback(routeLogger, buf)
-		if err != nil {
-			return err
-		}
-
-		if paginatedResponse.NextURL == nil {
-			break
-		} else {
-			route = *paginatedResponse.NextURL
-		}
-	}
-
-	return nil
-}
-
-func makeAPIRequest(logger lager.Logger, client *http.Client, rg *cloudcontroller.RequestGenerator, route string) (*http.Response, error) {
-	req, err := rg.NewGetRequest(logger.Session("new-get-request"), route)
-	if err != nil {
-		return nil, err
-	}
-
-	logger.Debug("making-request")
-	res, err := client.Do(req)
-	if err != nil {
-		logger.Error(messages.FailedToPerformRequest, err)
-		return nil, err
-	}
-
-	if res.StatusCode >= 400 {
-		err = fmt.Errorf("HTTP bad response: %d", res.StatusCode)
-		logger.Error("failed-to-ping-cloudcontroller", err)
-		return nil, err
-	}
-
-	return res, nil
 }
 
 type RoleAssignment struct {
