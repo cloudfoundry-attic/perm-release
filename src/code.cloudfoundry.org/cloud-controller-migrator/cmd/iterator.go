@@ -68,34 +68,46 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		}
 
 		var (
-			role           string
 			roleAssignment RoleAssignment
 		)
-		route = organization.Entity.UsersURL
-		role = "org-user"
+
+		type RoleRequest struct {
+			Route string
+			Role  string
+		}
+		roleRequests := []RoleRequest{
+			{Route: organization.Entity.UsersURL, Role: "org-user"},
+			{Route: organization.Entity.BillingManagersURL, Role: "org-billing-manager"},
+			{Route: organization.Entity.ManagersURL, Role: "org-manager"},
+			{Route: organization.Entity.AuditorsURL, Role: "org-auditor"},
+		}
 
 		var users []cloudcontroller.UserResource
 
-		err = makePaginatedAPIRequest(logger, client, rg, route, func(logger lager.Logger, r io.Reader) error {
-			var listUsersResponse cloudcontroller.ListUsersResponse
-			err = json.NewDecoder(r).Decode(&listUsersResponse)
-			if err != nil {
-				logger.Error("failed-to-decode-response", err)
-				return err
-			}
+		for _, roleRequest := range roleRequests {
+			route = roleRequest.Route
 
-			users = listUsersResponse.Resources
-			for _, u := range users {
-				roleAssignment = RoleAssignment{
-					RoleName:     role,
-					ResourceGUID: organization.Metadata.GUID,
-					UserGUID:     u.Metadata.GUID,
+			err = makePaginatedAPIRequest(logger, client, rg, route, func(logger lager.Logger, r io.Reader) error {
+				var listUsersResponse cloudcontroller.ListUsersResponse
+				err = json.NewDecoder(r).Decode(&listUsersResponse)
+				if err != nil {
+					logger.Error("failed-to-decode-response", err)
+					return err
 				}
-				organizationRoleAssignments = append(organizationRoleAssignments, roleAssignment)
-			}
 
-			return nil
-		})
+				users = listUsersResponse.Resources
+				for _, u := range users {
+					roleAssignment = RoleAssignment{
+						RoleName:     roleRequest.Role,
+						ResourceGUID: organization.Metadata.GUID,
+						UserGUID:     u.Metadata.GUID,
+					}
+					organizationRoleAssignments = append(organizationRoleAssignments, roleAssignment)
+				}
+
+				return nil
+			})
+		}
 	}
 
 	fmt.Fprintf(w, "Organizations: %d\n", len(organizations))
