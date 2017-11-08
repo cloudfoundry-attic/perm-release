@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"os"
+	"time"
 
 	"context"
 
@@ -26,6 +27,8 @@ import (
 type options struct {
 	ConfigFilePath cmd.FileOrStringFlag `long:"config-file-path" description:"Path to the config file for the CloudController migrator" required:"true"`
 }
+
+const CloudControllerTimeout = 5 * time.Second
 
 func main() {
 	parserOpts := &options{}
@@ -87,7 +90,7 @@ func main() {
 
 	client := uaaConfig.Client(ctx)
 
-	ccClient := cloudcontroller.NewAPIClient(config.CloudController.URL, client)
+	ccClient := cloudcontroller.NewAPIClient(config.CloudController.URL, client, CloudControllerTimeout)
 
 	err = cmd.IterateOverCloudControllerEntities(ctx, logger, os.Stdout, ccClient)
 	if err != nil {

@@ -10,19 +10,23 @@ import (
 
 	"fmt"
 
+	"time"
+
 	"code.cloudfoundry.org/cloud-controller-migrator/messages"
 	"code.cloudfoundry.org/lager"
 )
 
 type APIClient struct {
-	Host       string
-	HTTPClient *http.Client
+	Host           string
+	HTTPClient     *http.Client
+	RequestTimeout time.Duration
 }
 
-func NewAPIClient(host string, client *http.Client) *APIClient {
+func NewAPIClient(host string, client *http.Client, timeout time.Duration) *APIClient {
 	return &APIClient{
-		Host:       host,
-		HTTPClient: client,
+		Host:           host,
+		HTTPClient:     client,
+		RequestTimeout: timeout,
 	}
 }
 
@@ -43,7 +47,8 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 			"route": route,
 		})
 
-		res, err = makeAPIRequest(ctx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
+		newCtx, _ := context.WithTimeout(ctx, c.RequestTimeout)
+		res, err = makeAPIRequest(newCtx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
 		if err != nil {
 			return err
 		}

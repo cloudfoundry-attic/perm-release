@@ -12,6 +12,8 @@ import (
 
 	"encoding/json"
 
+	"time"
+
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/ginkgo"
@@ -24,11 +26,11 @@ var _ = Describe("APIClient", func() {
 		var (
 			c *APIClient
 
-			ctx context.Context
+			ctx     context.Context
+			client  *http.Client
+			timeout time.Duration
 
 			logger *lagertest.TestLogger
-
-			client *http.Client
 
 			host  string
 			route string
@@ -47,6 +49,8 @@ var _ = Describe("APIClient", func() {
 
 			client = http.DefaultClient
 
+			timeout = 5 * time.Second
+
 			host = server.URL()
 			route = ""
 
@@ -54,10 +58,7 @@ var _ = Describe("APIClient", func() {
 				return nil
 			}
 
-			c = &APIClient{
-				HTTPClient: client,
-				Host:       host,
-			}
+			c = NewAPIClient(host, client, timeout)
 		})
 
 		AfterEach(func() {
