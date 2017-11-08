@@ -44,7 +44,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	// List Organizations
 	route = "/v2/organizations"
 
-	var organizations []OrganizationResource
+	var organizations []cloudcontroller.OrganizationResource
 
 	for {
 		routeLogger = logger.WithData(lager.Data{
@@ -57,7 +57,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		}
 		defer res.Body.Close()
 
-		var listOrganizationsResponse ListOrganizationsResponse
+		var listOrganizationsResponse cloudcontroller.ListOrganizationsResponse
 		err = json.NewDecoder(res.Body).Decode(&listOrganizationsResponse)
 		if err != nil {
 			routeLogger.Error("failed-to-decode-response", err)
@@ -71,32 +71,41 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		}
 	}
 
+	var spaces []cloudcontroller.SpaceResource
+
 	for _, organization := range organizations {
-		fmt.Fprintf(w, "%s: %s\n", organization.Metadata.GUID, organization.Entity.Name)
+		route = organization.Entity.SpacesURL
+
+		for {
+			routeLogger = logger.WithData(lager.Data{
+				"route": route,
+			})
+
+			res, err = makeAPIRequest(routeLogger, client, rg, route)
+			if err != nil {
+				return err
+			}
+			defer res.Body.Close()
+
+			var listOrganizationSpacesResponse cloudcontroller.ListOrganizationSpacesResponse
+			err = json.NewDecoder(res.Body).Decode(&listOrganizationSpacesResponse)
+			if err != nil {
+				routeLogger.Error("failed-to-decode-response", err)
+			}
+
+			spaces = append(spaces, listOrganizationSpacesResponse.Resources...)
+			if listOrganizationSpacesResponse.NextURL == nil {
+				break
+			} else {
+				route = *listOrganizationSpacesResponse.NextURL
+			}
+		}
 	}
 
+	fmt.Fprintf(w, "Organizations: %d\n", len(organizations))
+	fmt.Fprintf(w, "Average spaces per organization: %f\n", float32(len(spaces))/float32(len(organizations)))
+
 	return nil
-}
-
-type ListOrganizationsResponse struct {
-	NextURL     *string                `json:"next_url"`
-	PreviousURL *string                `json:"prev_url"`
-	Resources   []OrganizationResource `json:"resources"`
-}
-
-type OrganizationResource struct {
-	Metadata struct {
-		GUID string `json:"guid"`
-		URL  string `json:"url"`
-	} `json:"metadata"`
-	Entity struct {
-		Name               string `json:"name"`
-		SpacesURL          string `json:"spaces_url"`
-		UsersURL           string `json:"users_url"`
-		ManagersURL        string `json:"managers_url"`
-		BillingManagersURL string `json:"billing_managers_url"`
-		AuditorsURL        string `json:"auditors_url"`
-	} `json:"entity"`
 }
 
 func makeAPIRequest(logger lager.Logger, client *http.Client, rg *cloudcontroller.RequestGenerator, route string) (*http.Response, error) {
