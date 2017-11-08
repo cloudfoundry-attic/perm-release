@@ -40,3 +40,7 @@
 [[constraint]]
   name = "github.com/onsi/gomega"
   version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/tedsuo/rata"
+  version = "1.0.0"
