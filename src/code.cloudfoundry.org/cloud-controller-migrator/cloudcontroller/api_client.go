@@ -43,7 +43,7 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 			"route": route,
 		})
 
-		res, err = makeAPIRequest(routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
+		res, err = makeAPIRequest(ctx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
 		if err != nil {
 			return err
 		}
@@ -74,11 +74,13 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 	return nil
 }
 
-func makeAPIRequest(logger lager.Logger, client *http.Client, rg *RequestGenerator, route string) (*http.Response, error) {
+func makeAPIRequest(ctx context.Context, logger lager.Logger, client *http.Client, rg *RequestGenerator, route string) (*http.Response, error) {
 	req, err := rg.NewGetRequest(logger.Session("new-get-request"), route)
 	if err != nil {
 		return nil, err
 	}
+
+	req = req.WithContext(ctx)
 
 	logger.Debug("making-request")
 	res, err := client.Do(req)
