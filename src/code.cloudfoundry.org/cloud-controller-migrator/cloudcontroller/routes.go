@@ -38,12 +38,22 @@ const (
 	ListSpaceManagers   = "list_space_managers"
 )
 
-func NewRequestGenerator(host string) *rata.RequestGenerator {
+type RequestGenerator struct {
+	*rata.RequestGenerator
+
+	Routes rata.Routes
+}
+
+func NewRequestGenerator(host string) *RequestGenerator {
 	rg := rata.NewRequestGenerator(host, Routes)
 
 	header := http.Header{}
 	header.Add("Accept", "application/json")
 
 	rg.Header = header
-	return rg
+
+	return &RequestGenerator{
+		RequestGenerator: rg,
+		Routes:           Routes,
+	}
 }
