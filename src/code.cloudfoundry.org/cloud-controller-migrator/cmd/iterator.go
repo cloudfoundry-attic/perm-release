@@ -48,6 +48,11 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	var spaces []cloudcontroller.SpaceResource
 	var organizationRoleAssignments []RoleAssignment
 
+	type RoleRequest struct {
+		Route string
+		Role  string
+	}
+
 	for _, organization := range organizations {
 		route = organization.Entity.SpacesURL
 
@@ -71,10 +76,6 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 			roleAssignment RoleAssignment
 		)
 
-		type RoleRequest struct {
-			Route string
-			Role  string
-		}
 		roleRequests := []RoleRequest{
 			{Route: organization.Entity.UsersURL, Role: "org-user"},
 			{Route: organization.Entity.BillingManagersURL, Role: "org-billing-manager"},
@@ -108,11 +109,56 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 				return nil
 			})
 		}
+
 	}
 
+	var spaceRoleAssignments []RoleAssignment
+
+	for _, space := range spaces {
+		var (
+			roleAssignment RoleAssignment
+		)
+
+		roleRequests := []RoleRequest{
+			{Route: space.Entity.DevelopersURL, Role: "space-developer"},
+			{Route: space.Entity.AuditorsURL, Role: "space-auditor"},
+			{Route: space.Entity.ManagersURL, Role: "space-manager"},
+		}
+
+		var users []cloudcontroller.UserResource
+
+		for _, roleRequest := range roleRequests {
+			route = roleRequest.Route
+
+			err = makePaginatedAPIRequest(logger, client, rg, route, func(logger lager.Logger, r io.Reader) error {
+				var listUsersResponse cloudcontroller.ListUsersResponse
+				err = json.NewDecoder(r).Decode(&listUsersResponse)
+				if err != nil {
+					logger.Error("failed-to-decode-response", err)
+					return err
+				}
+
+				users = listUsersResponse.Resources
+				for _, u := range users {
+					roleAssignment = RoleAssignment{
+						RoleName:     roleRequest.Role,
+						ResourceGUID: space.Metadata.GUID,
+						UserGUID:     u.Metadata.GUID,
+					}
+					spaceRoleAssignments = append(spaceRoleAssignments, roleAssignment)
+				}
+
+				return nil
+			})
+		}
+
+	}
+
+	fmt.Fprintf(w, "\nReport\n==========================================\n")
 	fmt.Fprintf(w, "Organizations: %d\n", len(organizations))
 	fmt.Fprintf(w, "Average spaces per organization: %f\n", float32(len(spaces))/float32(len(organizations)))
 	fmt.Fprintf(w, "Average role assignments per organization: %f\n", float32(len(organizationRoleAssignments))/float32(len(organizations)))
+	fmt.Fprintf(w, "Average role assignments per space: %f\n", float32(len(spaceRoleAssignments))/float32(len(spaces)))
 
 	return nil
 }
