@@ -22,20 +22,18 @@ type OrganizationResource struct {
 	} `json:"entity"`
 }
 
-type ListOrganizationSpacesResponse struct {
-	NextURL     *string         `json:"next_url"`
-	PreviousURL *string         `json:"prev_url"`
-	Resources   []SpaceResource `json:"resources"`
+type ListSpacesResponse struct {
+	PaginatedResponse
+	Resources []SpaceResource `json:"resources"`
 }
 
 type SpaceResource struct {
 	MetadataResource
 	Entity struct {
-		Name             string `json:"name"`
-		OrganizationGUID string `json:"organization_guid"`
-		DevelopersURL    string `json:"developers_url"`
-		AuditorsURL      string `json:"auditors_url"`
-		ManagersURL      string `json:"managers_url"`
+		Name          string `json:"name"`
+		DevelopersURL string `json:"developers_url"`
+		AuditorsURL   string `json:"auditors_url"`
+		ManagersURL   string `json:"managers_url"`
 	} `json:"entity"`
 }
 
@@ -44,4 +42,16 @@ type MetadataResource struct {
 		GUID string `json:"guid"`
 		URL  string `json:"url"`
 	} `json:"metadata"`
+}
+
+type ListUsersResponse struct {
+	PaginatedResponse
+	Resources []UserResource `json:"resources"`
+}
+
+type UserResource struct {
+	MetadataResource
+	Entity struct {
+		Username string `json:"username"`
+	} `json:"entity"`
 }
