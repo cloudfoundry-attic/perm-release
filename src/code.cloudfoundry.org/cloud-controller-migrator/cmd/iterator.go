@@ -40,6 +40,9 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		organizations = append(organizations, listOrganizationsResponse.Resources...)
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 
 	var spaces []cloudcontroller.SpaceResource
 	var organizationRoleAssignments []RoleAssignment
@@ -63,7 +66,6 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 			spaces = append(spaces, listOrganizationSpacesResponse.Resources...)
 			return nil
 		})
-
 		if err != nil {
 			return err
 		}
@@ -104,6 +106,9 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 				return nil
 			})
+			if err != nil {
+				return err
+			}
 		}
 
 	}
@@ -146,6 +151,9 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 				return nil
 			})
+			if err != nil {
+				return err
+			}
 		}
 
 	}
