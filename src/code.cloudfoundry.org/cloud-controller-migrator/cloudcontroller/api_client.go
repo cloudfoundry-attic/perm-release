@@ -14,8 +14,20 @@ import (
 	"code.cloudfoundry.org/lager"
 )
 
-func MakePaginatedGetRequest(ctx context.Context, logger lager.Logger, client *http.Client, host string, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error {
-	rg := NewRequestGenerator(host)
+type APIClient struct {
+	Host       string
+	HTTPClient *http.Client
+}
+
+func NewAPIClient(host string, client *http.Client) *APIClient {
+	return &APIClient{
+		Host:       host,
+		HTTPClient: client,
+	}
+}
+
+func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Logger, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error {
+	rg := NewRequestGenerator(c.Host)
 
 	var (
 		res *http.Response
@@ -31,7 +43,7 @@ func MakePaginatedGetRequest(ctx context.Context, logger lager.Logger, client *h
 			"route": route,
 		})
 
-		res, err = makeAPIRequest(routeLogger.Session("make-api-request"), client, rg, route)
+		res, err = makeAPIRequest(routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
 		if err != nil {
 			return err
 		}

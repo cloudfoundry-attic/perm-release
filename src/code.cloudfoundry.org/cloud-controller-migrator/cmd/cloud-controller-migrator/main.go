@@ -14,6 +14,7 @@ import (
 
 	"bytes"
 
+	"code.cloudfoundry.org/cloud-controller-migrator/cloudcontroller"
 	"code.cloudfoundry.org/cloud-controller-migrator/cmd"
 	"code.cloudfoundry.org/cloud-controller-migrator/httpx"
 	"code.cloudfoundry.org/lager"
@@ -86,7 +87,9 @@ func main() {
 
 	client := uaaConfig.Client(ctx)
 
-	err = cmd.IterateOverCloudControllerEntities(ctx, logger, os.Stdout, client, config.CloudController.URL)
+	ccClient := cloudcontroller.NewAPIClient(config.CloudController.URL, client)
+
+	err = cmd.IterateOverCloudControllerEntities(ctx, logger, os.Stdout, ccClient)
 	if err != nil {
 		panic(err)
 	}
