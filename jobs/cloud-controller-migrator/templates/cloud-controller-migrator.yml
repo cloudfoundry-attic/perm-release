@@ -7,5 +7,5 @@ uaa:
 cloud_controller:
   url: <%= p('cloud_controller.url') %>
   client_id: <%= p('cloud_controller.client_id') %>
-  client_secret: <%= p('cloud_controller.client_id') %>
+  client_secret: <%= p('cloud_controller.client_secret') %>
   client_scopes: <%= p('cloud_controller.client_scopes') %>
