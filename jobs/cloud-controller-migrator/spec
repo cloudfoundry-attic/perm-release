@@ -2,7 +2,7 @@
 name: cloud-controller-migrator
 
 templates:
-  uaa_ca.crt: config/certs/uaa-ca.crt
+  uaa-ca.crt: config/certs/uaa-ca.crt
   cloud-controller-migrator.yml: config/cloud-controller-migrator.yml
   run: bin/run
 

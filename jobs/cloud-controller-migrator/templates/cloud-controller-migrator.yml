@@ -2,7 +2,7 @@ log_level: <%= p('log_level') %>
 
 uaa:
   url: <%= p('uaa.url') %>
-  ca_cert_path: /var/vcap/jobs/cloud-controller-migrator/config/certs/uaa_ca.crt
+  ca_cert_path: /var/vcap/jobs/cloud-controller-migrator/config/certs/uaa-ca.crt
 
 cloud_controller:
   url: <%= p('cloud_controller.url') %>
