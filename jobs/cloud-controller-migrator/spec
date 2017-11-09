@@ -25,11 +25,13 @@ properties:
     description: The public url of the Cloud Controller API.
 
   cloud_controller.client_id:
-    descriptioni: The ID for the UAA client used to connect to the Cloud Controller API.
+    description: The ID for the UAA client used to connect to the Cloud Controller API.
 
   cloud_controller.client_secret:
     description: The secret for the UAA client used to connect to the Cloud Controller API
 
   cloud_controller.client_scopes:
     description: The scopes to request for the UAA client used to connect to the Cloud Controller API.
+    example:
+    - cloud_controller.admin_read_only
 
