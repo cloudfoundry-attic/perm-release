@@ -34,46 +34,55 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 	rg := NewRequestGenerator(c.Host)
 
 	var (
-		res *http.Response
-		err error
-
 		paginatedResponse PaginatedResponse
 
 		routeLogger lager.Logger
 	)
 
 	for {
-		routeLogger = logger.WithData(lager.Data{
-			"route": route,
-		})
+		nextURL, err := func() (*string, error) {
+			routeLogger = logger.WithData(lager.Data{
+				"route": route,
+			})
 
-		newCtx, _ := context.WithTimeout(ctx, c.RequestTimeout)
-		res, err = makeAPIRequest(newCtx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
+			newCtx, cancelFunc := context.WithTimeout(ctx, c.RequestTimeout)
+			res, err := makeAPIRequest(newCtx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
+			cancelFunc()
+			if err != nil {
+				return nil, err
+			}
+			defer res.Body.Close()
+
+			var body []byte
+			buf := bytes.NewBuffer(body)
+			r := io.TeeReader(res.Body, buf)
+
+			err = json.NewDecoder(r).Decode(&paginatedResponse)
+			if err != nil {
+				return nil, err
+			}
+
+			err = bodyCallback(ctx, routeLogger, buf)
+			if err != nil {
+				return nil, err
+			}
+
+			if paginatedResponse.NextURL == nil {
+				return nil, nil
+			}
+
+			return paginatedResponse.NextURL, nil
+		}()
+
 		if err != nil {
 			return err
 		}
 
-		var body []byte
-		buf := bytes.NewBuffer(body)
-		r := io.TeeReader(res.Body, buf)
-
-		defer res.Body.Close()
-
-		err = json.NewDecoder(r).Decode(&paginatedResponse)
-		if err != nil {
-			return err
-		}
-
-		err = bodyCallback(ctx, routeLogger, buf)
-		if err != nil {
-			return err
-		}
-
-		if paginatedResponse.NextURL == nil {
+		if nextURL == nil {
 			break
-		} else {
-			route = *paginatedResponse.NextURL
 		}
+
+		route = *nextURL
 	}
 
 	return nil

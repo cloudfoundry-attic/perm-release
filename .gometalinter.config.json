@@ -1,0 +1,13 @@
+{
+  "Test": true,
+  "Vendor": true,
+  "Exclude": [
+    "\\.pb\\.go",
+    "struct Fake.*aligncheck",
+    "should have comment",
+    "error return value not checked \\(defer",
+    "cyclomatic complexity (.+) of function main()",
+    "modelsbehaviors.*should not use dot imports",
+    "modelsbehaviors.*cancelFunc"
+  ]
+}

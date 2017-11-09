@@ -48,9 +48,7 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 				return fmt.Errorf("Expected to find response for route %s", route)
 			}
 
-			bodyCallback(ctx, logger, strings.NewReader(response))
-
-			return nil
+			return bodyCallback(ctx, logger, strings.NewReader(response))
 		}
 	})
 
