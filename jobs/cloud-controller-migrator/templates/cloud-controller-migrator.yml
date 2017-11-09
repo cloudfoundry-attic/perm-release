@@ -1,0 +1,11 @@
+log_level: <%= p('log_level') %>
+
+uaa:
+  url: <%= p('uaa.url') %>
+  ca_cert_path: /var/vcap/jobs/cloud-controller-migrator/config/certs/uaa_ca.crt
+
+cloud_controller:
+  url: <%= p('cloud_controller.url') %>
+  client_id: <%= p('cloud_controller.client_id') %>
+  client_secret: <%= p('cloud_controller.client_id') %>
+  client_scopes: <%= p('cloud_controller.client_scopes') %>

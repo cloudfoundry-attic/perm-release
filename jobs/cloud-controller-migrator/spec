@@ -1,0 +1,35 @@
+---
+name: cloud-controller-migrator
+
+templates:
+  uaa_ca.crt: config/certs/uaa-ca.crt
+  cloud-controller-migrator.yml: config/cloud-controller-migrator.yml
+  run: bin/run
+
+packages:
+- cloud-controller-migrator
+
+properties:
+  log_level:
+    description: The log level for the Cloud Controller Migrator.
+    default: info
+
+  uaa.url:
+    description: The public HTTPS url of the UAA.
+
+  uaa.ca_certs:
+    description: An array of certificate authorities being used by UAA. Allows multiple in case of rotation.
+    default: []
+
+  cloud_controller.url:
+    description: The public url of the Cloud Controller API.
+
+  cloud_controller.client_id:
+    descriptioni: The ID for the UAA client used to connect to the Cloud Controller API.
+
+  cloud_controller.client_secret:
+    description: The secret for the UAA client used to connect to the Cloud Controller API
+
+  cloud_controller.client_scopes:
+    description: The scopes to request for the UAA client used to connect to the Cloud Controller API.
+

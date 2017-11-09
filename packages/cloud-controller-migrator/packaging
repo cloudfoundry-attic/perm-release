@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -eux
+
+source /var/vcap/packages/golang-1.9-linux/bosh/compile.env
+
+mkdir -p "${GOPATH}/src"
+cp -a "${PWD}/code.cloudfoundry.org" "${GOPATH}/src/"
+
+mkdir "${BOSH_INSTALL_TARGET}/bin"
+go build -o "${BOSH_INSTALL_TARGET}/bin/cloud-controller-migrator" code.cloudfoundry.org/cloud-controller-migrator/cmd/cloud-controller-migrator

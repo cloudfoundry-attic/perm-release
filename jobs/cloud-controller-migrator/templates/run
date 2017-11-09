@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -eu
+
+/var/vcap/packages/cloud-controller-migrator \
+  --config-file-path=/var/vcap/jobs/cloud-controller-migrator/config/cloud-controller-migrator.yml
