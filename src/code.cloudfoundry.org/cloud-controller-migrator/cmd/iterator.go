@@ -8,8 +8,6 @@ import (
 
 	"encoding/json"
 
-	"math"
-
 	"code.cloudfoundry.org/cloud-controller-migrator/cloudcontroller"
 	"code.cloudfoundry.org/lager"
 )
@@ -161,10 +159,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	}
 
 	fmt.Fprintf(w, "\nReport\n==========================================\n")
-	fmt.Fprintf(w, "Organizations: %d\n", len(organizations))
-	fmt.Fprintf(w, "Average spaces per organization: %f\n", float64(len(spaces))/math.Min(float64(len(organizations)), 1.))
-	fmt.Fprintf(w, "Average role assignments per organization: %f\n", float64(len(organizationRoleAssignments))/math.Min(float64(len(organizations)), 1.))
-	fmt.Fprintf(w, "Average role assignments per space: %f\n", float64(len(spaceRoleAssignments))/math.Min(float64(len(spaces)), 1.))
+	fmt.Fprintf(w, "Number of role assignments: %f\n", len(organizationRoleAssignments)+len(spaceRoleAssignments))
 
 	return nil
 }
