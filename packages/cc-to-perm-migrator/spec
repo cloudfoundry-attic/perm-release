@@ -1,5 +1,5 @@
 ---
-name: cloud-controller-migrator
+name: cc-to-perm-migrator
 
 dependencies:
 - golang-1.9-linux

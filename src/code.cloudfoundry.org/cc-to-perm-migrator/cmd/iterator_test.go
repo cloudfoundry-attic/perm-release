@@ -1,7 +1,7 @@
 package cmd_test
 
 import (
-	. "code.cloudfoundry.org/cloud-controller-migrator/cmd"
+	. "code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 
 	"context"
 	"io"
@@ -10,7 +10,7 @@ import (
 
 	"fmt"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/cmd/cmdfakes"
+	"code.cloudfoundry.org/cc-to-perm-migrator/cmd/cmdfakes"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/ginkgo"

@@ -3,8 +3,8 @@ package cloudcontroller
 import (
 	"net/http"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/httpx"
-	"code.cloudfoundry.org/cloud-controller-migrator/messages"
+	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
+	"code.cloudfoundry.org/cc-to-perm-migrator/messages"
 	"code.cloudfoundry.org/lager"
 )
 

@@ -8,7 +8,7 @@ import (
 
 	"encoding/json"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/cloudcontroller"
+	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
 	"code.cloudfoundry.org/lager"
 )
 

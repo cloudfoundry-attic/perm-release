@@ -4,7 +4,7 @@ package cmdfakes
 import (
 	"sync"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/cmd"
+	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 )
 
 type FakeFileReader struct {

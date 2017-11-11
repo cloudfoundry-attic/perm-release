@@ -12,7 +12,7 @@ import (
 
 	"time"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/messages"
+	"code.cloudfoundry.org/cc-to-perm-migrator/messages"
 	"code.cloudfoundry.org/lager"
 )
 

@@ -1,11 +1,11 @@
 package cmd_test
 
 import (
-	. "code.cloudfoundry.org/cloud-controller-migrator/cmd"
+	. "code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 
 	"errors"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/cmd/cmdfakes"
+	"code.cloudfoundry.org/cc-to-perm-migrator/cmd/cmdfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

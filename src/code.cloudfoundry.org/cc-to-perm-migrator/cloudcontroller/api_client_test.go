@@ -3,7 +3,7 @@ package cloudcontroller_test
 import (
 	"errors"
 
-	. "code.cloudfoundry.org/cloud-controller-migrator/cloudcontroller"
+	. "code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
 
 	"context"
 	"io"

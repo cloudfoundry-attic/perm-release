@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/cmd"
+	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 )
 
 type FakeStatter struct {

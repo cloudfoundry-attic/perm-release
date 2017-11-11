@@ -1,13 +1,13 @@
 ---
-name: cloud-controller-migrator
+name: cc-to-perm-migrator
 
 templates:
   uaa-ca.crt: config/certs/uaa-ca.crt
-  cloud-controller-migrator.yml: config/cloud-controller-migrator.yml
+  cc-to-perm-migrator.yml: config/cc-to-perm-migrator.yml
   run: bin/run
 
 packages:
-- cloud-controller-migrator
+- cc-to-perm-migrator
 
 properties:
   log_level:

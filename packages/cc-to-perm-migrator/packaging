@@ -8,4 +8,4 @@ mkdir -p "${GOPATH}/src"
 cp -a "${PWD}/code.cloudfoundry.org" "${GOPATH}/src/"
 
 mkdir "${BOSH_INSTALL_TARGET}/bin"
-go build -o "${BOSH_INSTALL_TARGET}/bin/cloud-controller-migrator" code.cloudfoundry.org/cloud-controller-migrator/cmd/cloud-controller-migrator
+go build -o "${BOSH_INSTALL_TARGET}/bin/cc-to-perm-migrator" code.cloudfoundry.org/cc-to-perm-migrator/cmd/cc-to-perm-migrator

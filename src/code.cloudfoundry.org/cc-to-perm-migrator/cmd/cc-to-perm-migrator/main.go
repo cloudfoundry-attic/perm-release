@@ -15,9 +15,9 @@ import (
 
 	"bytes"
 
-	"code.cloudfoundry.org/cloud-controller-migrator/cloudcontroller"
-	"code.cloudfoundry.org/cloud-controller-migrator/cmd"
-	"code.cloudfoundry.org/cloud-controller-migrator/httpx"
+	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
+	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
+	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
 	"code.cloudfoundry.org/lager"
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/oauth2"
@@ -51,7 +51,7 @@ func main() {
 		panic(err)
 	}
 
-	logger, _ := config.Logger.Logger("cloud-controller-migrator")
+	logger, _ := config.Logger.Logger("cc-to-perm-migrator")
 
 	uaaCACert, err := config.UAA.CACertPath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
