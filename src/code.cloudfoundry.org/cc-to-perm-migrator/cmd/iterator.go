@@ -159,7 +159,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	}
 
 	fmt.Fprintf(w, "\nReport\n==========================================\n")
-	fmt.Fprintf(w, "Number of role assignments: %f\n", len(organizationRoleAssignments)+len(spaceRoleAssignments))
+	fmt.Fprintf(w, "Number of role assignments: %d\n", len(organizationRoleAssignments)+len(spaceRoleAssignments))
 
 	return nil
 }
