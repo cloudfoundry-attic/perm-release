@@ -26,6 +26,10 @@ processes:
     - <%= p('sql.db.username') %>
     - --sql-db-password
     - <%= p('sql.db.password') %>
+    - --sql-tls-required
+    - <%= p('sql.tls.required') %>
+    - --sql-tls-root-ca
+    - /var/vcap/jobs/perm/config/certs/sql_tls_ca.crt
 
     limits:
       memory: 256M

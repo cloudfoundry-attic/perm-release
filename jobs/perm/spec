@@ -7,6 +7,8 @@ templates:
   tls-ca.crt.erb: config/certs/tls-ca.crt
   tls.crt.erb: config/certs/tls.crt
   tls.key.erb: config/certs/tls.key
+  sql_tls_ca.crt.erb: config/certs/sql_tls_ca.crt
+
 packages:
 - perm
 
@@ -54,3 +56,10 @@ properties:
     description: "Username to use for connecting to SQL backend"
   sql.db.password:
     description: "Password to use for connecting to SQL backend"
+
+  sql.tls.required:
+    description: Require TLS connections to the SQL backend
+    default: false
+  sql.tls.ca_certs:
+    description: An array of CA certificate(s) for TLS connection to the SQL backend. Allows multiple in case of rotation.
+    default: []
