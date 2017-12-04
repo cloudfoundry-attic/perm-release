@@ -63,3 +63,7 @@ properties:
   sql.tls.ca_certs:
     description: An array of CA certificate(s) for TLS connection to the SQL backend. Allows multiple in case of rotation.
     default: []
+
+  sql.tuning.connection_max_lifetime:
+    description: Limit the lifetime in milliseconds of a SQL connection. If set <= 0, the connection may live forever.
+    default: 0
