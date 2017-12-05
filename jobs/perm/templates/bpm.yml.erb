@@ -30,7 +30,7 @@ processes:
     - <%= p('sql.tls.required') %>
     - --sql-tls-root-ca
     - /var/vcap/jobs/perm/config/certs/sql_tls_ca.crt
-    - --sql-connection-max-lifetime
+    - --sql-tuning-connection-max-lifetime
     - <%= p('sql.tuning.connection_max_lifetime') %>
 
     limits:
