@@ -13,4 +13,4 @@ set -e
   --sql-db-password <%= p('sql.db.password') %>
 <% end %>
 
-/var/vcap/packages/perm/bin/perm "$@"
+exec /var/vcap/packages/perm/bin/perm "$@"
