@@ -3,6 +3,9 @@
 set -e
 
 <% if spec.bootstrap %>
+# Kill the migration if still running on `bpm stop` or `monit stop`
+trap "killall -- -$$" SIGINT SIGTERM EXIT
+
 /var/vcap/packages/perm/bin/perm migrate up \
   --log-level <%= p('log_level') %> \
   --sql-db-driver <%= p('sql.db.driver') %> \
@@ -13,4 +16,5 @@ set -e
   --sql-db-password <%= p('sql.db.password') %>
 <% end %>
 
+# exec so that perm receives kill signals from bpm
 exec /var/vcap/packages/perm/bin/perm "$@"
