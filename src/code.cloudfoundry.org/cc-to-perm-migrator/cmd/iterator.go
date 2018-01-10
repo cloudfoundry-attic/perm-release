@@ -4,8 +4,6 @@ import (
 	"context"
 	"io"
 
-	"fmt"
-
 	"encoding/json"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
@@ -18,7 +16,7 @@ type CloudControllerAPIClient interface {
 	MakePaginatedGetRequest(ctx context.Context, logger lager.Logger, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error
 }
 
-func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger, w io.Writer, c CloudControllerAPIClient) error {
+func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger, roleAssignments chan<- RoleAssignment, c CloudControllerAPIClient) error {
 	var (
 		route string
 		err   error
@@ -45,7 +43,6 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	}
 
 	var spaces []cloudcontroller.SpaceResource
-	var organizationRoleAssignments []RoleAssignment
 
 	type RoleRequest struct {
 		Route string
@@ -70,10 +67,6 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 			return err
 		}
 
-		var (
-			roleAssignment RoleAssignment
-		)
-
 		roleRequests := []RoleRequest{
 			{Route: organization.Entity.UsersURL, Role: "org-user"},
 			{Route: organization.Entity.BillingManagersURL, Role: "org-billing-manager"},
@@ -96,12 +89,11 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 				users = listUsersResponse.Resources
 				for _, u := range users {
-					roleAssignment = RoleAssignment{
+					roleAssignments <- RoleAssignment{
 						RoleName:     roleRequest.Role,
 						ResourceGUID: organization.Metadata.GUID,
 						UserGUID:     u.Metadata.GUID,
 					}
-					organizationRoleAssignments = append(organizationRoleAssignments, roleAssignment)
 				}
 
 				return nil
@@ -113,13 +105,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 	}
 
-	var spaceRoleAssignments []RoleAssignment
-
 	for _, space := range spaces {
-		var (
-			roleAssignment RoleAssignment
-		)
-
 		roleRequests := []RoleRequest{
 			{Route: space.Entity.DevelopersURL, Role: "space-developer"},
 			{Route: space.Entity.AuditorsURL, Role: "space-auditor"},
@@ -141,12 +127,11 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 				users = listUsersResponse.Resources
 				for _, u := range users {
-					roleAssignment = RoleAssignment{
+					roleAssignments <- RoleAssignment{
 						RoleName:     roleRequest.Role,
 						ResourceGUID: space.Metadata.GUID,
 						UserGUID:     u.Metadata.GUID,
 					}
-					spaceRoleAssignments = append(spaceRoleAssignments, roleAssignment)
 				}
 
 				return nil
@@ -158,9 +143,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 	}
 
-	fmt.Fprintf(w, "\nReport\n==========================================\n")
-	fmt.Fprintf(w, "Number of role assignments: %d\n", len(organizationRoleAssignments)+len(spaceRoleAssignments))
-
+	close(roleAssignments)
 	return nil
 }
 

@@ -15,6 +15,8 @@ import (
 
 	"bytes"
 
+	"sync"
+
 	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
@@ -92,8 +94,24 @@ func main() {
 
 	ccClient := cloudcontroller.NewAPIClient(config.CloudController.URL, client, CloudControllerTimeout)
 
-	err = cmd.IterateOverCloudControllerEntities(ctx, logger, os.Stdout, ccClient)
-	if err != nil {
-		panic(err)
-	}
+	roleAssignments := make(chan cmd.RoleAssignment)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		cmd.GenerateReport(os.Stdout, roleAssignments)
+	}()
+
+	go func() {
+		defer wg.Done()
+		err = cmd.IterateOverCloudControllerEntities(ctx, logger, roleAssignments, ccClient)
+
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	wg.Wait()
 }

@@ -15,7 +15,6 @@ import (
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe(".IterateOverCloudControllerEntities", func() {
@@ -24,7 +23,7 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 
 		logger *lagertest.TestLogger
 
-		w io.Writer
+		c chan RoleAssignment
 
 		ccAPIClient *cmdfakes.FakeCloudControllerAPIClient
 
@@ -36,7 +35,7 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 
 		logger = lagertest.NewTestLogger("iterate-over-cloud-controller-entities")
 
-		w = gbytes.NewBuffer()
+		c = make(chan RoleAssignment, 1000)
 
 		routeResponses = make(map[string]string)
 
@@ -58,7 +57,7 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 		})
 
 		It("hits /v2/organizations", func() {
-			err := IterateOverCloudControllerEntities(ctx, logger, w, ccAPIClient)
+			err := IterateOverCloudControllerEntities(ctx, logger, c, ccAPIClient)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(ccAPIClient.MakePaginatedGetRequestCallCount()).To(Equal(1))
@@ -151,7 +150,7 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 		})
 
 		It("hits the spaces, users, billing managers, managers, and auditors URLs for every organization, and the developers, auditors, and managers URL for every space", func() {
-			err := IterateOverCloudControllerEntities(ctx, logger, w, ccAPIClient)
+			err := IterateOverCloudControllerEntities(ctx, logger, c, ccAPIClient)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(ccAPIClient.MakePaginatedGetRequestCallCount()).To(Equal(9))
@@ -163,27 +162,21 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(1)
 			Expect(route).To(Equal("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/spaces"))
 
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(2)
-			Expect(route).To(Equal("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/users"))
+			requestCount := ccAPIClient.MakePaginatedGetRequestCallCount()
 
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(3)
-			Expect(route).To(Equal("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/billing_managers"))
+			var routes []string
+			for i := 2; i < requestCount; i++ {
+				_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(i)
+				routes = append(routes, route)
+			}
 
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(4)
-			Expect(route).To(Equal("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/managers"))
-
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(5)
-			Expect(route).To(Equal("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/auditors"))
-
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(6)
-			Expect(route).To(Equal("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/developers"))
-
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(7)
-			Expect(route).To(Equal("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/auditors"))
-
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(8)
-			Expect(route).To(Equal("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/managers"))
+			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/users"))
+			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/billing_managers"))
+			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/managers"))
+			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/auditors"))
+			Expect(routes).To(ContainElement("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/developers"))
+			Expect(routes).To(ContainElement("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/auditors"))
+			Expect(routes).To(ContainElement("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/managers"))
 		})
 	})
-
 })
