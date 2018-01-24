@@ -90,6 +90,7 @@ func main() {
 
 	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, sslcli)
 
+	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL.String())
 	client := uaaConfig.Client(ctx)
 
 	ccClient := cloudcontroller.NewAPIClient(config.CloudController.URL, client, CloudControllerTimeout)

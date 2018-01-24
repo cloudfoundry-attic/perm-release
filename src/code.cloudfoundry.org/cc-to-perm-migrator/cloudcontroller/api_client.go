@@ -46,8 +46,9 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 			})
 
 			newCtx, cancelFunc := context.WithTimeout(ctx, c.RequestTimeout)
+			defer cancelFunc()
+
 			res, err := makeAPIRequest(newCtx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
-			cancelFunc()
 			if err != nil {
 				return nil, err
 			}
@@ -59,6 +60,7 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 
 			err = json.NewDecoder(r).Decode(&paginatedResponse)
 			if err != nil {
+				routeLogger.Error("failed-to-decode-response", err)
 				return nil, err
 			}
 
