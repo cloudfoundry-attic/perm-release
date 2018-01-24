@@ -1,18 +1,3 @@
 [submodule "perm"]
 	path = src/code.cloudfoundry.org/perm
 	url = https://github.com/cloudfoundry-incubator/perm
-[submodule "src/github.com/golang/protobuf"]
-	path = src/github.com/golang/protobuf
-	url = https://github.com/golang/protobuf
-[submodule "src/golang.org/x/net"]
-	path = src/golang.org/x/net
-	url = https://github.com/golang/net
-[submodule "src/golang.org/x/text"]
-	path = src/golang.org/x/text
-	url = https://github.com/golang/text
-[submodule "src/google.golang.org/genproto"]
-	path = src/google.golang.org/genproto
-	url = https://github.com/google/go-genproto
-[submodule "src/google.golang.org/grpc"]
-	path = src/google.golang.org/grpc
-	url = https://github.com/grpc/grpc-go
