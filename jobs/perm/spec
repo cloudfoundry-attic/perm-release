@@ -28,6 +28,9 @@ properties:
   log_level:
     description: The log level for the Perm server.
     default: info
+  server.max_connection_idle:
+    description: The amount of time before an idle connection will be closed with a GoAway.
+    default: 10s
   tls:
     description: Certificate and private key for TLS connection to Perm server
     type: certificate

@@ -8,6 +8,8 @@ processes:
     - <%= p('listen_hostname') %>
     - --listen-port
     - <%= p('listen_port') %>
+    - --max-connection-idle
+    - <%= p('server.max_connection_idle') %>
     - --log-level
     - <%= p('log_level') %>
     - --tls-certificate
