@@ -13,6 +13,7 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd/cmdfakes"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
+	"errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

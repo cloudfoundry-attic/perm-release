@@ -8,6 +8,7 @@ import (
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
 	"code.cloudfoundry.org/lager"
+	"fmt"
 )
 
 //go:generate counterfeiter . CloudControllerAPIClient
@@ -32,14 +33,14 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		err = json.NewDecoder(r).Decode(&listOrganizationsResponse)
 		if err != nil {
 			logger.Error("failed-to-decode-response", err)
-			return err
+			return nil
 		}
 
 		organizations = append(organizations, listOrganizationsResponse.Resources...)
 		return nil
 	})
 	if err != nil {
-		return err
+		logger.Error("failed-to-fetch-organizations", err)
 	}
 
 	var spaces []cloudcontroller.SpaceResource
@@ -57,14 +58,14 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 			err = json.NewDecoder(r).Decode(&listOrganizationSpacesResponse)
 			if err != nil {
 				logger.Error("failed-to-decode-response", err)
-				return err
+				return nil
 			}
 
 			spaces = append(spaces, listOrganizationSpacesResponse.Resources...)
 			return nil
 		})
 		if err != nil {
-			return err
+			logger.Error("failed-to-fetch-organizations", err)
 		}
 
 		roleRequests := []RoleRequest{
@@ -84,7 +85,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 				err = json.NewDecoder(r).Decode(&listUsersResponse)
 				if err != nil {
 					logger.Error("failed-to-decode-response", err)
-					return err
+					return nil
 				}
 
 				users = listUsersResponse.Resources
@@ -99,7 +100,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 				return nil
 			})
 			if err != nil {
-				return err
+				logger.Error(fmt.Sprintf("failed-to-fetch-assignments-for-role-%s", roleRequest.Role), err)
 			}
 		}
 
@@ -122,7 +123,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 				err = json.NewDecoder(r).Decode(&listUsersResponse)
 				if err != nil {
 					logger.Error("failed-to-decode-response", err)
-					return err
+					return nil
 				}
 
 				users = listUsersResponse.Resources
@@ -137,10 +138,9 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 				return nil
 			})
 			if err != nil {
-				return err
+				logger.Error(fmt.Sprintf("failed-to-fetch-assignments-for-role-%s", roleRequest.Role), err)
 			}
 		}
-
 	}
 
 	close(roleAssignments)
