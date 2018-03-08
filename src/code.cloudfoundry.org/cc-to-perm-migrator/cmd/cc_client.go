@@ -1,23 +1,23 @@
 package cmd
 
 import (
-	"context"
 	"io"
 
 	"encoding/json"
 
+	"fmt"
+
 	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
 	"code.cloudfoundry.org/lager"
-	"fmt"
 )
 
 //go:generate counterfeiter . CloudControllerAPIClient
 
 type CloudControllerAPIClient interface {
-	MakePaginatedGetRequest(ctx context.Context, logger lager.Logger, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error
+	MakePaginatedGetRequest(logger lager.Logger, route string, bodyCallback func(lager.Logger, io.Reader) error) error
 }
 
-func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger, roleAssignments chan<- RoleAssignment, c CloudControllerAPIClient) error {
+func IterateOverCloudControllerEntities(logger lager.Logger, roleAssignments chan<- RoleAssignment, c CloudControllerAPIClient) error {
 	var (
 		route string
 		err   error
@@ -28,7 +28,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 
 	var organizations []cloudcontroller.OrganizationResource
 
-	err = c.MakePaginatedGetRequest(ctx, logger, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
+	err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
 		var listOrganizationsResponse cloudcontroller.ListOrganizationsResponse
 		err = json.NewDecoder(r).Decode(&listOrganizationsResponse)
 		if err != nil {
@@ -53,7 +53,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 	for _, organization := range organizations {
 		route = organization.Entity.SpacesURL
 
-		err = c.MakePaginatedGetRequest(ctx, logger, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
+		err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
 			var listOrganizationSpacesResponse cloudcontroller.ListSpacesResponse
 			err = json.NewDecoder(r).Decode(&listOrganizationSpacesResponse)
 			if err != nil {
@@ -80,7 +80,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		for _, roleRequest := range roleRequests {
 			route = roleRequest.Route
 
-			err = c.MakePaginatedGetRequest(ctx, logger, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
+			err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
 				var listUsersResponse cloudcontroller.ListUsersResponse
 				err = json.NewDecoder(r).Decode(&listUsersResponse)
 				if err != nil {
@@ -118,7 +118,7 @@ func IterateOverCloudControllerEntities(ctx context.Context, logger lager.Logger
 		for _, roleRequest := range roleRequests {
 			route = roleRequest.Route
 
-			err = c.MakePaginatedGetRequest(ctx, logger, route, func(ctx context.Context, logger lager.Logger, r io.Reader) error {
+			err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
 				var listUsersResponse cloudcontroller.ListUsersResponse
 				err = json.NewDecoder(r).Decode(&listUsersResponse)
 				if err != nil {

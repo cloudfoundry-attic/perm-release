@@ -13,7 +13,6 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd/cmdfakes"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -42,13 +41,13 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 
 		ccAPIClient = new(cmdfakes.FakeCloudControllerAPIClient)
 
-		ccAPIClient.MakePaginatedGetRequestStub = func(ctx context.Context, logger lager.Logger, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error {
+		ccAPIClient.MakePaginatedGetRequestStub = func(logger lager.Logger, route string, bodyCallback func(lager.Logger, io.Reader) error) error {
 			response, ok := routeResponses[route]
 			if !ok {
 				return fmt.Errorf("Expected to find response for route %s", route)
 			}
 
-			return bodyCallback(ctx, logger, strings.NewReader(response))
+			return bodyCallback(logger, strings.NewReader(response))
 		}
 	})
 
@@ -58,13 +57,13 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 		})
 
 		It("hits /v2/organizations", func() {
-			err := IterateOverCloudControllerEntities(ctx, logger, c, ccAPIClient)
+			err := IterateOverCloudControllerEntities(logger, c, ccAPIClient)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(ccAPIClient.MakePaginatedGetRequestCallCount()).To(Equal(1))
 
 			var route string
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(0)
+			_, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(0)
 			Expect(route).To(Equal("/v2/organizations"))
 		})
 	})
@@ -151,23 +150,23 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 		})
 
 		It("hits the spaces, users, billing managers, managers, and auditors URLs for every organization, and the developers, auditors, and managers URL for every space", func() {
-			err := IterateOverCloudControllerEntities(ctx, logger, c, ccAPIClient)
+			err := IterateOverCloudControllerEntities(logger, c, ccAPIClient)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(ccAPIClient.MakePaginatedGetRequestCallCount()).To(Equal(9))
 
 			var route string
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(0)
+			_, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(0)
 			Expect(route).To(Equal("/v2/organizations"))
 
-			_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(1)
+			_, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(1)
 			Expect(route).To(Equal("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/spaces"))
 
 			requestCount := ccAPIClient.MakePaginatedGetRequestCallCount()
 
 			var routes []string
 			for i := 2; i < requestCount; i++ {
-				_, _, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(i)
+				_, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(i)
 				routes = append(routes, route)
 			}
 

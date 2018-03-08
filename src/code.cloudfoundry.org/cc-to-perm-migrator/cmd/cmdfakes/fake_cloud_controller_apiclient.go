@@ -2,7 +2,6 @@
 package cmdfakes
 
 import (
-	"context"
 	"io"
 	"sync"
 
@@ -11,13 +10,12 @@ import (
 )
 
 type FakeCloudControllerAPIClient struct {
-	MakePaginatedGetRequestStub        func(ctx context.Context, logger lager.Logger, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error
+	MakePaginatedGetRequestStub        func(logger lager.Logger, route string, bodyCallback func(lager.Logger, io.Reader) error) error
 	makePaginatedGetRequestMutex       sync.RWMutex
 	makePaginatedGetRequestArgsForCall []struct {
-		ctx          context.Context
 		logger       lager.Logger
 		route        string
-		bodyCallback func(context.Context, lager.Logger, io.Reader) error
+		bodyCallback func(lager.Logger, io.Reader) error
 	}
 	makePaginatedGetRequestReturns struct {
 		result1 error
@@ -29,19 +27,18 @@ type FakeCloudControllerAPIClient struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Logger, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error {
+func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequest(logger lager.Logger, route string, bodyCallback func(lager.Logger, io.Reader) error) error {
 	fake.makePaginatedGetRequestMutex.Lock()
 	ret, specificReturn := fake.makePaginatedGetRequestReturnsOnCall[len(fake.makePaginatedGetRequestArgsForCall)]
 	fake.makePaginatedGetRequestArgsForCall = append(fake.makePaginatedGetRequestArgsForCall, struct {
-		ctx          context.Context
 		logger       lager.Logger
 		route        string
-		bodyCallback func(context.Context, lager.Logger, io.Reader) error
-	}{ctx, logger, route, bodyCallback})
-	fake.recordInvocation("MakePaginatedGetRequest", []interface{}{ctx, logger, route, bodyCallback})
+		bodyCallback func(lager.Logger, io.Reader) error
+	}{logger, route, bodyCallback})
+	fake.recordInvocation("MakePaginatedGetRequest", []interface{}{logger, route, bodyCallback})
 	fake.makePaginatedGetRequestMutex.Unlock()
 	if fake.MakePaginatedGetRequestStub != nil {
-		return fake.MakePaginatedGetRequestStub(ctx, logger, route, bodyCallback)
+		return fake.MakePaginatedGetRequestStub(logger, route, bodyCallback)
 	}
 	if specificReturn {
 		return ret.result1
@@ -55,10 +52,10 @@ func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequestCallCount() int
 	return len(fake.makePaginatedGetRequestArgsForCall)
 }
 
-func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequestArgsForCall(i int) (context.Context, lager.Logger, string, func(context.Context, lager.Logger, io.Reader) error) {
+func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequestArgsForCall(i int) (lager.Logger, string, func(lager.Logger, io.Reader) error) {
 	fake.makePaginatedGetRequestMutex.RLock()
 	defer fake.makePaginatedGetRequestMutex.RUnlock()
-	return fake.makePaginatedGetRequestArgsForCall[i].ctx, fake.makePaginatedGetRequestArgsForCall[i].logger, fake.makePaginatedGetRequestArgsForCall[i].route, fake.makePaginatedGetRequestArgsForCall[i].bodyCallback
+	return fake.makePaginatedGetRequestArgsForCall[i].logger, fake.makePaginatedGetRequestArgsForCall[i].route, fake.makePaginatedGetRequestArgsForCall[i].bodyCallback
 }
 
 func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequestReturns(result1 error) {
