@@ -13,8 +13,7 @@ trap "killall -- -$$" SIGINT SIGTERM EXIT
   --sql-db-port <%= p('sql.db.port') %> \
   --sql-db-schema <%= p('sql.db.schema') %> \
   --sql-db-username <%= p('sql.db.username') %> \
-  --sql-db-password <%= p('sql.db.password') %> \
-  --audit-file-path <%= p('audit_file_path') %>
+  --sql-db-password <%= p('sql.db.password') %>
 <% end %>
 
 # exec so that perm receives kill signals from bpm

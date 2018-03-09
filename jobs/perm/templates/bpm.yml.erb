@@ -34,6 +34,8 @@ processes:
     - /var/vcap/jobs/perm/config/certs/sql_tls_ca.crt
     - --sql-tuning-connection-max-lifetime
     - <%= p('sql.tuning.connection_max_lifetime') %>
+    - --audit-file-path
+    - <%= p('audit_file_path') %>
 
     limits:
       memory: 256M
