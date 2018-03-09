@@ -107,7 +107,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		err = cmd.IterateOverCloudControllerEntities(ctx, logger, roleAssignments, ccClient)
+		err = cmd.IterateOverCloudControllerEntities(logger, roleAssignments, ccClient)
 
 		if err != nil {
 			panic(err)

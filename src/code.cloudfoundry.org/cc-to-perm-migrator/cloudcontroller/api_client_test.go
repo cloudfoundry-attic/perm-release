@@ -35,7 +35,7 @@ var _ = Describe("APIClient", func() {
 			host  string
 			route string
 
-			bodyCallback func(context.Context, lager.Logger, io.Reader) error
+			bodyCallback func(lager.Logger, io.Reader) error
 
 			server *ghttp.Server
 		)
@@ -54,7 +54,7 @@ var _ = Describe("APIClient", func() {
 			host = server.URL()
 			route = ""
 
-			bodyCallback = func(context.Context, lager.Logger, io.Reader) error {
+			bodyCallback = func(lager.Logger, io.Reader) error {
 				return nil
 			}
 
@@ -74,7 +74,7 @@ var _ = Describe("APIClient", func() {
 				ghttp.RespondWithJSONEncoded(200, paginatedResponse{}),
 			))
 
-			err := c.MakePaginatedGetRequest(ctx, logger, route, bodyCallback)
+			err := c.MakePaginatedGetRequest(logger, route, bodyCallback)
 
 			Expect(err).NotTo(HaveOccurred())
 
@@ -89,7 +89,7 @@ var _ = Describe("APIClient", func() {
 				ghttp.RespondWithJSONEncoded(400, paginatedResponse{}),
 			))
 
-			err := c.MakePaginatedGetRequest(ctx, logger, route, bodyCallback)
+			err := c.MakePaginatedGetRequest(logger, route, bodyCallback)
 
 			Expect(err).To(HaveOccurred())
 		})
@@ -104,11 +104,11 @@ var _ = Describe("APIClient", func() {
 				}),
 			))
 
-			bodyCallback = func(ctx context.Context, logger lager.Logger, r io.Reader) error {
+			bodyCallback = func(logger lager.Logger, r io.Reader) error {
 				return errors.New("some-callback-error")
 			}
 
-			err := c.MakePaginatedGetRequest(ctx, logger, route, bodyCallback)
+			err := c.MakePaginatedGetRequest(logger, route, bodyCallback)
 
 			Expect(err).To(MatchError("some-callback-error"))
 		})
@@ -146,7 +146,7 @@ var _ = Describe("APIClient", func() {
 			)
 
 			var responseNames []string
-			bodyCallback = func(ctx context.Context, logger lager.Logger, r io.Reader) error {
+			bodyCallback = func(logger lager.Logger, r io.Reader) error {
 				var p paginatedResponse
 
 				err := json.NewDecoder(r).Decode(&p)
@@ -156,7 +156,7 @@ var _ = Describe("APIClient", func() {
 				return nil
 			}
 
-			err := c.MakePaginatedGetRequest(ctx, logger, route, bodyCallback)
+			err := c.MakePaginatedGetRequest(logger, route, bodyCallback)
 
 			Expect(err).NotTo(HaveOccurred())
 

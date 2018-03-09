@@ -30,7 +30,7 @@ func NewAPIClient(host string, client *http.Client, timeout time.Duration) *APIC
 	}
 }
 
-func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Logger, route string, bodyCallback func(context.Context, lager.Logger, io.Reader) error) error {
+func (c *APIClient) MakePaginatedGetRequest(logger lager.Logger, route string, bodyCallback func(lager.Logger, io.Reader) error) error {
 	rg := NewRequestGenerator(c.Host)
 
 	var (
@@ -45,10 +45,10 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 				"route": route,
 			})
 
-			newCtx, cancelFunc := context.WithTimeout(ctx, c.RequestTimeout)
+			ctx, cancelFunc := context.WithTimeout(context.Background(), c.RequestTimeout)
 			defer cancelFunc()
 
-			res, err := makeAPIRequest(newCtx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
+			res, err := makeAPIRequest(ctx, routeLogger.Session("make-api-request"), c.HTTPClient, rg, route)
 			if err != nil {
 				return nil, err
 			}
@@ -64,7 +64,7 @@ func (c *APIClient) MakePaginatedGetRequest(ctx context.Context, logger lager.Lo
 				return nil, err
 			}
 
-			err = bodyCallback(ctx, routeLogger, buf)
+			err = bodyCallback(routeLogger, buf)
 			if err != nil {
 				return nil, err
 			}
