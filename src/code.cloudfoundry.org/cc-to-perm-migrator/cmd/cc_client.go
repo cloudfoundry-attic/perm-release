@@ -15,7 +15,7 @@ import (
 
 type CloudControllerAPIClient interface {
 	MakePaginatedGetRequest(logger lager.Logger, route string, bodyCallback func(lager.Logger, io.Reader) error) error
-	GetOrganizations(logger lager.Logger) ([]cloudcontroller.OrganizationResource, error)
+	GetOrganizations(logger lager.Logger) (*[]cloudcontroller.OrganizationResource, error)
 }
 
 func IterateOverCloudControllerEntities(logger lager.Logger, roleAssignments chan<- RoleAssignment, c CloudControllerAPIClient) error {

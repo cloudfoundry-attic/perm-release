@@ -24,17 +24,17 @@ type FakeCloudControllerAPIClient struct {
 	makePaginatedGetRequestReturnsOnCall map[int]struct {
 		result1 error
 	}
-	GetOrganizationsStub        func(logger lager.Logger) ([]cloudcontroller.OrganizationResource, error)
+	GetOrganizationsStub        func(logger lager.Logger) (*[]cloudcontroller.OrganizationResource, error)
 	getOrganizationsMutex       sync.RWMutex
 	getOrganizationsArgsForCall []struct {
 		logger lager.Logger
 	}
 	getOrganizationsReturns struct {
-		result1 []cloudcontroller.OrganizationResource
+		result1 *[]cloudcontroller.OrganizationResource
 		result2 error
 	}
 	getOrganizationsReturnsOnCall map[int]struct {
-		result1 []cloudcontroller.OrganizationResource
+		result1 *[]cloudcontroller.OrganizationResource
 		result2 error
 	}
 	invocations      map[string][][]interface{}
@@ -91,7 +91,7 @@ func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequestReturnsOnCall(i
 	}{result1}
 }
 
-func (fake *FakeCloudControllerAPIClient) GetOrganizations(logger lager.Logger) ([]cloudcontroller.OrganizationResource, error) {
+func (fake *FakeCloudControllerAPIClient) GetOrganizations(logger lager.Logger) (*[]cloudcontroller.OrganizationResource, error) {
 	fake.getOrganizationsMutex.Lock()
 	ret, specificReturn := fake.getOrganizationsReturnsOnCall[len(fake.getOrganizationsArgsForCall)]
 	fake.getOrganizationsArgsForCall = append(fake.getOrganizationsArgsForCall, struct {
@@ -120,24 +120,24 @@ func (fake *FakeCloudControllerAPIClient) GetOrganizationsArgsForCall(i int) lag
 	return fake.getOrganizationsArgsForCall[i].logger
 }
 
-func (fake *FakeCloudControllerAPIClient) GetOrganizationsReturns(result1 []cloudcontroller.OrganizationResource, result2 error) {
+func (fake *FakeCloudControllerAPIClient) GetOrganizationsReturns(result1 *[]cloudcontroller.OrganizationResource, result2 error) {
 	fake.GetOrganizationsStub = nil
 	fake.getOrganizationsReturns = struct {
-		result1 []cloudcontroller.OrganizationResource
+		result1 *[]cloudcontroller.OrganizationResource
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeCloudControllerAPIClient) GetOrganizationsReturnsOnCall(i int, result1 []cloudcontroller.OrganizationResource, result2 error) {
+func (fake *FakeCloudControllerAPIClient) GetOrganizationsReturnsOnCall(i int, result1 *[]cloudcontroller.OrganizationResource, result2 error) {
 	fake.GetOrganizationsStub = nil
 	if fake.getOrganizationsReturnsOnCall == nil {
 		fake.getOrganizationsReturnsOnCall = make(map[int]struct {
-			result1 []cloudcontroller.OrganizationResource
+			result1 *[]cloudcontroller.OrganizationResource
 			result2 error
 		})
 	}
 	fake.getOrganizationsReturnsOnCall[i] = struct {
-		result1 []cloudcontroller.OrganizationResource
+		result1 *[]cloudcontroller.OrganizationResource
 		result2 error
 	}{result1, result2}
 }
