@@ -5,6 +5,7 @@ import (
 	"io"
 	"sync"
 
+	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/lager"
 )
@@ -22,6 +23,19 @@ type FakeCloudControllerAPIClient struct {
 	}
 	makePaginatedGetRequestReturnsOnCall map[int]struct {
 		result1 error
+	}
+	GetOrganizationsStub        func(logger lager.Logger) ([]cloudcontroller.OrganizationResource, error)
+	getOrganizationsMutex       sync.RWMutex
+	getOrganizationsArgsForCall []struct {
+		logger lager.Logger
+	}
+	getOrganizationsReturns struct {
+		result1 []cloudcontroller.OrganizationResource
+		result2 error
+	}
+	getOrganizationsReturnsOnCall map[int]struct {
+		result1 []cloudcontroller.OrganizationResource
+		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -77,11 +91,64 @@ func (fake *FakeCloudControllerAPIClient) MakePaginatedGetRequestReturnsOnCall(i
 	}{result1}
 }
 
+func (fake *FakeCloudControllerAPIClient) GetOrganizations(logger lager.Logger) ([]cloudcontroller.OrganizationResource, error) {
+	fake.getOrganizationsMutex.Lock()
+	ret, specificReturn := fake.getOrganizationsReturnsOnCall[len(fake.getOrganizationsArgsForCall)]
+	fake.getOrganizationsArgsForCall = append(fake.getOrganizationsArgsForCall, struct {
+		logger lager.Logger
+	}{logger})
+	fake.recordInvocation("GetOrganizations", []interface{}{logger})
+	fake.getOrganizationsMutex.Unlock()
+	if fake.GetOrganizationsStub != nil {
+		return fake.GetOrganizationsStub(logger)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.getOrganizationsReturns.result1, fake.getOrganizationsReturns.result2
+}
+
+func (fake *FakeCloudControllerAPIClient) GetOrganizationsCallCount() int {
+	fake.getOrganizationsMutex.RLock()
+	defer fake.getOrganizationsMutex.RUnlock()
+	return len(fake.getOrganizationsArgsForCall)
+}
+
+func (fake *FakeCloudControllerAPIClient) GetOrganizationsArgsForCall(i int) lager.Logger {
+	fake.getOrganizationsMutex.RLock()
+	defer fake.getOrganizationsMutex.RUnlock()
+	return fake.getOrganizationsArgsForCall[i].logger
+}
+
+func (fake *FakeCloudControllerAPIClient) GetOrganizationsReturns(result1 []cloudcontroller.OrganizationResource, result2 error) {
+	fake.GetOrganizationsStub = nil
+	fake.getOrganizationsReturns = struct {
+		result1 []cloudcontroller.OrganizationResource
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCloudControllerAPIClient) GetOrganizationsReturnsOnCall(i int, result1 []cloudcontroller.OrganizationResource, result2 error) {
+	fake.GetOrganizationsStub = nil
+	if fake.getOrganizationsReturnsOnCall == nil {
+		fake.getOrganizationsReturnsOnCall = make(map[int]struct {
+			result1 []cloudcontroller.OrganizationResource
+			result2 error
+		})
+	}
+	fake.getOrganizationsReturnsOnCall[i] = struct {
+		result1 []cloudcontroller.OrganizationResource
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeCloudControllerAPIClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.makePaginatedGetRequestMutex.RLock()
 	defer fake.makePaginatedGetRequestMutex.RUnlock()
+	fake.getOrganizationsMutex.RLock()
+	defer fake.getOrganizationsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

@@ -30,6 +30,29 @@ func NewAPIClient(host string, client *http.Client, timeout time.Duration) *APIC
 	}
 }
 
+func (c *APIClient) GetOrganizations(logger lager.Logger) (*[]OrganizationResource, error) {
+	// List Organizations
+	route := "/v2/organizations"
+
+	var organizations []OrganizationResource
+
+	err := c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
+		var listOrganizationsResponse ListOrganizationsResponse
+		err := json.NewDecoder(r).Decode(&listOrganizationsResponse)
+		if err != nil {
+			logger.Error("failed-to-decode-response", err)
+			return nil
+		}
+		organizations = append(organizations, listOrganizationsResponse.Resources...)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &organizations, nil
+}
+
 func (c *APIClient) MakePaginatedGetRequest(logger lager.Logger, route string, bodyCallback func(lager.Logger, io.Reader) error) error {
 	rg := NewRequestGenerator(c.Host)
 
