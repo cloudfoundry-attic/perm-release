@@ -52,7 +52,7 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 	})
 
 	Context("when no organizations", func() {
-		JustBeforeEach(func() {
+		BeforeEach(func() {
 			routeResponses["/v2/organizations"] = `{}`
 		})
 
@@ -69,7 +69,7 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 	})
 
 	Context("when there are organizations", func() {
-		JustBeforeEach(func() {
+		BeforeEach(func() {
 			routeResponses["/v2/organizations"] = `{
 			  "total_results": 1,
 			  "total_pages": 1,
@@ -138,22 +138,15 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 			  ]
 			}`
 
-			routeResponses["/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/users"] = `{}`
-			routeResponses["/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/billing_managers"] = `{}`
-			routeResponses["/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/managers"] = `{}`
-			routeResponses["/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/auditors"] = `{}`
-
-			routeResponses["/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/developers"] = `{}`
-			routeResponses["/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/auditors"] = `{}`
-			routeResponses["/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/managers"] = `{}`
-
+			routeResponses["/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/user_roles"] = `{}`
+			routeResponses["/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/user_roles"] = `{}`
 		})
 
-		It("hits the spaces, users, billing managers, managers, and auditors URLs for every organization, and the developers, auditors, and managers URL for every space", func() {
+		It("hits the organization user roles and space user roles endpoints for every organization and space", func() {
 			err := IterateOverCloudControllerEntities(logger, c, ccAPIClient)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(ccAPIClient.MakePaginatedGetRequestCallCount()).To(Equal(9))
+			Expect(ccAPIClient.MakePaginatedGetRequestCallCount()).To(Equal(4))
 
 			var route string
 			_, route, _ = ccAPIClient.MakePaginatedGetRequestArgsForCall(0)
@@ -170,13 +163,8 @@ var _ = Describe(".IterateOverCloudControllerEntities", func() {
 				routes = append(routes, route)
 			}
 
-			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/users"))
-			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/billing_managers"))
-			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/managers"))
-			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/auditors"))
-			Expect(routes).To(ContainElement("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/developers"))
-			Expect(routes).To(ContainElement("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/auditors"))
-			Expect(routes).To(ContainElement("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/managers"))
+			Expect(routes).To(ContainElement("/v2/organizations/a7aff246-5f5b-4cf8-87d8-f316053e4a20/user_roles"))
+			Expect(routes).To(ContainElement("/v2/spaces/5489e195-c42b-4e61-bf30-323c331ecc01/user_roles"))
 		})
 	})
 })

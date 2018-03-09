@@ -2,7 +2,6 @@ package cloudcontroller
 
 type PaginatedResponse struct {
 	NextURL     *string `json:"next_url"`
-	PreviousURL *string `json:"prev_url"`
 }
 
 type ListOrganizationsResponse struct {
@@ -12,14 +11,6 @@ type ListOrganizationsResponse struct {
 
 type OrganizationResource struct {
 	MetadataResource
-	Entity struct {
-		Name               string `json:"name"`
-		SpacesURL          string `json:"spaces_url"`
-		UsersURL           string `json:"users_url"`
-		ManagersURL        string `json:"managers_url"`
-		BillingManagersURL string `json:"billing_managers_url"`
-		AuditorsURL        string `json:"auditors_url"`
-	} `json:"entity"`
 }
 
 type ListSpacesResponse struct {
@@ -29,29 +20,34 @@ type ListSpacesResponse struct {
 
 type SpaceResource struct {
 	MetadataResource
-	Entity struct {
-		Name          string `json:"name"`
-		DevelopersURL string `json:"developers_url"`
-		AuditorsURL   string `json:"auditors_url"`
-		ManagersURL   string `json:"managers_url"`
-	} `json:"entity"`
 }
 
 type MetadataResource struct {
 	Metadata struct {
 		GUID string `json:"guid"`
-		URL  string `json:"url"`
 	} `json:"metadata"`
 }
 
-type ListUsersResponse struct {
+type ListOrganizationRolesResponse struct {
 	PaginatedResponse
-	Resources []UserResource `json:"resources"`
+	Resources []OrgUserResource `json:"resources"`
 }
 
-type UserResource struct {
+type ListSpaceRolesResponse struct {
+	PaginatedResponse
+	Resources []SpaceUserResource `json:"resources"`
+}
+
+type OrgUserResource struct {
 	MetadataResource
 	Entity struct {
-		Username string `json:"username"`
-	} `json:"entity"`
+		Roles []string `json:"organization_roles"`
+	}
 }
+type SpaceUserResource struct {
+	MetadataResource
+	Entity struct {
+		Roles []string `json:"space_roles"`
+	}
+}
+

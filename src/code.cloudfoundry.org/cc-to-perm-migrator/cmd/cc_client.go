@@ -51,7 +51,8 @@ func IterateOverCloudControllerEntities(logger lager.Logger, roleAssignments cha
 	}
 
 	for _, organization := range organizations {
-		route = organization.Entity.SpacesURL
+		orgGUID := organization.Metadata.GUID
+		route = fmt.Sprintf("/v2/organizations/%s/spaces", orgGUID)
 
 		err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
 			var listOrganizationSpacesResponse cloudcontroller.ListSpacesResponse
@@ -68,78 +69,67 @@ func IterateOverCloudControllerEntities(logger lager.Logger, roleAssignments cha
 			logger.Error("failed-to-fetch-organizations", err)
 		}
 
-		roleRequests := []RoleRequest{
-			{Route: organization.Entity.UsersURL, Role: "org-user"},
-			{Route: organization.Entity.BillingManagersURL, Role: "org-billing-manager"},
-			{Route: organization.Entity.ManagersURL, Role: "org-manager"},
-			{Route: organization.Entity.AuditorsURL, Role: "org-auditor"},
-		}
+		var users []cloudcontroller.OrgUserResource
 
-		var users []cloudcontroller.UserResource
+		route = fmt.Sprintf("/v2/organizations/%s/user_roles", orgGUID)
 
-		for _, roleRequest := range roleRequests {
-			route = roleRequest.Route
+		err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
+			var listUsersResponse cloudcontroller.ListOrganizationRolesResponse
+			err = json.NewDecoder(r).Decode(&listUsersResponse)
+			if err != nil {
+				logger.Error("failed-to-decode-response", err)
+				return nil
+			}
 
-			err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
-				var listUsersResponse cloudcontroller.ListUsersResponse
-				err = json.NewDecoder(r).Decode(&listUsersResponse)
-				if err != nil {
-					logger.Error("failed-to-decode-response", err)
-					return nil
-				}
-
-				users = listUsersResponse.Resources
-				for _, u := range users {
+			users = listUsersResponse.Resources
+			for _, u := range users {
+				for _, role := range u.Entity.Roles {
 					roleAssignments <- RoleAssignment{
-						RoleName:     roleRequest.Role,
-						ResourceGUID: organization.Metadata.GUID,
+						RoleName:     role,
+						ResourceGUID: orgGUID,
 						UserGUID:     u.Metadata.GUID,
 					}
 				}
-
-				return nil
-			})
-			if err != nil {
-				logger.Error(fmt.Sprintf("failed-to-fetch-assignments-for-role-%s", roleRequest.Role), err)
 			}
+
+			return nil
+		})
+		if err != nil {
+			logger.Error(fmt.Sprintf("failed-to-fetch-assignments-for-org-%s", orgGUID), err)
 		}
 
 	}
 
 	for _, space := range spaces {
-		roleRequests := []RoleRequest{
-			{Route: space.Entity.DevelopersURL, Role: "space-developer"},
-			{Route: space.Entity.AuditorsURL, Role: "space-auditor"},
-			{Route: space.Entity.ManagersURL, Role: "space-manager"},
-		}
+		spaceGUID := space.Metadata.GUID
 
-		var users []cloudcontroller.UserResource
+		route = fmt.Sprintf("/v2/spaces/%s/user_roles", spaceGUID)
+		var users []cloudcontroller.SpaceUserResource
 
-		for _, roleRequest := range roleRequests {
-			route = roleRequest.Route
+		err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
+			var listUsersResponse cloudcontroller.ListSpaceRolesResponse
+			err = json.NewDecoder(r).Decode(&listUsersResponse)
+			if err != nil {
+				logger.Error("failed-to-decode-response", err)
+				return nil
+			}
 
-			err = c.MakePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
-				var listUsersResponse cloudcontroller.ListUsersResponse
-				err = json.NewDecoder(r).Decode(&listUsersResponse)
-				if err != nil {
-					logger.Error("failed-to-decode-response", err)
-					return nil
-				}
-
-				users = listUsersResponse.Resources
-				for _, u := range users {
+			users = listUsersResponse.Resources
+			for _, u := range users {
+				for _, role := range u.Entity.Roles {
 					roleAssignments <- RoleAssignment{
-						RoleName:     roleRequest.Role,
+						RoleName:     role,
 						ResourceGUID: space.Metadata.GUID,
 						UserGUID:     u.Metadata.GUID,
 					}
 				}
 
-				return nil
-			})
-			if err != nil {
-				logger.Error(fmt.Sprintf("failed-to-fetch-assignments-for-role-%s", roleRequest.Role), err)
 			}
+
+			return nil
+		})
+		if err != nil {
+			logger.Error(fmt.Sprintf("failed-to-fetch-assignments-for-space-%s", spaceGUID), err)
 		}
 	}
 
