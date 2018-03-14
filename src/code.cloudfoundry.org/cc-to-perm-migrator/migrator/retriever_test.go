@@ -26,30 +26,53 @@ var _ = Describe("Retriever", func() {
 
 	Describe("#FetchCAPIEntities", func() {
 		BeforeEach(func() {
-			client.GetOrgGUIDsReturns([]string{"org-guid"}, nil)
+			client.GetOrgGUIDsReturns([]string{"org-guid-1", "org-guid-2"}, nil)
 		})
-		Context("when the capi client returns a single org with an org role assignment", func() {
+
+		Context("when the capi client returns orgs with different org role assignment", func() {
 			BeforeEach(func() {
-				client.GetOrgRoleAssignmentsReturns(
+				client.GetOrgRoleAssignmentsReturnsOnCall(0,
 					[]RoleAssignment{
 						{
-							ResourceGUID: "org-guid",
-							UserGUID:     "user-guid",
-							Roles:        []string{"org_auditor"},
+							ResourceGUID: "org-guid-1",
+							UserGUID:     "user-guid-1",
+							Roles:        []string{"org_auditor", "org_user"},
+						},
+						{
+							ResourceGUID: "org-guid-1",
+							UserGUID:     "user-guid-2",
+							Roles:        []string{"billing_manager"},
+						},
+					}, nil)
+				client.GetOrgRoleAssignmentsReturnsOnCall(1,
+					[]RoleAssignment{
+						{
+							ResourceGUID: "org-guid-2",
+							UserGUID:     "user-guid-1",
+							Roles:        []string{"org_manager"},
 						},
 					}, nil)
 
 			})
-			It("returns an org auditor assignment to the channel", func() {
+			It("returns the org role assignments to the channel", func() {
 				FetchCAPIEntities(client, logger, assignments, errs)
 
 				Expect(client.GetOrgGUIDsCallCount()).To(Equal(1))
+				Expect(client.GetOrgRoleAssignmentsCallCount()).To(Equal(2))
 				_, orgGUID := client.GetOrgRoleAssignmentsArgsForCall(0)
-				Expect(orgGUID).To(Equal("org-guid"))
+				Expect(orgGUID).To(Equal("org-guid-1"))
+				_, orgGUID = client.GetOrgRoleAssignmentsArgsForCall(1)
+				Expect(orgGUID).To(Equal("org-guid-2"))
 
-				expectedAssignment := RoleAssignment{ResourceGUID: "org-guid", UserGUID: "user-guid", Roles: []string{"org_auditor"}}
-				assignment := <-assignments
-				Expect(assignment).To(Equal(expectedAssignment))
+				expectedAssignment1 := RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-1", Roles: []string{"org_auditor", "org_user"}}
+				expectedAssignment2 := RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-2", Roles: []string{"billing_manager"}}
+				expectedAssignment3 := RoleAssignment{ResourceGUID: "org-guid-2", UserGUID: "user-guid-1", Roles: []string{"org_manager"}}
+
+				assignment1, assignment2, assignment3 := <-assignments, <-assignments, <-assignments
+				Expect(assignment1).To(Equal(expectedAssignment1))
+				Expect(assignment2).To(Equal(expectedAssignment2))
+				Expect(assignment3).To(Equal(expectedAssignment3))
+
 			})
 		})
 
@@ -84,37 +107,69 @@ var _ = Describe("Retriever", func() {
 			})
 		})
 
-		Context("when the capi client returns a space with a space role assignment", func() {
+		Context("when the capi client returns spaces with space role assignments", func() {
 			BeforeEach(func() {
-				client.GetSpaceGUIDsReturns([]string{"space-guid"}, nil)
-				client.GetSpaceRoleAssignmentsReturns(
+				client.GetSpaceGUIDsReturnsOnCall(0, []string{"space-guid-1"}, nil)
+				client.GetSpaceGUIDsReturnsOnCall(1, []string{"space-guid-2"}, nil)
+				client.GetSpaceRoleAssignmentsReturnsOnCall(0,
 					[]RoleAssignment{
 						{
-							ResourceGUID: "space-guid",
-							UserGUID:     "user-guid",
+							ResourceGUID: "space-guid-1",
+							UserGUID:     "user-guid-1",
+							Roles:        []string{"space_developer", "space_manager"},
+						},
+						{
+							ResourceGUID: "space-guid-1",
+							UserGUID:     "user-guid-2",
+							Roles:        []string{"space_auditor"},
+						},
+					}, nil)
+				client.GetSpaceRoleAssignmentsReturnsOnCall(1,
+					[]RoleAssignment{
+						{
+							ResourceGUID: "space-guid-2",
+							UserGUID:     "user-guid-4",
+							Roles:        []string{"space_manager"},
+						},
+						{
+							ResourceGUID: "space-guid-2",
+							UserGUID:     "user-guid-5",
 							Roles:        []string{"space_developer"},
 						},
 					}, nil)
 
 			})
-			It("returns a space developer assignment to the channel", func() {
+			It("returns the space role assignments to the channel", func() {
 				FetchCAPIEntities(client, logger, assignments, errs)
 
-				Expect(client.GetSpaceGUIDsCallCount()).To(Equal(1))
+				Expect(client.GetSpaceGUIDsCallCount()).To(Equal(2))
 				_, orgGUID := client.GetSpaceGUIDsArgsForCall(0)
-				Expect(orgGUID).To(Equal("org-guid"))
+				Expect(orgGUID).To(Equal("org-guid-1"))
+				_, orgGUID = client.GetSpaceGUIDsArgsForCall(1)
+				Expect(orgGUID).To(Equal("org-guid-2"))
 				_, spaceGUID := client.GetSpaceRoleAssignmentsArgsForCall(0)
-				Expect(spaceGUID).To(Equal("space-guid"))
+				Expect(spaceGUID).To(Equal("space-guid-1"))
+				_, spaceGUID = client.GetSpaceRoleAssignmentsArgsForCall(1)
+				Expect(spaceGUID).To(Equal("space-guid-2"))
 
-				assignment := <-assignments
-				expectedAssignment := RoleAssignment{ResourceGUID: "space-guid", UserGUID: "user-guid", Roles: []string{"space_developer"}}
-				Expect(assignment).To(Equal(expectedAssignment))
+				assignment1, assignment2 := <-assignments, <-assignments
+				expectedAssignment1 := RoleAssignment{ResourceGUID: "space-guid-1", UserGUID: "user-guid-1", Roles: []string{"space_developer", "space_manager"}}
+				expectedAssignment2 := RoleAssignment{ResourceGUID: "space-guid-1", UserGUID: "user-guid-2", Roles: []string{"space_auditor"}}
+				Expect(assignment1).To(Equal(expectedAssignment1))
+				Expect(assignment2).To(Equal(expectedAssignment2))
+
+				assignment3, assignment4 := <-assignments, <-assignments
+				expectedAssignment3 := RoleAssignment{ResourceGUID: "space-guid-2", UserGUID: "user-guid-4", Roles: []string{"space_manager"}}
+				expectedAssignment4 := RoleAssignment{ResourceGUID: "space-guid-2", UserGUID: "user-guid-5", Roles: []string{"space_developer"}}
+				Expect(assignment3).To(Equal(expectedAssignment3))
+				Expect(assignment4).To(Equal(expectedAssignment4))
 
 			})
 		})
 
 		Context("when the capi client call for spaces returns an error", func() {
 			BeforeEach(func() {
+				client.GetOrgGUIDsReturns([]string{"org-guid"}, nil)
 				client.GetSpaceGUIDsReturns([]string{}, fmt.Errorf("space-guid-error"))
 			})
 			It("sends an error to the errors channel", func() {
@@ -127,6 +182,7 @@ var _ = Describe("Retriever", func() {
 
 		Context("when the capi client call for space role assignment returns an error", func() {
 			BeforeEach(func() {
+				client.GetOrgGUIDsReturns([]string{"org-guid"}, nil)
 				client.GetSpaceGUIDsReturns([]string{"space-guid"}, nil)
 				client.GetSpaceRoleAssignmentsReturns([]RoleAssignment{}, fmt.Errorf("space-role-assignment-error"))
 			})
