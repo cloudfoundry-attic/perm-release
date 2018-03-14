@@ -10,7 +10,7 @@ type ListOrgsResponse struct {
 }
 
 type OrgResource struct {
-	MetadataResource `json:"metadata"`
+	Metadata MetadataResource `json:"metadata"`
 }
 
 type ListSpacesResponse struct {
@@ -19,7 +19,7 @@ type ListSpacesResponse struct {
 }
 
 type SpaceResource struct {
-	MetadataResource `json:"metadata"`
+	Metadata MetadataResource `json:"metadata"`
 }
 
 type MetadataResource struct {

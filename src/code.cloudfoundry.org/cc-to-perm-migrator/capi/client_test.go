@@ -377,4 +377,145 @@ var _ = Describe("Client", func() {
 			})
 		})
 	})
+	Describe("#GetOrgGUIDs", func() {
+		Context("when the server responds successfully", func() {
+			BeforeEach(func() {
+				orgsResponse := capimodels.ListOrgsResponse{
+					Resources: []capimodels.OrgResource{{
+						Metadata: capimodels.MetadataResource{
+							GUID: "org-guid-1",
+						},
+					},
+						{
+							Metadata: capimodels.MetadataResource{
+								GUID: "org-guid-2",
+							},
+						}},
+				}
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/v2/organizations"),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, orgsResponse),
+					),
+				)
+			})
+			It("returns a list of org GUIDS", func() {
+				orgGUIDs, err := client.GetOrgGUIDs(logger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(orgGUIDs)).To(Equal(2))
+				Expect(orgGUIDs[0]).To(Equal("org-guid-1"))
+				Expect(orgGUIDs[1]).To(Equal("org-guid-2"))
+			})
+		})
+		Context("when the server responds with an error", func() {
+			BeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/v2/organizations"),
+						ghttp.RespondWithJSONEncoded(http.StatusInternalServerError, `boo`),
+					),
+				)
+			})
+			It("returns an error", func() {
+				_, err := client.GetOrgGUIDs(logger)
+				Expect(err).To(MatchError("failed-to-fetch-organizations"))
+			})
+		})
+		Context("when the response contains bad JSON", func() {
+			BeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/v2/organizations"),
+						ghttp.VerifyHeaderKV("Accept", "application/json"),
+						ghttp.RespondWith(http.StatusOK, "bad response"),
+					),
+				)
+			})
+
+			It("should return an empty list of orgs and an error", func() {
+				actualGUIDs, err := client.GetOrgGUIDs(logger)
+
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
+				Expect(actualGUIDs).To(BeEmpty())
+
+				Expect(err).To(MatchError("failed-to-fetch-organizations"))
+			})
+		})
+	})
+	Describe("#GetSpaceGUIDs", func() {
+		var (
+			route   string
+			orgGUID string
+		)
+
+		BeforeEach(func() {
+			orgGUID = "org-guid-1"
+			route = fmt.Sprintf("/v2/organizations/%s/spaces", orgGUID)
+		})
+		Context("when the server responds successfully", func() {
+			BeforeEach(func() {
+				getSpaceGUIDsResponse := capimodels.ListSpacesResponse{
+					Resources: []capimodels.SpaceResource{
+						{
+							Metadata: capimodels.MetadataResource{
+								GUID: "space-guid-1",
+							},
+						},
+						{
+							Metadata: capimodels.MetadataResource{
+								GUID: "space-guid-2",
+							},
+						},
+					},
+				}
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", route),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, getSpaceGUIDsResponse),
+					),
+				)
+			})
+			It("returns a list of space GUIDS", func() {
+				spaceGUIDs, err := client.GetSpaceGUIDs(logger, orgGUID)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(spaceGUIDs)).To(Equal(2))
+				Expect(spaceGUIDs[0]).To(Equal("space-guid-1"))
+				Expect(spaceGUIDs[1]).To(Equal("space-guid-2"))
+			})
+		})
+		Context("when the server responds with an error", func() {
+			BeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", route),
+						ghttp.RespondWithJSONEncoded(http.StatusInternalServerError, `boo`),
+					),
+				)
+			})
+			It("returns an error", func() {
+				_, err := client.GetSpaceGUIDs(logger, orgGUID)
+				Expect(err).To(MatchError("failed-to-fetch-spaces"))
+			})
+		})
+		Context("when the response contains bad JSON", func() {
+			BeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", route),
+						ghttp.VerifyHeaderKV("Accept", "application/json"),
+						ghttp.RespondWith(http.StatusOK, "bad response"),
+					),
+				)
+			})
+
+			It("should return an empty list of orgs and an error", func() {
+				actualGUIDs, err := client.GetSpaceGUIDs(logger, orgGUID)
+
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
+				Expect(actualGUIDs).To(BeEmpty())
+
+				Expect(err).To(MatchError("failed-to-fetch-spaces"))
+			})
+		})
+	})
 })

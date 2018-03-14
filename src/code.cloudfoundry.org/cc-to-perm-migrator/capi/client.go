@@ -29,6 +29,53 @@ func NewClient(host string) *Client {
 	}
 }
 
+func (c *Client) GetSpaceGUIDs(logger lager.Logger, orgGUID string) ([]string, error) {
+	route := fmt.Sprintf("/v2/organizations/%s/spaces", orgGUID)
+	var spaceGUIDS []string
+	var listSpacesResponse capimodels.ListSpacesResponse
+
+	err := c.makePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
+		listSpacesResponse = capimodels.ListSpacesResponse{}
+		err := json.NewDecoder(r).Decode(&listSpacesResponse)
+		if err != nil {
+			logger.Error("failed-to-decode-response", err)
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return []string{}, errors.New("failed-to-fetch-spaces")
+	}
+	for _, spaceResource := range listSpacesResponse.Resources {
+		spaceGUIDS = append(spaceGUIDS, spaceResource.Metadata.GUID)
+	}
+	return spaceGUIDS, nil
+}
+
+func (c *Client) GetOrgGUIDs(logger lager.Logger) ([]string, error) {
+	route := "/v2/organizations"
+	var orgGUIDs []string
+	var listOrgsResponse capimodels.ListOrgsResponse
+
+	err := c.makePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
+		listOrgsResponse = capimodels.ListOrgsResponse{}
+		err := json.NewDecoder(r).Decode(&listOrgsResponse)
+		if err != nil {
+			logger.Error("failed-to-decode-response", err)
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return []string{}, errors.New("failed-to-fetch-organizations")
+	}
+	for _, orgResource := range listOrgsResponse.Resources {
+		orgGUIDs = append(orgGUIDs, orgResource.Metadata.GUID)
+	}
+	return orgGUIDs, err
+}
+
 func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]migrator.RoleAssignment, error) {
 	route := fmt.Sprintf("/v2/organizations/%s/user_roles", orgGUID)
 
