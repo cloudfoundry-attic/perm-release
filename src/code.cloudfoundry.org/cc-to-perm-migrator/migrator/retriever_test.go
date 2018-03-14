@@ -67,12 +67,12 @@ var _ = Describe("Retriever", func() {
 				expectedAssignment1 := RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-1", Roles: []string{"org_auditor", "org_user"}}
 				expectedAssignment2 := RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-2", Roles: []string{"billing_manager"}}
 				expectedAssignment3 := RoleAssignment{ResourceGUID: "org-guid-2", UserGUID: "user-guid-1", Roles: []string{"org_manager"}}
-
 				assignment1, assignment2, assignment3 := <-assignments, <-assignments, <-assignments
 				Expect(assignment1).To(Equal(expectedAssignment1))
 				Expect(assignment2).To(Equal(expectedAssignment2))
 				Expect(assignment3).To(Equal(expectedAssignment3))
-
+				Eventually(assignments).Should(BeClosed())
+				Eventually(errs).Should(BeClosed())
 			})
 		})
 
@@ -99,11 +99,7 @@ var _ = Describe("Retriever", func() {
 				Expect(client.GetOrgRoleAssignmentsCallCount()).To(Equal(1))
 				actualError := <-errs
 				Expect(actualError).To(MatchError("org-role-assignments-error"))
-				select {
-				case <-assignments:
-					Fail("assignments channel should be empty")
-				default:
-				}
+				Eventually(assignments).Should(BeClosed())
 			})
 		})
 
@@ -192,11 +188,7 @@ var _ = Describe("Retriever", func() {
 				Expect(client.GetSpaceRoleAssignmentsCallCount()).To(Equal(1))
 				actualError := <-errs
 				Expect(actualError).To(MatchError("space-role-assignment-error"))
-				select {
-				case <-assignments:
-					Fail("assignments channel should be empty")
-				default:
-				}
+				Eventually(assignments).Should(BeClosed())
 			})
 
 			Context("where the org auditor role assignment was still returned from capi", func() {

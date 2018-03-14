@@ -24,7 +24,7 @@ var _ = Describe("Client", func() {
 	BeforeEach(func() {
 		logger = lagertest.NewTestLogger("test-capi-client")
 		server = ghttp.NewServer()
-		client = NewClient(server.URL())
+		client = NewClient(server.URL(), http.DefaultClient)
 	})
 
 	AfterEach(func() {

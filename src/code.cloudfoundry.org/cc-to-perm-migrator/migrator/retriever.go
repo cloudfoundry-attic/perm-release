@@ -51,4 +51,7 @@ func FetchCAPIEntities(client CAPIClient, logger lager.Logger, assignments chan<
 			}
 		}
 	}
+
+	close(assignments)
+	close(errs)
 }

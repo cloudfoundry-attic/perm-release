@@ -17,9 +17,10 @@ import (
 
 	"sync"
 
-	"code.cloudfoundry.org/cc-to-perm-migrator/cloudcontroller"
+	"code.cloudfoundry.org/cc-to-perm-migrator/capi"
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
 	"code.cloudfoundry.org/lager"
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/oauth2"
@@ -93,25 +94,22 @@ func main() {
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL.String())
 	client := uaaConfig.Client(ctx)
 
-	ccClient := cloudcontroller.NewAPIClient(config.CloudController.URL, client, CloudControllerTimeout)
+	ccClient := capi.NewClient(config.CloudController.URL, client)
 
-	roleAssignments := make(chan cmd.RoleAssignment)
+	roleAssignments := make(chan migrator.RoleAssignment)
+	errors := make(chan error)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
-		cmd.GenerateReport(os.Stdout, roleAssignments)
+		cmd.GenerateReport(os.Stdout, roleAssignments, errors)
 	}()
 
 	go func() {
 		defer wg.Done()
-		err = cmd.IterateOverCloudControllerEntities(logger, roleAssignments, ccClient)
-
-		if err != nil {
-			panic(err)
-		}
+		migrator.FetchCAPIEntities(ccClient, logger, roleAssignments, errors)
 	}()
 
 	wg.Wait()

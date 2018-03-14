@@ -1,18 +1,22 @@
 package cmd_test
 
 import (
+	"errors"
+
 	. "code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe("Generating a report", func() {
-	var c chan RoleAssignment
-
+	var c chan migrator.RoleAssignment
+	var e chan error
 	BeforeEach(func() {
-		c = make(chan RoleAssignment, 1000)
+		c = make(chan migrator.RoleAssignment, 1000)
+		e = make(chan error, 1000)
 	})
 
 	Describe(".GenerateReport", func() {
@@ -26,13 +30,16 @@ var _ = Describe("Generating a report", func() {
 
 		Context("when the channel is sent 2 elements", func() {
 			It1Second("", func() {
-				c <- RoleAssignment{}
-				c <- RoleAssignment{}
+				c <- migrator.RoleAssignment{}
+				c <- migrator.RoleAssignment{}
+				e <- errors.New("There has been a problem")
 				close(c)
+				close(e)
 
-				GenerateReport(b, c)
+				GenerateReport(b, c, e)
 
 				Expect(b).To(Say("Number of role assignments: 2\\."))
+				Expect(b).To(Say("Number of errors: 1\\."))
 			})
 		})
 	})
@@ -49,7 +56,7 @@ var _ = Describe("Generating a report", func() {
 
 		Context("when the channel is sent one element", func() {
 			It1Second("returns 1", func() {
-				c <- RoleAssignment{}
+				c <- migrator.RoleAssignment{}
 				close(c)
 
 				count := ComputeNumberAssignments(c)
@@ -60,8 +67,8 @@ var _ = Describe("Generating a report", func() {
 
 		Context("when the channel is sent 2 elements", func() {
 			It1Second("returns 1", func() {
-				c <- RoleAssignment{}
-				c <- RoleAssignment{}
+				c <- migrator.RoleAssignment{}
+				c <- migrator.RoleAssignment{}
 				close(c)
 
 				count := ComputeNumberAssignments(c)
@@ -82,7 +89,7 @@ var _ = Describe("Generating a report", func() {
 			It1Second("returns 1", func() {
 				go func() {
 					for i := 0; i < n; i++ {
-						c <- RoleAssignment{}
+						c <- migrator.RoleAssignment{}
 					}
 					close(c)
 				}()
