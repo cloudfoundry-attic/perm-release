@@ -15,6 +15,14 @@ processes:
     - <%= p('statsd.hostname') %>
     - --statsd-port
     - <%= p('statsd.port') %>
+    - --admin-probe-interval
+    - <%= p('perm.admin_probe_interval') %>
+    - --admin-probe-timeout
+    - <%= p('perm.admin_probe_timeout') %>
+    - --query-probe-interval
+    - <%= p('perm.query_probe_interval') %>
+    - --query-probe-timeout
+    - <%= p('perm.query_probe_timeout') %>
 
     limits:
       memory: 256M
