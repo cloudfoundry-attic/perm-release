@@ -31,8 +31,6 @@ type options struct {
 	ConfigFilePath cmd.FileOrStringFlag `long:"config-file-path" description:"Path to the config file for the CloudController migrator" required:"true"`
 }
 
-const CloudControllerTimeout = 5 * time.Second
-
 func main() {
 	parserOpts := &options{}
 	parser := flags.NewParser(parserOpts, flags.Default)
