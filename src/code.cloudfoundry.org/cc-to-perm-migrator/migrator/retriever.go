@@ -11,8 +11,8 @@ type RoleAssignment struct {
 }
 
 type ErrorEvent struct {
-	Cause error
-	GUID string
+	Cause      error
+	GUID       string
 	EntityType string
 }
 
