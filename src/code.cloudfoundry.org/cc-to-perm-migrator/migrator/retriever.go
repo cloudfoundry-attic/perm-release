@@ -10,6 +10,16 @@ type RoleAssignment struct {
 	Roles        []string
 }
 
+type ErrorEvent struct {
+	Cause error
+	GUID string
+	EntityType string
+}
+
+func (e *ErrorEvent) Error() string {
+	return e.Cause.Error()
+}
+
 //go:generate counterfeiter . CAPIClient
 
 type CAPIClient interface {

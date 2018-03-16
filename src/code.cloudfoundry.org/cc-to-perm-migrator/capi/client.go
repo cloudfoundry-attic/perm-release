@@ -41,13 +41,16 @@ func (c *Client) GetSpaceGUIDs(logger lager.Logger, orgGUID string) ([]string, e
 			logger.Error("failed-to-decode-response", err)
 			return err
 		}
+		for _, spaceResource := range listSpacesResponse.Resources {
+			spaceGUIDS = append(spaceGUIDS, spaceResource.Metadata.GUID)
+		}
 		return nil
 	})
 	if err != nil {
-		return []string{}, errors.New("failed-to-fetch-spaces")
-	}
-	for _, spaceResource := range listSpacesResponse.Resources {
-		spaceGUIDS = append(spaceGUIDS, spaceResource.Metadata.GUID)
+		return []string{}, &migrator.ErrorEvent{
+			Cause:      errors.New("failed-to-fetch-spaces"),
+			EntityType: route,
+		}
 	}
 	return spaceGUIDS, nil
 }
@@ -65,15 +68,18 @@ func (c *Client) GetOrgGUIDs(logger lager.Logger) ([]string, error) {
 			return err
 		}
 
+		for _, orgResource := range listOrgsResponse.Resources {
+			orgGUIDs = append(orgGUIDs, orgResource.Metadata.GUID)
+		}
 		return nil
 	})
 	if err != nil {
-		return []string{}, errors.New("failed-to-fetch-organizations")
+		return []string{}, &migrator.ErrorEvent{
+			Cause:      errors.New("failed-to-fetch-organizations"),
+			EntityType: route,
+		}
 	}
-	for _, orgResource := range listOrgsResponse.Resources {
-		orgGUIDs = append(orgGUIDs, orgResource.Metadata.GUID)
-	}
-	return orgGUIDs, err
+	return orgGUIDs, nil
 }
 
 func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]migrator.RoleAssignment, error) {
@@ -100,7 +106,10 @@ func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]m
 	})
 
 	if err != nil {
-		return orgRoles, errors.New("failed-to-fetch-organization-user-roles")
+		return orgRoles, &migrator.ErrorEvent{
+			Cause:      errors.New("failed-to-fetch-organization-user-roles"),
+			EntityType: route,
+		}
 	}
 
 	return orgRoles, nil
@@ -130,7 +139,10 @@ func (c *Client) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) 
 	})
 
 	if err != nil {
-		return spaceRoles, errors.New("failed-to-fetch-space-user-roles")
+		return spaceRoles, &migrator.ErrorEvent{
+			Cause:      errors.New("failed-to-fetch-space-user-roles"),
+			EntityType: route,
+		}
 	}
 	return spaceRoles, nil
 }

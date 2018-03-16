@@ -80,11 +80,12 @@ var _ = Describe("Retriever", func() {
 			BeforeEach(func() {
 				client.GetOrgGUIDsReturns([]string{}, fmt.Errorf("org-guids-error"))
 			})
+
 			It("sends an error to the errors channel", func() {
 				FetchCAPIEntities(client, logger, assignments, errs)
 				Expect(client.GetOrgGUIDsCallCount()).To(Equal(1))
-				actualError := <-errs
-				Expect(actualError).To(MatchError("org-guids-error"))
+				actualErrorEvent := <-errs
+				Expect(actualErrorEvent).To(MatchError("org-guids-error"))
 			})
 		})
 
@@ -97,8 +98,8 @@ var _ = Describe("Retriever", func() {
 				FetchCAPIEntities(client, logger, assignments, errs)
 				Expect(client.GetOrgGUIDsCallCount()).To(Equal(1))
 				Expect(client.GetOrgRoleAssignmentsCallCount()).To(Equal(1))
-				actualError := <-errs
-				Expect(actualError).To(MatchError("org-role-assignments-error"))
+				actualErrorEvent := <-errs
+				Expect(actualErrorEvent).To(MatchError("org-role-assignments-error"))
 				Eventually(assignments).Should(BeClosed())
 			})
 		})
@@ -171,8 +172,8 @@ var _ = Describe("Retriever", func() {
 			It("sends an error to the errors channel", func() {
 				FetchCAPIEntities(client, logger, assignments, errs)
 				Expect(client.GetSpaceGUIDsCallCount()).To(Equal(1))
-				actualError := <-errs
-				Expect(actualError).To(MatchError("space-guid-error"))
+				actualErrorEvent := <-errs
+				Expect(actualErrorEvent).To(MatchError("space-guid-error"))
 			})
 		})
 
@@ -182,12 +183,13 @@ var _ = Describe("Retriever", func() {
 				client.GetSpaceGUIDsReturns([]string{"space-guid"}, nil)
 				client.GetSpaceRoleAssignmentsReturns([]RoleAssignment{}, fmt.Errorf("space-role-assignment-error"))
 			})
+
 			It("sends an error to the errors channel", func() {
 				FetchCAPIEntities(client, logger, assignments, errs)
 				Expect(client.GetSpaceGUIDsCallCount()).To(Equal(1))
 				Expect(client.GetSpaceRoleAssignmentsCallCount()).To(Equal(1))
-				actualError := <-errs
-				Expect(actualError).To(MatchError("space-role-assignment-error"))
+				actualErrorEvent := <-errs
+				Expect(actualErrorEvent).To(MatchError("space-role-assignment-error"))
 				Eventually(assignments).Should(BeClosed())
 			})
 
@@ -208,8 +210,9 @@ var _ = Describe("Retriever", func() {
 					Expect(client.GetSpaceGUIDsCallCount()).To(Equal(1))
 					Expect(client.GetSpaceRoleAssignmentsCallCount()).To(Equal(1))
 
-					actualError := <-errs
-					Expect(actualError).To(MatchError("space-role-assignment-error"))
+					actualErrorEvent := <-errs
+					Expect(actualErrorEvent).To(MatchError("space-role-assignment-error"))
+
 					assignment := <-assignments
 					expectedAssignment := RoleAssignment{ResourceGUID: "org-guid", UserGUID: "user-guid", Roles: []string{"org_auditor"}}
 					Expect(assignment).To(Equal(expectedAssignment))

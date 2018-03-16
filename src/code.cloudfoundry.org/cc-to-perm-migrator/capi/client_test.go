@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"errors"
+
 	. "code.cloudfoundry.org/cc-to-perm-migrator/capi"
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi/capimodels"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
@@ -140,7 +142,11 @@ var _ = Describe("Client", func() {
 				Expect(server.ReceivedRequests()).To(HaveLen(1))
 				Expect(roleAssignments).To(BeEmpty())
 
-				Expect(err).To(MatchError("failed-to-fetch-organization-user-roles"))
+				expectedErr := migrator.ErrorEvent{
+					Cause:      errors.New("failed-to-fetch-organization-user-roles"),
+					EntityType: "/v2/organizations",
+				}
+				Expect(err).To(MatchError(expectedErr.Error()))
 			})
 		})
 
@@ -377,10 +383,20 @@ var _ = Describe("Client", func() {
 			})
 		})
 	})
+
 	Describe("#GetOrgGUIDs", func() {
+		var (
+			orgResponsePage1 capimodels.ListOrgsResponse
+			orgResponsePage2 capimodels.ListOrgsResponse
+		)
+
 		Context("when the server responds successfully", func() {
 			BeforeEach(func() {
-				orgsResponse := capimodels.ListOrgsResponse{
+				page2Path := "/FAKE-PAGE2-PATH"
+				orgResponsePage1 = capimodels.ListOrgsResponse{
+					PaginatedResponse: capimodels.PaginatedResponse{
+						NextURL: &page2Path,
+					},
 					Resources: []capimodels.OrgResource{{
 						Metadata: capimodels.MetadataResource{
 							GUID: "org-guid-1",
@@ -392,19 +408,48 @@ var _ = Describe("Client", func() {
 							},
 						}},
 				}
+				orgResponsePage2 = capimodels.ListOrgsResponse{
+					Resources: []capimodels.OrgResource{{
+						Metadata: capimodels.MetadataResource{
+							GUID: "org-guid-3",
+						},
+					},
+						{
+							Metadata: capimodels.MetadataResource{
+								GUID: "org-guid-4",
+							},
+						}},
+				}
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/v2/organizations"),
-						ghttp.RespondWithJSONEncoded(http.StatusOK, orgsResponse),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, orgResponsePage1),
 					),
 				)
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", page2Path),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, orgResponsePage2),
+					),
+				)
+
 			})
 			It("returns a list of org GUIDS", func() {
 				orgGUIDs, err := client.GetOrgGUIDs(logger)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(orgGUIDs)).To(Equal(2))
-				Expect(orgGUIDs[0]).To(Equal("org-guid-1"))
-				Expect(orgGUIDs[1]).To(Equal("org-guid-2"))
+				Expect(len(orgGUIDs)).To(Equal(4))
+
+				var expectedOrgGUIDs []string
+				orgs := append(orgResponsePage1.Resources, orgResponsePage2.Resources...)
+				for _, org := range orgs {
+					expectedOrgGUIDs = append(expectedOrgGUIDs, org.Metadata.GUID)
+				}
+
+				Expect(orgGUIDs).To(HaveLen(len(expectedOrgGUIDs)))
+
+				for _, guid := range expectedOrgGUIDs {
+					Expect(orgGUIDs).To(ContainElement(guid))
+				}
 			})
 		})
 		Context("when the server responds with an error", func() {
@@ -442,19 +487,26 @@ var _ = Describe("Client", func() {
 			})
 		})
 	})
+
 	Describe("#GetSpaceGUIDs", func() {
 		var (
-			route   string
+			route, page2Route string
+
 			orgGUID string
 		)
 
 		BeforeEach(func() {
 			orgGUID = "org-guid-1"
 			route = fmt.Sprintf("/v2/organizations/%s/spaces", orgGUID)
+			page2Route = "/FAKE-PAGE-2"
 		})
+
 		Context("when the server responds successfully", func() {
 			BeforeEach(func() {
 				getSpaceGUIDsResponse := capimodels.ListSpacesResponse{
+					PaginatedResponse: capimodels.PaginatedResponse{
+						NextURL: &page2Route,
+					},
 					Resources: []capimodels.SpaceResource{
 						{
 							Metadata: capimodels.MetadataResource{
@@ -468,21 +520,48 @@ var _ = Describe("Client", func() {
 						},
 					},
 				}
+				getSpaceGUIDsResponsePart2 := capimodels.ListSpacesResponse{
+					Resources: []capimodels.SpaceResource{
+						{
+							Metadata: capimodels.MetadataResource{
+								GUID: "space-guid-3",
+							},
+						},
+						{
+							Metadata: capimodels.MetadataResource{
+								GUID: "space-guid-4",
+							},
+						},
+					},
+				}
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", route),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, getSpaceGUIDsResponse),
 					),
 				)
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", page2Route),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, getSpaceGUIDsResponsePart2),
+					),
+				)
+
 			})
-			It("returns a list of space GUIDS", func() {
+
+			It("returns a list of space GUIDs", func() {
 				spaceGUIDs, err := client.GetSpaceGUIDs(logger, orgGUID)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(spaceGUIDs)).To(Equal(2))
-				Expect(spaceGUIDs[0]).To(Equal("space-guid-1"))
-				Expect(spaceGUIDs[1]).To(Equal("space-guid-2"))
+				Expect(len(spaceGUIDs)).To(Equal(4))
+
+				expectedSpaceGUIDs := []string{"space-guid-1", "space-guid-2", "space-guid-3", "space-guid-4"}
+
+				for _, expectedSpaceGUID := range expectedSpaceGUIDs {
+					Expect(spaceGUIDs).To(ContainElement(expectedSpaceGUID))
+				}
 			})
 		})
+
 		Context("when the server responds with an error", func() {
 			BeforeEach(func() {
 				server.AppendHandlers(
@@ -497,6 +576,7 @@ var _ = Describe("Client", func() {
 				Expect(err).To(MatchError("failed-to-fetch-spaces"))
 			})
 		})
+
 		Context("when the response contains bad JSON", func() {
 			BeforeEach(func() {
 				server.AppendHandlers(
