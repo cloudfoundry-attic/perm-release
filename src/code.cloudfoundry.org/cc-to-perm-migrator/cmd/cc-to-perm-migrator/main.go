@@ -54,7 +54,7 @@ func main() {
 
 	logger, _ := config.Logger.Logger("cc-to-perm-migrator")
 
-	progressLogger := log.New(os.Stdout, "", log.LstdFlags|log.LUTC)
+	progressLogger := log.New(os.Stderr, "", log.LstdFlags|log.LUTC)
 
 	uaaCACert, err := config.UAA.CACertPath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
@@ -104,7 +104,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		cmd.GenerateReport(os.Stdout, roleAssignments, errors)
+		cmd.GenerateReport(os.Stderr, roleAssignments, errors)
 	}()
 
 	go func() {
