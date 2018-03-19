@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"log"
 	"os"
 
 	"context"
@@ -52,6 +53,8 @@ func main() {
 	}
 
 	logger, _ := config.Logger.Logger("cc-to-perm-migrator")
+
+	progressLogger := log.New(os.Stdout, "", log.LstdFlags|log.LUTC)
 
 	uaaCACert, err := config.UAA.CACertPath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
@@ -106,7 +109,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		migrator.FetchCAPIEntities(ccClient, logger, roleAssignments, errors)
+		migrator.FetchCAPIEntities(ccClient, logger, progressLogger, roleAssignments, errors)
 	}()
 
 	wg.Wait()

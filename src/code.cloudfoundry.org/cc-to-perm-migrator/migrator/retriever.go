@@ -1,6 +1,8 @@
 package migrator
 
 import (
+	"log"
+
 	"code.cloudfoundry.org/lager"
 )
 
@@ -29,17 +31,19 @@ type CAPIClient interface {
 	GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]RoleAssignment, error)
 }
 
-func FetchCAPIEntities(client CAPIClient, logger lager.Logger, assignments chan<- RoleAssignment, errs chan<- error) {
+func FetchCAPIEntities(client CAPIClient, logger lager.Logger, progress *log.Logger, assignments chan<- RoleAssignment, errs chan<- error) {
 	organizations, err := client.GetOrgGUIDs(logger)
 	if err != nil {
 		errs <- err
 	}
-
-	for _, organization := range organizations {
+	progress.Printf("Fetched %d org GUIDs", len(organizations))
+	for orgIndex, organization := range organizations {
+		progress.Printf("Processing org %s [%d/%d]", organization, orgIndex+1, len(organizations))
 		orgAssignments, err := client.GetOrgRoleAssignments(logger, organization)
 		if err != nil {
 			errs <- err
 		}
+		progress.Printf("%s: Fetched %d org role assignments. Migrating...", organization, len(orgAssignments))
 
 		for _, assignment := range orgAssignments {
 			assignments <- assignment
@@ -49,7 +53,7 @@ func FetchCAPIEntities(client CAPIClient, logger lager.Logger, assignments chan<
 		if err != nil {
 			errs <- err
 		}
-
+		progress.Printf("%s: Fetched %d spaces. Migrating...", organization, len(orgAssignments))
 		for _, space := range spaces {
 			spaceAssignments, err := client.GetSpaceRoleAssignments(nil, space)
 			if err != nil {
@@ -61,7 +65,7 @@ func FetchCAPIEntities(client CAPIClient, logger lager.Logger, assignments chan<
 			}
 		}
 	}
-
+	progress.Printf("Done.")
 	close(assignments)
 	close(errs)
 }

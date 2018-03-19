@@ -18,7 +18,6 @@ func GenerateReport(w io.Writer, roleAssignments <-chan migrator.RoleAssignment,
 	fmt.Fprintf(w, "Total errors: %d.\n", errorSummary.Count())
 	fmt.Fprintf(w, "\nSummary\n==========================================\n")
 
-	// TODO: sort by endpoin
 	var perTypeKeys []string
 	for key := range errorSummary.PerType {
 		perTypeKeys = append(perTypeKeys, key)
