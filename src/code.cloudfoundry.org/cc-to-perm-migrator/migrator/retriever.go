@@ -55,7 +55,7 @@ func FetchCAPIEntities(client CAPIClient, logger lager.Logger, progress *log.Log
 		}
 		progress.Printf("%s: Fetched %d spaces. Migrating...", organization, len(orgAssignments))
 		for _, space := range spaces {
-			spaceAssignments, err := client.GetSpaceRoleAssignments(nil, space)
+			spaceAssignments, err := client.GetSpaceRoleAssignments(logger, space)
 			if err != nil {
 				errs <- err
 			}
