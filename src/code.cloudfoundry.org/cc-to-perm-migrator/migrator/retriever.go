@@ -6,22 +6,6 @@ import (
 	"code.cloudfoundry.org/lager"
 )
 
-type RoleAssignment struct {
-	ResourceGUID string
-	UserGUID     string
-	Roles        []string
-}
-
-type ErrorEvent struct {
-	Cause      error
-	GUID       string
-	EntityType string
-}
-
-func (e *ErrorEvent) Error() string {
-	return e.Cause.Error()
-}
-
 //go:generate counterfeiter . CAPIClient
 
 type CAPIClient interface {
