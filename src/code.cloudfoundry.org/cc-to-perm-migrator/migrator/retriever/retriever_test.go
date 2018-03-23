@@ -1,4 +1,4 @@
-package migrator_test
+package retriever_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -8,8 +8,8 @@ import (
 
 	"log"
 
-	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator"
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/migratorfakes"
+	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever/retrieverfakes"
 	"code.cloudfoundry.org/lager/lagertest"
 	"github.com/onsi/gomega/gbytes"
 )
@@ -17,7 +17,7 @@ import (
 var _ = Describe("Retriever", func() {
 	var assignments chan RoleAssignment
 	var errs chan error
-	var client *migratorfakes.FakeCAPIClient
+	var client *retrieverfakes.FakeCAPIClient
 	var logger *lagertest.TestLogger
 	var progressLogger *log.Logger
 	var progressLog *gbytes.Buffer
@@ -25,7 +25,7 @@ var _ = Describe("Retriever", func() {
 	BeforeEach(func() {
 		assignments = make(chan RoleAssignment, 10)
 		errs = make(chan error, 10)
-		client = new(migratorfakes.FakeCAPIClient)
+		client = new(retrieverfakes.FakeCAPIClient)
 		logger = lagertest.NewTestLogger("fetch-capi-entities")
 		progressLog = gbytes.NewBuffer()
 		progressLogger = log.New(progressLog, "", 0)

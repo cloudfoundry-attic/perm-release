@@ -1,4 +1,4 @@
-package migrator
+package retriever
 
 type RoleAssignment struct {
 	ResourceGUID string

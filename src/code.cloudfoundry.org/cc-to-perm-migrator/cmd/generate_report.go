@@ -6,10 +6,10 @@ import (
 
 	"sort"
 
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 )
 
-func GenerateReport(w io.Writer, roleAssignments <-chan migrator.RoleAssignment, errors <-chan error) {
+func GenerateReport(w io.Writer, roleAssignments <-chan retriever.RoleAssignment, errors <-chan error) {
 	count := ComputeNumberAssignments(roleAssignments)
 	errorSummary := ComputeErrors(errors)
 
@@ -51,7 +51,7 @@ func GenerateReport(w io.Writer, roleAssignments <-chan migrator.RoleAssignment,
 	}
 }
 
-func ComputeNumberAssignments(roleAssignments <-chan migrator.RoleAssignment) int {
+func ComputeNumberAssignments(roleAssignments <-chan retriever.RoleAssignment) int {
 	var count int
 
 	for range roleAssignments {
@@ -100,7 +100,7 @@ func ComputeErrors(errors <-chan error) ErrorSummary {
 
 	for errorItem := range errors {
 		switch errorEvent := errorItem.(type) {
-		case *migrator.ErrorEvent:
+		case *retriever.ErrorEvent:
 			summary.AddPerTypeError(errorEvent.EntityType, errorEvent.Error())
 
 		default:

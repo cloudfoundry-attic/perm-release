@@ -20,7 +20,7 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi"
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/oauth2"
@@ -96,7 +96,7 @@ func main() {
 
 	ccClient := capi.NewClient(config.CloudController.URL, client)
 
-	roleAssignments := make(chan migrator.RoleAssignment)
+	roleAssignments := make(chan retriever.RoleAssignment)
 	errors := make(chan error)
 
 	var wg sync.WaitGroup
@@ -109,7 +109,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		migrator.FetchCAPIEntities(ccClient, logger, progressLogger, roleAssignments, errors)
+		retriever.FetchCAPIEntities(ccClient, logger, progressLogger, roleAssignments, errors)
 	}()
 
 	wg.Wait()

@@ -1,4 +1,4 @@
-package migrator
+package retriever
 
 type ErrorEvent struct {
 	Cause      error

@@ -5,17 +5,17 @@ import (
 
 	. "code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe("Generating a report", func() {
-	var c chan migrator.RoleAssignment
+	var c chan retriever.RoleAssignment
 	var e chan error
 	BeforeEach(func() {
-		c = make(chan migrator.RoleAssignment, 1000)
+		c = make(chan retriever.RoleAssignment, 1000)
 		e = make(chan error, 1000)
 	})
 
@@ -30,8 +30,8 @@ var _ = Describe("Generating a report", func() {
 
 		Context("when the channel is sent 2 elements", func() {
 			It1Second("gives success and error counts", func() {
-				c <- migrator.RoleAssignment{}
-				c <- migrator.RoleAssignment{}
+				c <- retriever.RoleAssignment{}
+				c <- retriever.RoleAssignment{}
 				e <- errors.New("There has been a problem")
 				close(c)
 				close(e)
@@ -43,25 +43,25 @@ var _ = Describe("Generating a report", func() {
 		})
 		Context("when the channel receives errors and ErrorEvents", func() {
 			It1Second("gives an error summary", func() {
-				c <- migrator.RoleAssignment{}
-				c <- migrator.RoleAssignment{}
+				c <- retriever.RoleAssignment{}
+				c <- retriever.RoleAssignment{}
 				e <- errors.New("There has been a problem")
 				for i := 0; i < 3; i++ {
-					e <- &migrator.ErrorEvent{
+					e <- &retriever.ErrorEvent{
 						Cause:      errors.New("failed-to-fetch-orgs"),
 						GUID:       "",
 						EntityType: "/v2/organizations",
 					}
 				}
 				for i := 0; i < 4; i++ {
-					e <- &migrator.ErrorEvent{
+					e <- &retriever.ErrorEvent{
 						Cause:      errors.New("failed-to-decode-response"),
 						GUID:       "",
 						EntityType: "/v2/organizations/org-guid/user_roles",
 					}
 				}
 				for i := 0; i < 2; i++ {
-					e <- &migrator.ErrorEvent{
+					e <- &retriever.ErrorEvent{
 						Cause:      errors.New("something-happened"),
 						GUID:       "org-guid",
 						EntityType: "/v2/organizations/org-guid/user_roles",
@@ -96,7 +96,7 @@ var _ = Describe("Generating a report", func() {
 
 		Context("when the channel is sent one element", func() {
 			It1Second("returns 1", func() {
-				c <- migrator.RoleAssignment{}
+				c <- retriever.RoleAssignment{}
 				close(c)
 
 				count := ComputeNumberAssignments(c)
@@ -107,8 +107,8 @@ var _ = Describe("Generating a report", func() {
 
 		Context("when the channel is sent 2 elements", func() {
 			It1Second("returns 1", func() {
-				c <- migrator.RoleAssignment{}
-				c <- migrator.RoleAssignment{}
+				c <- retriever.RoleAssignment{}
+				c <- retriever.RoleAssignment{}
 				close(c)
 
 				count := ComputeNumberAssignments(c)
@@ -129,7 +129,7 @@ var _ = Describe("Generating a report", func() {
 			It1Second("returns 1", func() {
 				go func() {
 					for i := 0; i < n; i++ {
-						c <- migrator.RoleAssignment{}
+						c <- retriever.RoleAssignment{}
 					}
 					close(c)
 				}()
