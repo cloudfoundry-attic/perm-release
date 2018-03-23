@@ -20,6 +20,7 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi"
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
 	flags "github.com/jessevdk/go-flags"
@@ -104,7 +105,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		cmd.GenerateReport(os.Stderr, roleAssignments, errors)
+		reporter.GenerateReport(os.Stderr, roleAssignments, errors)
 	}()
 
 	go func() {

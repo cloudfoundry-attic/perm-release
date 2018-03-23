@@ -1,9 +1,9 @@
-package cmd_test
+package reporter_test
 
 import (
 	"errors"
 
-	. "code.cloudfoundry.org/cc-to-perm-migrator/cmd"
+	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	. "github.com/onsi/ginkgo"
