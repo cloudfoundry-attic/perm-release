@@ -15,15 +15,25 @@ type CAPIClient interface {
 	GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]RoleAssignment, error)
 }
 
-func FetchCAPIEntities(client CAPIClient, logger lager.Logger, progress *log.Logger, assignments chan<- RoleAssignment, errs chan<- error) {
-	organizations, err := client.GetOrgGUIDs(logger)
+type Retriever struct {
+	client CAPIClient
+}
+
+func NewRetriever(client CAPIClient) *Retriever {
+	return &Retriever{
+		client: client,
+	}
+}
+
+func (r *Retriever) FetchCAPIEntities(logger lager.Logger, progress *log.Logger, assignments chan<- RoleAssignment, errs chan<- error) {
+	organizations, err := r.client.GetOrgGUIDs(logger)
 	if err != nil {
 		errs <- err
 	}
 	progress.Printf("Fetched %d org GUIDs", len(organizations))
 	for orgIndex, organization := range organizations {
 		progress.Printf("Processing org %s [%d/%d]", organization, orgIndex+1, len(organizations))
-		orgAssignments, err := client.GetOrgRoleAssignments(logger, organization)
+		orgAssignments, err := r.client.GetOrgRoleAssignments(logger, organization)
 		if err != nil {
 			errs <- err
 		}
@@ -33,13 +43,13 @@ func FetchCAPIEntities(client CAPIClient, logger lager.Logger, progress *log.Log
 			assignments <- assignment
 		}
 
-		spaces, err := client.GetSpaceGUIDs(logger, organization)
+		spaces, err := r.client.GetSpaceGUIDs(logger, organization)
 		if err != nil {
 			errs <- err
 		}
 		progress.Printf("%s: Fetched %d spaces. Migrating...", organization, len(orgAssignments))
 		for _, space := range spaces {
-			spaceAssignments, err := client.GetSpaceRoleAssignments(logger, space)
+			spaceAssignments, err := r.client.GetSpaceRoleAssignments(logger, space)
 			if err != nil {
 				errs <- err
 			}

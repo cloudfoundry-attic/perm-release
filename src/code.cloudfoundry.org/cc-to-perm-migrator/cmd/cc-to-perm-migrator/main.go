@@ -95,22 +95,23 @@ func main() {
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL.String())
 	client := uaaConfig.Client(ctx)
 
-	ccClient := capi.NewClient(config.CloudController.URL, client)
-
 	roleAssignments := make(chan retriever.RoleAssignment)
 	errors := make(chan error)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	ccClient := capi.NewClient(config.CloudController.URL, client)
+	retr := retriever.NewRetriever(ccClient)
+
 	go func() {
 		defer wg.Done()
-		reporter.GenerateReport(os.Stderr, roleAssignments, errors)
+		retr.FetchCAPIEntities(logger, progressLogger, roleAssignments, errors)
 	}()
 
 	go func() {
 		defer wg.Done()
-		retriever.FetchCAPIEntities(ccClient, logger, progressLogger, roleAssignments, errors)
+		reporter.GenerateReport(os.Stderr, roleAssignments, errors)
 	}()
 
 	wg.Wait()

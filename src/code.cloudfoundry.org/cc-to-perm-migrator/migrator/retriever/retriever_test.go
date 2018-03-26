@@ -21,6 +21,7 @@ var _ = Describe("Retriever", func() {
 	var logger *lagertest.TestLogger
 	var progressLogger *log.Logger
 	var progressLog *gbytes.Buffer
+	var subject *Retriever
 
 	BeforeEach(func() {
 		assignments = make(chan RoleAssignment, 10)
@@ -29,6 +30,8 @@ var _ = Describe("Retriever", func() {
 		logger = lagertest.NewTestLogger("fetch-capi-entities")
 		progressLog = gbytes.NewBuffer()
 		progressLogger = log.New(progressLog, "", 0)
+
+		subject = NewRetriever(client)
 	})
 
 	Describe("#FetchCAPIEntities", func() {
@@ -62,7 +65,7 @@ var _ = Describe("Retriever", func() {
 
 			})
 			It("returns the org role assignments to the channel", func() {
-				FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 
 				Expect(client.GetOrgGUIDsCallCount()).To(Equal(1))
 				Expect(client.GetOrgRoleAssignmentsCallCount()).To(Equal(2))
@@ -82,7 +85,7 @@ var _ = Describe("Retriever", func() {
 				Eventually(errs).Should(BeClosed())
 			})
 			It("reports the progress of the migration", func() {
-				FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 				Expect(progressLog).To(gbytes.Say("Fetched 2 org GUIDs"))
 				Expect(progressLog).To(gbytes.Say("Processing org org-guid-1 \\[1/2\\]"))
 				Expect(progressLog).To(gbytes.Say("org-guid-1: Fetched 2 org role assignments. Migrating..."))
@@ -100,7 +103,7 @@ var _ = Describe("Retriever", func() {
 			})
 
 			It("sends an error to the errors channel", func() {
-				FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 				Expect(client.GetOrgGUIDsCallCount()).To(Equal(1))
 				actualErrorEvent := <-errs
 				Expect(actualErrorEvent).To(MatchError("org-guids-error"))
@@ -113,7 +116,7 @@ var _ = Describe("Retriever", func() {
 				client.GetOrgRoleAssignmentsReturns([]RoleAssignment{}, fmt.Errorf("org-role-assignments-error"))
 			})
 			It("sends an error to the errors channel", func() {
-				FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 				Expect(client.GetOrgGUIDsCallCount()).To(Equal(1))
 				Expect(client.GetOrgRoleAssignmentsCallCount()).To(Equal(1))
 				actualErrorEvent := <-errs
@@ -155,7 +158,7 @@ var _ = Describe("Retriever", func() {
 
 			})
 			It("returns the space role assignments to the channel", func() {
-				FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 
 				Expect(client.GetSpaceGUIDsCallCount()).To(Equal(2))
 				_, orgGUID := client.GetSpaceGUIDsArgsForCall(0)
@@ -188,7 +191,7 @@ var _ = Describe("Retriever", func() {
 				client.GetSpaceGUIDsReturns([]string{}, fmt.Errorf("space-guid-error"))
 			})
 			It("sends an error to the errors channel", func() {
-				FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 				Expect(client.GetSpaceGUIDsCallCount()).To(Equal(1))
 				actualErrorEvent := <-errs
 				Expect(actualErrorEvent).To(MatchError("space-guid-error"))
@@ -203,7 +206,7 @@ var _ = Describe("Retriever", func() {
 			})
 
 			It("sends an error to the errors channel", func() {
-				FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 				Expect(client.GetSpaceGUIDsCallCount()).To(Equal(1))
 				Expect(client.GetSpaceRoleAssignmentsCallCount()).To(Equal(1))
 				actualErrorEvent := <-errs
@@ -224,7 +227,7 @@ var _ = Describe("Retriever", func() {
 
 				})
 				It("returns an org assignment and an error to their channels", func() {
-					FetchCAPIEntities(client, logger, progressLogger, assignments, errs)
+					subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
 					Expect(client.GetSpaceGUIDsCallCount()).To(Equal(1))
 					Expect(client.GetSpaceRoleAssignmentsCallCount()).To(Equal(1))
 
