@@ -6,29 +6,30 @@ import (
 	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 )
 
-var _ = Describe("Generating a report", func() {
+var _ = ginkgo.Describe("Reporter", func() {
 	var c chan models.RoleAssignment
 	var e chan error
-	BeforeEach(func() {
+	ginkgo.BeforeEach(func() {
 		c = make(chan models.RoleAssignment, 1000)
 		e = make(chan error, 1000)
 	})
 
-	Describe(".GenerateReport", func() {
+	ginkgo.Describe("#GenerateReport", func() {
 		var (
-			b *Buffer
+			b       *Buffer
+			subject *Reporter
 		)
 
-		BeforeEach(func() {
+		ginkgo.BeforeEach(func() {
 			b = NewBuffer()
 		})
 
-		Context("when the channel is sent 2 elements", func() {
+		ginkgo.Context("when the channel is sent 2 elements", func() {
 			It1Second("gives success and error counts", func() {
 				c <- models.RoleAssignment{}
 				c <- models.RoleAssignment{}
@@ -36,12 +37,12 @@ var _ = Describe("Generating a report", func() {
 				close(c)
 				close(e)
 
-				GenerateReport(b, c, e)
+				subject.GenerateReport(b, c, e)
 				Expect(b).To(Say("Number of role assignments: 2\\."))
 				Expect(b).To(Say("Total errors: 1\\."))
 			})
 		})
-		Context("when the channel receives errors and ErrorEvents", func() {
+		ginkgo.Context("when the channel receives errors and ErrorEvents", func() {
 			It1Second("gives an error summary", func() {
 				c <- models.RoleAssignment{}
 				c <- models.RoleAssignment{}
@@ -69,7 +70,7 @@ var _ = Describe("Generating a report", func() {
 				}
 				close(c)
 				close(e)
-				GenerateReport(b, c, e)
+				subject.GenerateReport(b, c, e)
 				Expect(b).To(Say("Number of role assignments: 2\\."))
 				Expect(b).To(Say("Total errors: 10\\."))
 				Expect(b).To(Say("Summary"))
@@ -84,8 +85,8 @@ var _ = Describe("Generating a report", func() {
 		})
 	})
 
-	Describe(".ComputeNumberAssignments", func() {
-		Context("when the channel is closed without sending anything onto it", func() {
+	ginkgo.Describe(".ComputeNumberAssignments", func() {
+		ginkgo.Context("when the channel is closed without sending anything onto it", func() {
 			It1Second("returns 0", func() {
 				close(c)
 				count := ComputeNumberAssignments(c)
@@ -94,7 +95,7 @@ var _ = Describe("Generating a report", func() {
 			})
 		})
 
-		Context("when the channel is sent one element", func() {
+		ginkgo.Context("when the channel is sent one element", func() {
 			It1Second("returns 1", func() {
 				c <- models.RoleAssignment{}
 				close(c)
@@ -105,7 +106,7 @@ var _ = Describe("Generating a report", func() {
 			})
 		})
 
-		Context("when the channel is sent 2 elements", func() {
+		ginkgo.Context("when the channel is sent 2 elements", func() {
 			It1Second("returns 1", func() {
 				c <- models.RoleAssignment{}
 				c <- models.RoleAssignment{}
@@ -117,12 +118,12 @@ var _ = Describe("Generating a report", func() {
 			})
 		})
 
-		Context("when the channel is sent more elements", func() {
+		ginkgo.Context("when the channel is sent more elements", func() {
 			var (
 				n int
 			)
 
-			BeforeEach(func() {
+			ginkgo.BeforeEach(func() {
 				n = 16258
 			})
 
@@ -141,12 +142,12 @@ var _ = Describe("Generating a report", func() {
 		})
 
 	})
-	Describe("ErrorSummary", func() {
+	ginkgo.Describe("ErrorSummary", func() {
 		var summary ErrorSummary
-		BeforeEach(func() {
+		ginkgo.BeforeEach(func() {
 			summary = NewErrorSummary()
 		})
-		It("maintains summary and counts", func() {
+		ginkgo.It("maintains summary and counts", func() {
 			summary.AddPerTypeError("one", "two")
 			summary.AddPerTypeError("one", "three")
 			summary.AddPerTypeError("two", "three")
@@ -159,7 +160,7 @@ var _ = Describe("Generating a report", func() {
 })
 
 func It1Second(text string, f func()) {
-	It(text, func(done Done) {
+	ginkgo.It(text, func(done ginkgo.Done) {
 		defer close(done)
 		f()
 	}, 1)

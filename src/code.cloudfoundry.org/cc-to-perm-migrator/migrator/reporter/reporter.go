@@ -9,7 +9,9 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 )
 
-func GenerateReport(w io.Writer, roleAssignments <-chan models.RoleAssignment, errors <-chan error) {
+type Reporter struct{}
+
+func (r *Reporter) GenerateReport(w io.Writer, roleAssignments <-chan models.RoleAssignment, errors <-chan error) {
 	count := ComputeNumberAssignments(roleAssignments)
 	errorSummary := ComputeErrors(errors)
 

@@ -104,6 +104,7 @@ func main() {
 
 	ccClient := capi.NewClient(config.CloudController.URL, client)
 	retr := retriever.NewRetriever(ccClient)
+	var repr reporter.Reporter
 
 	go func() {
 		defer wg.Done()
@@ -112,7 +113,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		reporter.GenerateReport(os.Stderr, roleAssignments, errors)
+		repr.GenerateReport(os.Stderr, roleAssignments, errors)
 	}()
 
 	wg.Wait()
