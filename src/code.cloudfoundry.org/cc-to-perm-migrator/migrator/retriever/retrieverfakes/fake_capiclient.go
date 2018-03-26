@@ -4,6 +4,7 @@ package retrieverfakes
 import (
 	"sync"
 
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
 )
@@ -36,32 +37,32 @@ type FakeCAPIClient struct {
 		result1 []string
 		result2 error
 	}
-	GetOrgRoleAssignmentsStub        func(logger lager.Logger, orgGUID string) ([]retriever.RoleAssignment, error)
+	GetOrgRoleAssignmentsStub        func(logger lager.Logger, orgGUID string) ([]models.RoleAssignment, error)
 	getOrgRoleAssignmentsMutex       sync.RWMutex
 	getOrgRoleAssignmentsArgsForCall []struct {
 		logger  lager.Logger
 		orgGUID string
 	}
 	getOrgRoleAssignmentsReturns struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}
 	getOrgRoleAssignmentsReturnsOnCall map[int]struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}
-	GetSpaceRoleAssignmentsStub        func(logger lager.Logger, spaceGUID string) ([]retriever.RoleAssignment, error)
+	GetSpaceRoleAssignmentsStub        func(logger lager.Logger, spaceGUID string) ([]models.RoleAssignment, error)
 	getSpaceRoleAssignmentsMutex       sync.RWMutex
 	getSpaceRoleAssignmentsArgsForCall []struct {
 		logger    lager.Logger
 		spaceGUID string
 	}
 	getSpaceRoleAssignmentsReturns struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}
 	getSpaceRoleAssignmentsReturnsOnCall map[int]struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}
 	invocations      map[string][][]interface{}
@@ -171,7 +172,7 @@ func (fake *FakeCAPIClient) GetSpaceGUIDsReturnsOnCall(i int, result1 []string, 
 	}{result1, result2}
 }
 
-func (fake *FakeCAPIClient) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]retriever.RoleAssignment, error) {
+func (fake *FakeCAPIClient) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]models.RoleAssignment, error) {
 	fake.getOrgRoleAssignmentsMutex.Lock()
 	ret, specificReturn := fake.getOrgRoleAssignmentsReturnsOnCall[len(fake.getOrgRoleAssignmentsArgsForCall)]
 	fake.getOrgRoleAssignmentsArgsForCall = append(fake.getOrgRoleAssignmentsArgsForCall, struct {
@@ -201,29 +202,29 @@ func (fake *FakeCAPIClient) GetOrgRoleAssignmentsArgsForCall(i int) (lager.Logge
 	return fake.getOrgRoleAssignmentsArgsForCall[i].logger, fake.getOrgRoleAssignmentsArgsForCall[i].orgGUID
 }
 
-func (fake *FakeCAPIClient) GetOrgRoleAssignmentsReturns(result1 []retriever.RoleAssignment, result2 error) {
+func (fake *FakeCAPIClient) GetOrgRoleAssignmentsReturns(result1 []models.RoleAssignment, result2 error) {
 	fake.GetOrgRoleAssignmentsStub = nil
 	fake.getOrgRoleAssignmentsReturns = struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeCAPIClient) GetOrgRoleAssignmentsReturnsOnCall(i int, result1 []retriever.RoleAssignment, result2 error) {
+func (fake *FakeCAPIClient) GetOrgRoleAssignmentsReturnsOnCall(i int, result1 []models.RoleAssignment, result2 error) {
 	fake.GetOrgRoleAssignmentsStub = nil
 	if fake.getOrgRoleAssignmentsReturnsOnCall == nil {
 		fake.getOrgRoleAssignmentsReturnsOnCall = make(map[int]struct {
-			result1 []retriever.RoleAssignment
+			result1 []models.RoleAssignment
 			result2 error
 		})
 	}
 	fake.getOrgRoleAssignmentsReturnsOnCall[i] = struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeCAPIClient) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]retriever.RoleAssignment, error) {
+func (fake *FakeCAPIClient) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]models.RoleAssignment, error) {
 	fake.getSpaceRoleAssignmentsMutex.Lock()
 	ret, specificReturn := fake.getSpaceRoleAssignmentsReturnsOnCall[len(fake.getSpaceRoleAssignmentsArgsForCall)]
 	fake.getSpaceRoleAssignmentsArgsForCall = append(fake.getSpaceRoleAssignmentsArgsForCall, struct {
@@ -253,24 +254,24 @@ func (fake *FakeCAPIClient) GetSpaceRoleAssignmentsArgsForCall(i int) (lager.Log
 	return fake.getSpaceRoleAssignmentsArgsForCall[i].logger, fake.getSpaceRoleAssignmentsArgsForCall[i].spaceGUID
 }
 
-func (fake *FakeCAPIClient) GetSpaceRoleAssignmentsReturns(result1 []retriever.RoleAssignment, result2 error) {
+func (fake *FakeCAPIClient) GetSpaceRoleAssignmentsReturns(result1 []models.RoleAssignment, result2 error) {
 	fake.GetSpaceRoleAssignmentsStub = nil
 	fake.getSpaceRoleAssignmentsReturns = struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeCAPIClient) GetSpaceRoleAssignmentsReturnsOnCall(i int, result1 []retriever.RoleAssignment, result2 error) {
+func (fake *FakeCAPIClient) GetSpaceRoleAssignmentsReturnsOnCall(i int, result1 []models.RoleAssignment, result2 error) {
 	fake.GetSpaceRoleAssignmentsStub = nil
 	if fake.getSpaceRoleAssignmentsReturnsOnCall == nil {
 		fake.getSpaceRoleAssignmentsReturnsOnCall = make(map[int]struct {
-			result1 []retriever.RoleAssignment
+			result1 []models.RoleAssignment
 			result2 error
 		})
 	}
 	fake.getSpaceRoleAssignmentsReturnsOnCall[i] = struct {
-		result1 []retriever.RoleAssignment
+		result1 []models.RoleAssignment
 		result2 error
 	}{result1, result2}
 }

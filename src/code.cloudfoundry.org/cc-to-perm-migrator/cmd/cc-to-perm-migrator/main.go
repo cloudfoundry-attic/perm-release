@@ -20,6 +20,7 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi"
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
@@ -95,7 +96,7 @@ func main() {
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL.String())
 	client := uaaConfig.Client(ctx)
 
-	roleAssignments := make(chan retriever.RoleAssignment)
+	roleAssignments := make(chan models.RoleAssignment)
 	errors := make(chan error)
 
 	var wg sync.WaitGroup

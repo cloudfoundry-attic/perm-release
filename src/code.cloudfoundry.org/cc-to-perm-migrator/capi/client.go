@@ -13,7 +13,7 @@ import (
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi/capimodels"
 	"code.cloudfoundry.org/cc-to-perm-migrator/messages"
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/lager"
 )
 
@@ -47,7 +47,7 @@ func (c *Client) GetSpaceGUIDs(logger lager.Logger, orgGUID string) ([]string, e
 		return nil
 	})
 	if err != nil {
-		return []string{}, &retriever.ErrorEvent{
+		return []string{}, &models.ErrorEvent{
 			Cause:      errors.New("failed-to-fetch-spaces"),
 			EntityType: route,
 		}
@@ -74,7 +74,7 @@ func (c *Client) GetOrgGUIDs(logger lager.Logger) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return []string{}, &retriever.ErrorEvent{
+		return []string{}, &models.ErrorEvent{
 			Cause:      errors.New("failed-to-fetch-organizations"),
 			EntityType: route,
 		}
@@ -82,10 +82,10 @@ func (c *Client) GetOrgGUIDs(logger lager.Logger) ([]string, error) {
 	return orgGUIDs, nil
 }
 
-func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]retriever.RoleAssignment, error) {
+func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]models.RoleAssignment, error) {
 	route := fmt.Sprintf("/v2/organizations/%s/user_roles", orgGUID)
 
-	var orgRoles []retriever.RoleAssignment
+	var orgRoles []models.RoleAssignment
 
 	err := c.makePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
 		var listOrgRolesResponse capimodels.ListOrgRolesResponse
@@ -95,7 +95,7 @@ func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]r
 			return err
 		}
 		for _, role := range listOrgRolesResponse.Resources {
-			orgRoles = append(orgRoles, retriever.RoleAssignment{
+			orgRoles = append(orgRoles, models.RoleAssignment{
 				UserGUID:     role.Metadata.GUID,
 				ResourceGUID: orgGUID,
 				Roles:        role.Entity.Roles,
@@ -106,7 +106,7 @@ func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]r
 	})
 
 	if err != nil {
-		return orgRoles, &retriever.ErrorEvent{
+		return orgRoles, &models.ErrorEvent{
 			Cause:      errors.New("failed-to-fetch-organization-user-roles"),
 			EntityType: route,
 		}
@@ -115,10 +115,10 @@ func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]r
 	return orgRoles, nil
 }
 
-func (c *Client) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]retriever.RoleAssignment, error) {
+func (c *Client) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]models.RoleAssignment, error) {
 	route := fmt.Sprintf("/v2/spaces/%s/user_roles", spaceGUID)
 
-	var spaceRoles []retriever.RoleAssignment
+	var spaceRoles []models.RoleAssignment
 
 	err := c.makePaginatedGetRequest(logger, route, func(logger lager.Logger, r io.Reader) error {
 		var listSpaceRolesResponse capimodels.ListSpaceRolesResponse
@@ -128,7 +128,7 @@ func (c *Client) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) 
 			return err
 		}
 		for _, role := range listSpaceRolesResponse.Resources {
-			spaceRoles = append(spaceRoles, retriever.RoleAssignment{
+			spaceRoles = append(spaceRoles, models.RoleAssignment{
 				UserGUID:     role.Metadata.GUID,
 				ResourceGUID: spaceGUID,
 				Roles:        role.Entity.Roles,
@@ -139,7 +139,7 @@ func (c *Client) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) 
 	})
 
 	if err != nil {
-		return spaceRoles, &retriever.ErrorEvent{
+		return spaceRoles, &models.ErrorEvent{
 			Cause:      errors.New("failed-to-fetch-space-user-roles"),
 			EntityType: route,
 		}

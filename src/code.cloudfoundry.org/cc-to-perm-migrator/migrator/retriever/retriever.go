@@ -3,6 +3,7 @@ package retriever
 import (
 	"log"
 
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/lager"
 )
 
@@ -11,8 +12,8 @@ import (
 type CAPIClient interface {
 	GetOrgGUIDs(logger lager.Logger) ([]string, error)
 	GetSpaceGUIDs(logger lager.Logger, orgGUID string) ([]string, error)
-	GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]RoleAssignment, error)
-	GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]RoleAssignment, error)
+	GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]models.RoleAssignment, error)
+	GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) ([]models.RoleAssignment, error)
 }
 
 type Retriever struct {
@@ -25,7 +26,7 @@ func NewRetriever(client CAPIClient) *Retriever {
 	}
 }
 
-func (r *Retriever) FetchCAPIEntities(logger lager.Logger, progress *log.Logger, assignments chan<- RoleAssignment, errs chan<- error) {
+func (r *Retriever) FetchCAPIEntities(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error) {
 	organizations, err := r.client.GetOrgGUIDs(logger)
 	if err != nil {
 		errs <- err

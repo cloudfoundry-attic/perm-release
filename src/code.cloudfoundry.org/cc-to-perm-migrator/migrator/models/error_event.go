@@ -1,4 +1,4 @@
-package retriever
+package models
 
 type ErrorEvent struct {
 	Cause      error

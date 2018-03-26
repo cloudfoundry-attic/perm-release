@@ -1,4 +1,4 @@
-package retriever
+package models
 
 type RoleAssignment struct {
 	ResourceGUID string

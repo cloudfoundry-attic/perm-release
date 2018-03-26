@@ -11,7 +11,7 @@ import (
 
 	. "code.cloudfoundry.org/cc-to-perm-migrator/capi"
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi/capimodels"
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/lager/lagertest"
 	"github.com/onsi/gomega/ghttp"
 )
@@ -117,7 +117,7 @@ var _ = Describe("Client", func() {
 				Expect(roleAssignments).To(HaveLen(len(expectedResources)))
 
 				for _, resource := range expectedResources {
-					Expect(roleAssignments).To(ContainElement(retriever.RoleAssignment{
+					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
 						UserGUID:     resource.Metadata.GUID,
 						ResourceGUID: orgGUID,
 						Roles:        resource.Entity.Roles,
@@ -142,7 +142,7 @@ var _ = Describe("Client", func() {
 				Expect(server.ReceivedRequests()).To(HaveLen(1))
 				Expect(roleAssignments).To(BeEmpty())
 
-				expectedErr := retriever.ErrorEvent{
+				expectedErr := models.ErrorEvent{
 					Cause:      errors.New("failed-to-fetch-organization-user-roles"),
 					EntityType: "/v2/organizations",
 				}
@@ -178,7 +178,7 @@ var _ = Describe("Client", func() {
 				Expect(roleAssignments).To(HaveLen(len(expectedResources)))
 
 				for _, resource := range expectedResources {
-					Expect(roleAssignments).To(ContainElement(retriever.RoleAssignment{
+					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
 						UserGUID:     resource.Metadata.GUID,
 						ResourceGUID: orgGUID,
 						Roles:        resource.Entity.Roles,
@@ -295,7 +295,7 @@ var _ = Describe("Client", func() {
 				Expect(roleAssignments).To(HaveLen(len(expectedResources)))
 
 				for _, resource := range expectedResources {
-					Expect(roleAssignments).To(ContainElement(retriever.RoleAssignment{
+					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
 						UserGUID:     resource.Metadata.GUID,
 						ResourceGUID: spaceGUID,
 						Roles:        resource.Entity.Roles,
@@ -352,7 +352,7 @@ var _ = Describe("Client", func() {
 				Expect(roleAssignments).To(HaveLen(len(expectedResources)))
 
 				for _, resource := range expectedResources {
-					Expect(roleAssignments).To(ContainElement(retriever.RoleAssignment{
+					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
 						UserGUID:     resource.Metadata.GUID,
 						ResourceGUID: spaceGUID,
 						Roles:        resource.Entity.Roles,

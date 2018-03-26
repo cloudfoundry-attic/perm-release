@@ -8,6 +8,7 @@ import (
 
 	"log"
 
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever/retrieverfakes"
 	"code.cloudfoundry.org/lager/lagertest"
@@ -15,7 +16,7 @@ import (
 )
 
 var _ = Describe("Retriever", func() {
-	var assignments chan RoleAssignment
+	var assignments chan models.RoleAssignment
 	var errs chan error
 	var client *retrieverfakes.FakeCAPIClient
 	var logger *lagertest.TestLogger
@@ -24,7 +25,7 @@ var _ = Describe("Retriever", func() {
 	var subject *Retriever
 
 	BeforeEach(func() {
-		assignments = make(chan RoleAssignment, 10)
+		assignments = make(chan models.RoleAssignment, 10)
 		errs = make(chan error, 10)
 		client = new(retrieverfakes.FakeCAPIClient)
 		logger = lagertest.NewTestLogger("fetch-capi-entities")
@@ -42,7 +43,7 @@ var _ = Describe("Retriever", func() {
 		Context("when the capi client returns orgs with different org role assignment", func() {
 			BeforeEach(func() {
 				client.GetOrgRoleAssignmentsReturnsOnCall(0,
-					[]RoleAssignment{
+					[]models.RoleAssignment{
 						{
 							ResourceGUID: "org-guid-1",
 							UserGUID:     "user-guid-1",
@@ -55,7 +56,7 @@ var _ = Describe("Retriever", func() {
 						},
 					}, nil)
 				client.GetOrgRoleAssignmentsReturnsOnCall(1,
-					[]RoleAssignment{
+					[]models.RoleAssignment{
 						{
 							ResourceGUID: "org-guid-2",
 							UserGUID:     "user-guid-1",
@@ -74,9 +75,9 @@ var _ = Describe("Retriever", func() {
 				_, orgGUID = client.GetOrgRoleAssignmentsArgsForCall(1)
 				Expect(orgGUID).To(Equal("org-guid-2"))
 
-				expectedAssignment1 := RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-1", Roles: []string{"org_auditor", "org_user"}}
-				expectedAssignment2 := RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-2", Roles: []string{"billing_manager"}}
-				expectedAssignment3 := RoleAssignment{ResourceGUID: "org-guid-2", UserGUID: "user-guid-1", Roles: []string{"org_manager"}}
+				expectedAssignment1 := models.RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-1", Roles: []string{"org_auditor", "org_user"}}
+				expectedAssignment2 := models.RoleAssignment{ResourceGUID: "org-guid-1", UserGUID: "user-guid-2", Roles: []string{"billing_manager"}}
+				expectedAssignment3 := models.RoleAssignment{ResourceGUID: "org-guid-2", UserGUID: "user-guid-1", Roles: []string{"org_manager"}}
 				assignment1, assignment2, assignment3 := <-assignments, <-assignments, <-assignments
 				Expect(assignment1).To(Equal(expectedAssignment1))
 				Expect(assignment2).To(Equal(expectedAssignment2))
@@ -113,7 +114,7 @@ var _ = Describe("Retriever", func() {
 		Context("when the capi client call for org role assignment returns an error", func() {
 			BeforeEach(func() {
 				client.GetOrgGUIDsReturns([]string{"org-guid"}, nil)
-				client.GetOrgRoleAssignmentsReturns([]RoleAssignment{}, fmt.Errorf("org-role-assignments-error"))
+				client.GetOrgRoleAssignmentsReturns([]models.RoleAssignment{}, fmt.Errorf("org-role-assignments-error"))
 			})
 			It("sends an error to the errors channel", func() {
 				subject.FetchCAPIEntities(logger, progressLogger, assignments, errs)
@@ -130,7 +131,7 @@ var _ = Describe("Retriever", func() {
 				client.GetSpaceGUIDsReturnsOnCall(0, []string{"space-guid-1"}, nil)
 				client.GetSpaceGUIDsReturnsOnCall(1, []string{"space-guid-2"}, nil)
 				client.GetSpaceRoleAssignmentsReturnsOnCall(0,
-					[]RoleAssignment{
+					[]models.RoleAssignment{
 						{
 							ResourceGUID: "space-guid-1",
 							UserGUID:     "user-guid-1",
@@ -143,7 +144,7 @@ var _ = Describe("Retriever", func() {
 						},
 					}, nil)
 				client.GetSpaceRoleAssignmentsReturnsOnCall(1,
-					[]RoleAssignment{
+					[]models.RoleAssignment{
 						{
 							ResourceGUID: "space-guid-2",
 							UserGUID:     "user-guid-4",
@@ -171,14 +172,14 @@ var _ = Describe("Retriever", func() {
 				Expect(spaceGUID).To(Equal("space-guid-2"))
 
 				assignment1, assignment2 := <-assignments, <-assignments
-				expectedAssignment1 := RoleAssignment{ResourceGUID: "space-guid-1", UserGUID: "user-guid-1", Roles: []string{"space_developer", "space_manager"}}
-				expectedAssignment2 := RoleAssignment{ResourceGUID: "space-guid-1", UserGUID: "user-guid-2", Roles: []string{"space_auditor"}}
+				expectedAssignment1 := models.RoleAssignment{ResourceGUID: "space-guid-1", UserGUID: "user-guid-1", Roles: []string{"space_developer", "space_manager"}}
+				expectedAssignment2 := models.RoleAssignment{ResourceGUID: "space-guid-1", UserGUID: "user-guid-2", Roles: []string{"space_auditor"}}
 				Expect(assignment1).To(Equal(expectedAssignment1))
 				Expect(assignment2).To(Equal(expectedAssignment2))
 
 				assignment3, assignment4 := <-assignments, <-assignments
-				expectedAssignment3 := RoleAssignment{ResourceGUID: "space-guid-2", UserGUID: "user-guid-4", Roles: []string{"space_manager"}}
-				expectedAssignment4 := RoleAssignment{ResourceGUID: "space-guid-2", UserGUID: "user-guid-5", Roles: []string{"space_developer"}}
+				expectedAssignment3 := models.RoleAssignment{ResourceGUID: "space-guid-2", UserGUID: "user-guid-4", Roles: []string{"space_manager"}}
+				expectedAssignment4 := models.RoleAssignment{ResourceGUID: "space-guid-2", UserGUID: "user-guid-5", Roles: []string{"space_developer"}}
 				Expect(assignment3).To(Equal(expectedAssignment3))
 				Expect(assignment4).To(Equal(expectedAssignment4))
 
@@ -202,7 +203,7 @@ var _ = Describe("Retriever", func() {
 			BeforeEach(func() {
 				client.GetOrgGUIDsReturns([]string{"org-guid"}, nil)
 				client.GetSpaceGUIDsReturns([]string{"space-guid"}, nil)
-				client.GetSpaceRoleAssignmentsReturns([]RoleAssignment{}, fmt.Errorf("space-role-assignment-error"))
+				client.GetSpaceRoleAssignmentsReturns([]models.RoleAssignment{}, fmt.Errorf("space-role-assignment-error"))
 			})
 
 			It("sends an error to the errors channel", func() {
@@ -217,7 +218,7 @@ var _ = Describe("Retriever", func() {
 			Context("where the org auditor role assignment was still returned from capi", func() {
 				BeforeEach(func() {
 					client.GetOrgRoleAssignmentsReturns(
-						[]RoleAssignment{
+						[]models.RoleAssignment{
 							{
 								ResourceGUID: "org-guid",
 								UserGUID:     "user-guid",
@@ -235,7 +236,7 @@ var _ = Describe("Retriever", func() {
 					Expect(actualErrorEvent).To(MatchError("space-role-assignment-error"))
 
 					assignment := <-assignments
-					expectedAssignment := RoleAssignment{ResourceGUID: "org-guid", UserGUID: "user-guid", Roles: []string{"org_auditor"}}
+					expectedAssignment := models.RoleAssignment{ResourceGUID: "org-guid", UserGUID: "user-guid", Roles: []string{"org_auditor"}}
 					Expect(assignment).To(Equal(expectedAssignment))
 				})
 
