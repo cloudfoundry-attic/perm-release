@@ -6,55 +6,55 @@ import (
 	"sync"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/lager"
 )
 
 type FakeRetriever struct {
-	FetchRoleAssignmentsStub        func(logger lager.Logger, progress *log.Logger, assignments chan<- retriever.RoleAssignment, errs chan<- error)
-	FetchRoleAssignmentsMutex       sync.RWMutex
-	FetchRoleAssignmentsArgsForCall []struct {
+	FetchRoleAssignmentsStub        func(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error)
+	fetchRoleAssignmentsMutex       sync.RWMutex
+	fetchRoleAssignmentsArgsForCall []struct {
 		logger      lager.Logger
 		progress    *log.Logger
-		assignments chan<- retriever.RoleAssignment
+		assignments chan<- models.RoleAssignment
 		errs        chan<- error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeRetriever) FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- retriever.RoleAssignment, errs chan<- error) {
-	fake.FetchRoleAssignmentsMutex.Lock()
-	fake.FetchRoleAssignmentsArgsForCall = append(fake.FetchRoleAssignmentsArgsForCall, struct {
+func (fake *FakeRetriever) FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error) {
+	fake.fetchRoleAssignmentsMutex.Lock()
+	fake.fetchRoleAssignmentsArgsForCall = append(fake.fetchRoleAssignmentsArgsForCall, struct {
 		logger      lager.Logger
 		progress    *log.Logger
-		assignments chan<- retriever.RoleAssignment
+		assignments chan<- models.RoleAssignment
 		errs        chan<- error
 	}{logger, progress, assignments, errs})
 	fake.recordInvocation("FetchRoleAssignments", []interface{}{logger, progress, assignments, errs})
-	fake.FetchRoleAssignmentsMutex.Unlock()
+	fake.fetchRoleAssignmentsMutex.Unlock()
 	if fake.FetchRoleAssignmentsStub != nil {
 		fake.FetchRoleAssignmentsStub(logger, progress, assignments, errs)
 	}
 }
 
 func (fake *FakeRetriever) FetchRoleAssignmentsCallCount() int {
-	fake.FetchRoleAssignmentsMutex.RLock()
-	defer fake.FetchRoleAssignmentsMutex.RUnlock()
-	return len(fake.FetchRoleAssignmentsArgsForCall)
+	fake.fetchRoleAssignmentsMutex.RLock()
+	defer fake.fetchRoleAssignmentsMutex.RUnlock()
+	return len(fake.fetchRoleAssignmentsArgsForCall)
 }
 
-func (fake *FakeRetriever) FetchRoleAssignmentsArgsForCall(i int) (lager.Logger, *log.Logger, chan<- retriever.RoleAssignment, chan<- error) {
-	fake.FetchRoleAssignmentsMutex.RLock()
-	defer fake.FetchRoleAssignmentsMutex.RUnlock()
-	return fake.FetchRoleAssignmentsArgsForCall[i].logger, fake.FetchRoleAssignmentsArgsForCall[i].progress, fake.FetchRoleAssignmentsArgsForCall[i].assignments, fake.FetchRoleAssignmentsArgsForCall[i].errs
+func (fake *FakeRetriever) FetchRoleAssignmentsArgsForCall(i int) (lager.Logger, *log.Logger, chan<- models.RoleAssignment, chan<- error) {
+	fake.fetchRoleAssignmentsMutex.RLock()
+	defer fake.fetchRoleAssignmentsMutex.RUnlock()
+	return fake.fetchRoleAssignmentsArgsForCall[i].logger, fake.fetchRoleAssignmentsArgsForCall[i].progress, fake.fetchRoleAssignmentsArgsForCall[i].assignments, fake.fetchRoleAssignmentsArgsForCall[i].errs
 }
 
 func (fake *FakeRetriever) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.FetchRoleAssignmentsMutex.RLock()
-	defer fake.FetchRoleAssignmentsMutex.RUnlock()
+	fake.fetchRoleAssignmentsMutex.RLock()
+	defer fake.fetchRoleAssignmentsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

@@ -5,18 +5,17 @@ import (
 	"code.cloudfoundry.org/lager"
 	"io"
 	"log"
-	"os"
 	"sync"
 )
 
 //go:generate counterfeiter . Retriever
 type Retriever interface {
-	FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error)
+	FetchRoleAssignments(logger lager.Logger, progressLogger *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error)
 }
 
-//go:generate counterfeiter . Retriever
+//go:generate counterfeiter . Reporter
 type Reporter interface {
-	GenerateReport(w io.Writer, roleAssignments <-chan models.RoleAssignment, errors <-chan error)
+	GenerateReport(w io.Writer, numAssignments int, errs []error)
 }
 
 type Migrator struct {
@@ -31,22 +30,39 @@ func NewMigrator(retriever Retriever, reporter Reporter) *Migrator {
 	}
 }
 
-func (m *Migrator) Migrate(logger lager.Logger, progress *log.Logger) {
-	roleAssignments := make(chan models.RoleAssignment)
-	errs := make(chan error)
+func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writer io.Writer) {
+	assignmentChan := make(chan models.RoleAssignment)
+	errChan := make(chan error)
 
-	var wg sync.WaitGroup
+	var (
+		count int
+		errs  []error
+		wg    sync.WaitGroup
+	)
+
 	wg.Add(2)
 
 	go func() {
-		defer wg.Done()
-		m.retriever.FetchRoleAssignments(logger, progress, roleAssignments, errs)
+		defer close(assignmentChan)
+		defer close(errChan)
+		m.retriever.FetchRoleAssignments(logger, progressLogger, assignmentChan, errChan)
 	}()
 
 	go func() {
 		defer wg.Done()
-		m.reporter.GenerateReport(os.Stderr, roleAssignments, errs)
+		for range assignmentChan {
+			count++
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for err := range errChan {
+			errs = append(errs, err)
+		}
 	}()
 
 	wg.Wait()
+
+	m.reporter.GenerateReport(writer, count, errs)
 }

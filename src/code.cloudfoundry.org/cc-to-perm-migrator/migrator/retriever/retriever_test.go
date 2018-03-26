@@ -35,6 +35,11 @@ var _ = Describe("Retriever", func() {
 		subject = NewRetriever(client)
 	})
 
+	AfterEach(func() {
+		close(assignments)
+		close(errs)
+	})
+
 	Describe("#FetchRoleAssignments", func() {
 		BeforeEach(func() {
 			client.GetOrgGUIDsReturns([]string{"org-guid-1", "org-guid-2"}, nil)
@@ -82,9 +87,8 @@ var _ = Describe("Retriever", func() {
 				Expect(assignment1).To(Equal(expectedAssignment1))
 				Expect(assignment2).To(Equal(expectedAssignment2))
 				Expect(assignment3).To(Equal(expectedAssignment3))
-				Eventually(assignments).Should(BeClosed())
-				Eventually(errs).Should(BeClosed())
 			})
+
 			It("reports the progress of the migration", func() {
 				subject.FetchRoleAssignments(logger, progressLogger, assignments, errs)
 				Expect(progressLog).To(gbytes.Say("Fetched 2 org GUIDs"))
@@ -122,7 +126,6 @@ var _ = Describe("Retriever", func() {
 				Expect(client.GetOrgRoleAssignmentsCallCount()).To(Equal(1))
 				actualErrorEvent := <-errs
 				Expect(actualErrorEvent).To(MatchError("org-role-assignments-error"))
-				Eventually(assignments).Should(BeClosed())
 			})
 		})
 
@@ -212,7 +215,6 @@ var _ = Describe("Retriever", func() {
 				Expect(client.GetSpaceRoleAssignmentsCallCount()).To(Equal(1))
 				actualErrorEvent := <-errs
 				Expect(actualErrorEvent).To(MatchError("space-role-assignment-error"))
-				Eventually(assignments).Should(BeClosed())
 			})
 
 			Context("where the org auditor role assignment was still returned from capi", func() {

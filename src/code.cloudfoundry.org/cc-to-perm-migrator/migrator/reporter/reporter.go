@@ -9,24 +9,25 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 )
 
+//go:generate counterfeiter io.Writer
+
 type Reporter struct{}
 
-func (r *Reporter) GenerateReport(w io.Writer, roleAssignments <-chan models.RoleAssignment, errors <-chan error) {
-	count := ComputeNumberAssignments(roleAssignments)
-	errorSummary := ComputeErrors(errors)
+func (r *Reporter) GenerateReport(w io.Writer, numAssignments int, errs []error) {
+	fmt.Fprint(w, "Report\n==========================================\n")
+	fmt.Fprintf(w, "Number of role assignments: %d\n", numAssignments)
+	fmt.Fprintf(w, "Total errors: %d\n\n", len(errs))
+	fmt.Fprint(w, "Summary\n==========================================\n")
 
-	fmt.Fprintf(w, "\nReport\n==========================================\n")
-	fmt.Fprintf(w, "Number of role assignments: %d.\n", count)
-	fmt.Fprintf(w, "Total errors: %d.\n", errorSummary.Count())
-	fmt.Fprintf(w, "\nSummary\n==========================================\n")
-
+	errorSummary := computeErrors(errs)
 	var perTypeKeys []string
-	for key := range errorSummary.PerType {
+	for key := range errorSummary.perType {
 		perTypeKeys = append(perTypeKeys, key)
 	}
 	sort.Strings(perTypeKeys)
+
 	for _, endpoint := range perTypeKeys {
-		messageCount := errorSummary.PerType[endpoint]
+		messageCount := errorSummary.perType[endpoint]
 		fmt.Fprintf(w, "For %s:\n", endpoint)
 		var messageKeys []string
 		for messageKey := range messageCount {
@@ -39,74 +40,44 @@ func (r *Reporter) GenerateReport(w io.Writer, roleAssignments <-chan models.Rol
 		}
 	}
 
-	if len(errorSummary.Other) > 0 {
+	if len(errorSummary.other) > 0 {
 		fmt.Fprint(w, "Other errors:\n")
 		var otherMessageKeys []string
-		for messageKey := range errorSummary.Other {
+		for messageKey := range errorSummary.other {
 			otherMessageKeys = append(otherMessageKeys, messageKey)
 		}
 		sort.Strings(otherMessageKeys)
 		for _, messageKey := range otherMessageKeys {
-			messageCount := errorSummary.Other[messageKey]
+			messageCount := errorSummary.other[messageKey]
 			fmt.Fprintf(w, "- %3d %s", messageCount, messageKey)
 		}
 	}
 }
 
-func ComputeNumberAssignments(roleAssignments <-chan models.RoleAssignment) int {
-	var count int
+type errorSummary struct {
+	other   map[string]int
+	perType map[string]map[string]int
+}
 
-	for range roleAssignments {
-		count++
+func (e *errorSummary) addPerTypeError(entity, errorMessage string) {
+	if _, ok := e.perType[entity]; !ok {
+		e.perType[entity] = make(map[string]int)
+	}
+	e.perType[entity][errorMessage] += 1
+}
+
+func computeErrors(errs []error) errorSummary {
+	summary := errorSummary{
+		other:   make(map[string]int),
+		perType: make(map[string]map[string]int),
 	}
 
-	return count
-}
-
-type ErrorSummary struct {
-	Other   map[string]int
-	PerType map[string]map[string]int
-}
-
-func NewErrorSummary() ErrorSummary {
-	summary := ErrorSummary{}
-	summary.Other = make(map[string]int)
-	summary.PerType = make(map[string]map[string]int)
-	return summary
-}
-
-func (e *ErrorSummary) AddPerTypeError(entity, errorMessage string) {
-	if _, ok := e.PerType[entity]; !ok {
-		e.PerType[entity] = make(map[string]int)
-	}
-	e.PerType[entity][errorMessage] += 1
-}
-
-func (e *ErrorSummary) AddOtherError(errorMessage string) {
-	e.Other[errorMessage] += 1
-}
-
-func (e *ErrorSummary) Count() int {
-	total := 0
-	for _, subMap := range e.PerType {
-		for _, count := range subMap {
-			total += count
-		}
-	}
-	total += len(e.Other)
-	return total
-}
-
-func ComputeErrors(errors <-chan error) ErrorSummary {
-	summary := NewErrorSummary()
-
-	for errorItem := range errors {
+	for _, errorItem := range errs {
 		switch errorEvent := errorItem.(type) {
 		case *models.ErrorEvent:
-			summary.AddPerTypeError(errorEvent.EntityType, errorEvent.Error())
-
+			summary.addPerTypeError(errorEvent.EntityType, errorEvent.Error())
 		default:
-			summary.Other[errorItem.Error()] += 1
+			summary.other[errorItem.Error()] += 1
 		}
 	}
 	return summary

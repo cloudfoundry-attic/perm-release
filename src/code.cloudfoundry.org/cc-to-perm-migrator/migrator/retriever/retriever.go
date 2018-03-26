@@ -61,6 +61,4 @@ func (r *Retriever) FetchRoleAssignments(logger lager.Logger, progress *log.Logg
 		}
 	}
 	progress.Printf("Done.")
-	close(assignments)
-	close(errs)
 }

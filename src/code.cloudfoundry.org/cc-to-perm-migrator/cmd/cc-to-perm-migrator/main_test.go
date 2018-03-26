@@ -111,6 +111,7 @@ var _ = Describe("CCToPermMigrator", func() {
 			contents := fmt.Sprintf(configTemplate, server.URL(), server.URL())
 			err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
 		})
+
 		It("exits with 1 when no flags are passed", func() {
 			session := RunCommand("--config-file-path", configFilePath)
 			Eventually(session, 1).Should(gexec.Exit(0))

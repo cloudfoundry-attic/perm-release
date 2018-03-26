@@ -97,5 +97,5 @@ func main() {
 	ccClient := capi.NewClient(config.CloudController.URL, client)
 
 	migrator.NewMigrator(retriever.NewRetriever(ccClient), &reporter.Reporter{}).
-		Migrate(logger, progressLogger)
+		Migrate(logger, progressLogger, os.Stderr)
 }
