@@ -11,9 +11,9 @@ import (
 )
 
 type FakeRetriever struct {
-	FetchCAPIEntitiesStub        func(logger lager.Logger, progress *log.Logger, assignments chan<- retriever.RoleAssignment, errs chan<- error)
-	fetchCAPIEntitiesMutex       sync.RWMutex
-	fetchCAPIEntitiesArgsForCall []struct {
+	FetchRoleAssignmentsStub        func(logger lager.Logger, progress *log.Logger, assignments chan<- retriever.RoleAssignment, errs chan<- error)
+	FetchRoleAssignmentsMutex       sync.RWMutex
+	FetchRoleAssignmentsArgsForCall []struct {
 		logger      lager.Logger
 		progress    *log.Logger
 		assignments chan<- retriever.RoleAssignment
@@ -23,38 +23,38 @@ type FakeRetriever struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeRetriever) FetchCAPIEntities(logger lager.Logger, progress *log.Logger, assignments chan<- retriever.RoleAssignment, errs chan<- error) {
-	fake.fetchCAPIEntitiesMutex.Lock()
-	fake.fetchCAPIEntitiesArgsForCall = append(fake.fetchCAPIEntitiesArgsForCall, struct {
+func (fake *FakeRetriever) FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- retriever.RoleAssignment, errs chan<- error) {
+	fake.FetchRoleAssignmentsMutex.Lock()
+	fake.FetchRoleAssignmentsArgsForCall = append(fake.FetchRoleAssignmentsArgsForCall, struct {
 		logger      lager.Logger
 		progress    *log.Logger
 		assignments chan<- retriever.RoleAssignment
 		errs        chan<- error
 	}{logger, progress, assignments, errs})
-	fake.recordInvocation("FetchCAPIEntities", []interface{}{logger, progress, assignments, errs})
-	fake.fetchCAPIEntitiesMutex.Unlock()
-	if fake.FetchCAPIEntitiesStub != nil {
-		fake.FetchCAPIEntitiesStub(logger, progress, assignments, errs)
+	fake.recordInvocation("FetchRoleAssignments", []interface{}{logger, progress, assignments, errs})
+	fake.FetchRoleAssignmentsMutex.Unlock()
+	if fake.FetchRoleAssignmentsStub != nil {
+		fake.FetchRoleAssignmentsStub(logger, progress, assignments, errs)
 	}
 }
 
-func (fake *FakeRetriever) FetchCAPIEntitiesCallCount() int {
-	fake.fetchCAPIEntitiesMutex.RLock()
-	defer fake.fetchCAPIEntitiesMutex.RUnlock()
-	return len(fake.fetchCAPIEntitiesArgsForCall)
+func (fake *FakeRetriever) FetchRoleAssignmentsCallCount() int {
+	fake.FetchRoleAssignmentsMutex.RLock()
+	defer fake.FetchRoleAssignmentsMutex.RUnlock()
+	return len(fake.FetchRoleAssignmentsArgsForCall)
 }
 
-func (fake *FakeRetriever) FetchCAPIEntitiesArgsForCall(i int) (lager.Logger, *log.Logger, chan<- retriever.RoleAssignment, chan<- error) {
-	fake.fetchCAPIEntitiesMutex.RLock()
-	defer fake.fetchCAPIEntitiesMutex.RUnlock()
-	return fake.fetchCAPIEntitiesArgsForCall[i].logger, fake.fetchCAPIEntitiesArgsForCall[i].progress, fake.fetchCAPIEntitiesArgsForCall[i].assignments, fake.fetchCAPIEntitiesArgsForCall[i].errs
+func (fake *FakeRetriever) FetchRoleAssignmentsArgsForCall(i int) (lager.Logger, *log.Logger, chan<- retriever.RoleAssignment, chan<- error) {
+	fake.FetchRoleAssignmentsMutex.RLock()
+	defer fake.FetchRoleAssignmentsMutex.RUnlock()
+	return fake.FetchRoleAssignmentsArgsForCall[i].logger, fake.FetchRoleAssignmentsArgsForCall[i].progress, fake.FetchRoleAssignmentsArgsForCall[i].assignments, fake.FetchRoleAssignmentsArgsForCall[i].errs
 }
 
 func (fake *FakeRetriever) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.fetchCAPIEntitiesMutex.RLock()
-	defer fake.fetchCAPIEntitiesMutex.RUnlock()
+	fake.FetchRoleAssignmentsMutex.RLock()
+	defer fake.FetchRoleAssignmentsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

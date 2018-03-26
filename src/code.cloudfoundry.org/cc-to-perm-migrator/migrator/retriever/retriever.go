@@ -26,7 +26,7 @@ func NewRetriever(client CAPIClient) *Retriever {
 	}
 }
 
-func (r *Retriever) FetchCAPIEntities(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error) {
+func (r *Retriever) FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error) {
 	organizations, err := r.client.GetOrgGUIDs(logger)
 	if err != nil {
 		errs <- err

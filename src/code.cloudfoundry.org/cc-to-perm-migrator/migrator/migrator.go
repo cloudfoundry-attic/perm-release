@@ -11,7 +11,7 @@ import (
 
 //go:generate counterfeiter . Retriever
 type Retriever interface {
-	FetchCAPIEntities(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error)
+	FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error)
 }
 
 //go:generate counterfeiter . Retriever
@@ -40,7 +40,7 @@ func (m *Migrator) Migrate(logger lager.Logger, progress *log.Logger) {
 
 	go func() {
 		defer wg.Done()
-		m.retriever.FetchCAPIEntities(logger, progress, roleAssignments, errs)
+		m.retriever.FetchRoleAssignments(logger, progress, roleAssignments, errs)
 	}()
 
 	go func() {
