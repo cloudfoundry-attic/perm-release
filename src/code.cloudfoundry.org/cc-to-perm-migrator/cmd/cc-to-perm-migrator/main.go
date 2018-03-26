@@ -15,12 +15,10 @@ import (
 
 	"bytes"
 
-	"sync"
-
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi"
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
@@ -96,25 +94,8 @@ func main() {
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL.String())
 	client := uaaConfig.Client(ctx)
 
-	roleAssignments := make(chan models.RoleAssignment)
-	errors := make(chan error)
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
 	ccClient := capi.NewClient(config.CloudController.URL, client)
-	retr := retriever.NewRetriever(ccClient)
-	var repr reporter.Reporter
 
-	go func() {
-		defer wg.Done()
-		retr.FetchCAPIEntities(logger, progressLogger, roleAssignments, errors)
-	}()
-
-	go func() {
-		defer wg.Done()
-		repr.GenerateReport(os.Stderr, roleAssignments, errors)
-	}()
-
-	wg.Wait()
+	migrator.NewMigrator(retriever.NewRetriever(ccClient), &reporter.Reporter{}).
+		Migrate(logger, progressLogger)
 }
