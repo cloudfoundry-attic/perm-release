@@ -94,7 +94,7 @@ var _ = ginkgo.Describe("Reporter", func() {
 			subject.GenerateReport(buffer, orgs, spaces, errs)
 
 			Expect(buffer).To(Say("Report\n"))
-			Expect(buffer).To(Say("Number of role assignments: 4"))
+			Expect(buffer).To(Say("Number of role assignments: 6"))
 			Expect(buffer).To(Say("Total errors: 10"))
 			Expect(buffer).To(Say("Summary\n"))
 			Expect(buffer).To(Say("For /v2/organizations:"))

@@ -72,11 +72,19 @@ func countNumAssignments(orgs []models.Organization, spaces []models.Space) int 
 	var numAssignments int
 
 	for _, org := range orgs {
-		numAssignments += len(org.Assignments)
+		for _, assignment := range org.Assignments {
+			for range assignment.Roles {
+				numAssignments++
+			}
+		}
 	}
 
 	for _, space := range spaces {
-		numAssignments += len(space.Assignments)
+		for _, assignment := range space.Assignments {
+			for range assignment.Roles {
+				numAssignments++
+			}
+		}
 	}
 
 	return numAssignments
