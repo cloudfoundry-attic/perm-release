@@ -1,4 +1,5 @@
 log_level: <%= p('log_level') %>
+dry_run: <%= p('dry_run') %>
 
 uaa:
   url: <%= p('uaa.url') %>

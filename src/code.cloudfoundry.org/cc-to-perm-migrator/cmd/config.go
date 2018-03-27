@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	Logger LagerConfig `yaml:",inline"`
+	DryRun bool        `yaml:"dry_run"`
 
 	UAA             uaaConfig `yaml:"uaa"`
 	CloudController ccConfig  `yaml:"cloud_controller"`

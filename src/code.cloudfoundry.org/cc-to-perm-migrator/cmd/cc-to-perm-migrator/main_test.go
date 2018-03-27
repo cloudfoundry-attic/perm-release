@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"net/http"
+	"os"
 
 	"fmt"
 
@@ -12,6 +13,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/ghttp"
 )
@@ -52,6 +54,8 @@ var _ = Describe("CCToPermMigrator", func() {
 		orgRolesNextURL   = "/v2/organizations/guid/next"
 		spacesNextURL     = "/v2/spaces/page2"
 		spaceRolesNextURL = "/v2/spaces/next"
+
+		numAssignments int
 	)
 
 	BeforeEach(func() {
@@ -110,11 +114,98 @@ var _ = Describe("CCToPermMigrator", func() {
 
 			contents := fmt.Sprintf(configTemplate, server.URL(), server.URL())
 			err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
+			Expect(err).NotTo(HaveOccurred())
+
+			for _, resource := range orgRoles1Page1.Resources {
+				for i := 0; i < len(resource.Entity.Roles); i++ {
+					numAssignments++
+				}
+			}
+			for _, resource := range orgRoles1Page2.Resources {
+				for i := 0; i < len(resource.Entity.Roles); i++ {
+					numAssignments++
+				}
+			}
+			for _, resource := range orgRoles2.Resources {
+				for i := 0; i < len(resource.Entity.Roles); i++ {
+					numAssignments++
+				}
+			}
+			for _, resource := range spaceRoles1Page1.Resources {
+				for i := 0; i < len(resource.Entity.Roles); i++ {
+					numAssignments++
+				}
+			}
+			for _, resource := range spaceRoles1Page2.Resources {
+				for i := 0; i < len(resource.Entity.Roles); i++ {
+					numAssignments++
+				}
+			}
+			for _, resource := range spaceRoles2.Resources {
+				for i := 0; i < len(resource.Entity.Roles); i++ {
+					numAssignments++
+				}
+			}
+			for _, resource := range spaceRoles3.Resources {
+				for i := 0; i < len(resource.Entity.Roles); i++ {
+					numAssignments++
+				}
+			}
 		})
 
-		It("exits with 1 when no flags are passed", func() {
-			session := RunCommand("--config-file-path", configFilePath)
-			Eventually(session, 1).Should(gexec.Exit(0))
+		AfterEach(func() {
+			os.RemoveAll(tmpDir)
+		})
+
+		Context("when the config flag is not passed", func() {
+			BeforeEach(func() {
+				server.AllowUnhandledRequests = true
+			})
+
+			It("exits with 1", func() {
+				session := RunCommand()
+				Eventually(session).Should(gexec.Exit(1))
+			})
+		})
+
+		Context("in regular (non-dry-mode) mode", func() {
+			BeforeEach(func() {
+				f, err := os.OpenFile(configFilePath, os.O_APPEND|os.O_WRONLY, 0644)
+				Expect(err).NotTo(HaveOccurred())
+				defer f.Close()
+
+				_, err = f.WriteString("\ndry_run: false\n")
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("runs successfully", func() {
+				session := RunCommand("--config-file-path", configFilePath)
+
+				Eventually(session).Should(gexec.Exit(0))
+
+				Eventually(session.Err).Should(gbytes.Say("Number of role assignments: %d", numAssignments))
+				Eventually(session.Err).Should(gbytes.Say("Total errors: 0"))
+			})
+		})
+
+		Context("in dry-run mode", func() {
+			BeforeEach(func() {
+				f, err := os.OpenFile(configFilePath, os.O_APPEND|os.O_WRONLY, 0644)
+				Expect(err).NotTo(HaveOccurred())
+				defer f.Close()
+
+				_, err = f.WriteString("\ndry_run: true\n")
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("runs successfully", func() {
+				session := RunCommand("--config-file-path", configFilePath)
+
+				Eventually(session).Should(gexec.Exit(0))
+
+				Eventually(session.Err).Should(gbytes.Say("Number of role assignments: %d", numAssignments))
+				Eventually(session.Err).Should(gbytes.Say("Total errors: 0"))
+			})
 		})
 	})
 })
