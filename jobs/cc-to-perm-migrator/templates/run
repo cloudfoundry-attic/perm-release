@@ -7,8 +7,8 @@ LOG_DIR=/var/vcap/sys/log/cc-to-perm-migrator
 mkdir -p "$LOG_DIR"
 chown -R vcap:vcap "$LOG_DIR"
 
-exec > >(tee -a "${LOG_DIR}/cc-to-perm-migrator.stdout.log")
 exec 2> >(tee -a "${LOG_DIR}/cc-to-perm-migrator.stderr.log")
+exec > >(tee -a "${LOG_DIR}/cc-to-perm-migrator.stdout.log")
 
 /var/vcap/packages/cc-to-perm-migrator/bin/cc-to-perm-migrator \
   --config-file-path=/var/vcap/jobs/cc-to-perm-migrator/config/cc-to-perm-migrator.yml
