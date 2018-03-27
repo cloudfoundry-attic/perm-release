@@ -15,6 +15,8 @@ import (
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
+
+	"code.cloudfoundry.org/perm-go/perm-gofakes"
 	"github.com/onsi/gomega/ghttp"
 )
 
@@ -29,11 +31,18 @@ cloud_controller:
   client_id: perm-migrator
   client_secret: secret
   client_scopes: ["cloud_controller.admin_read_only"]
+
+perm:
+  hostname: %s
+  port: %d
 `
 
 var _ = Describe("CCToPermMigrator", func() {
 	var (
-		server *ghttp.Server
+		roleServiceServer *permgofakes.FakeRoleServiceServer
+
+		ccServer   *ghttp.Server
+		permServer *PermServer
 
 		orgsPage1 capimodels.ListOrgsResponse
 		orgsPage2 capimodels.ListOrgsResponse
@@ -59,7 +68,14 @@ var _ = Describe("CCToPermMigrator", func() {
 	)
 
 	BeforeEach(func() {
-		server = ghttp.NewServer()
+		roleServiceServer = new(permgofakes.FakeRoleServiceServer)
+
+		var err error
+
+		ccServer = ghttp.NewServer()
+		permServer, err = NewPermServer(roleServiceServer)
+
+		Expect(err).NotTo(HaveOccurred())
 
 		orgsPage1 = createOrgResponse([]string{"org-guid-1"}, orgsNextURL)
 		orgsPage2 = createOrgResponse([]string{"org-guid-2"}, "")
@@ -77,7 +93,8 @@ var _ = Describe("CCToPermMigrator", func() {
 	})
 
 	AfterEach(func() {
-		server.Close()
+		ccServer.Close()
+		permServer.Stop()
 	})
 
 	Describe("#Main", func() {
@@ -88,31 +105,31 @@ var _ = Describe("CCToPermMigrator", func() {
 		BeforeEach(func() {
 			//These handlers are appended in the order in which they are called.
 			//If adding more handlers, make sure they are placed correctly in the set of calls.
-			appendHandler(server, "POST", "/oauth/token", tokenJSON{
+			appendHandler(ccServer, "POST", "/oauth/token", tokenJSON{
 				AccessToken:  "cool",
 				TokenType:    "whatever",
 				RefreshToken: "something",
 				ExpiresIn:    "1234",
 			})
-			appendHandler(server, "GET", "/v2/organizations", orgsPage1)
-			appendHandler(server, "GET", orgsNextURL, orgsPage2)
-			appendHandler(server, "GET", "/v2/organizations/org-guid-1/user_roles", orgRoles1Page1)
-			appendHandler(server, "GET", orgRolesNextURL, orgRoles1Page2)
-			appendHandler(server, "GET", "/v2/organizations/org-guid-1/spaces", spaces1Page1)
-			appendHandler(server, "GET", spacesNextURL, spaces1Page2)
-			appendHandler(server, "GET", "/v2/spaces/space-guid-1/user_roles", spaceRoles1Page1)
-			appendHandler(server, "GET", spaceRolesNextURL, spaceRoles1Page2)
+			appendHandler(ccServer, "GET", "/v2/organizations", orgsPage1)
+			appendHandler(ccServer, "GET", orgsNextURL, orgsPage2)
+			appendHandler(ccServer, "GET", "/v2/organizations/org-guid-1/user_roles", orgRoles1Page1)
+			appendHandler(ccServer, "GET", orgRolesNextURL, orgRoles1Page2)
+			appendHandler(ccServer, "GET", "/v2/organizations/org-guid-1/spaces", spaces1Page1)
+			appendHandler(ccServer, "GET", spacesNextURL, spaces1Page2)
+			appendHandler(ccServer, "GET", "/v2/spaces/space-guid-1/user_roles", spaceRoles1Page1)
+			appendHandler(ccServer, "GET", spaceRolesNextURL, spaceRoles1Page2)
 
-			appendHandler(server, "GET", "/v2/spaces/space-guid-2/user_roles", spaceRoles2)
-			appendHandler(server, "GET", "/v2/organizations/org-guid-2/user_roles", orgRoles2)
-			appendHandler(server, "GET", "/v2/organizations/org-guid-2/spaces", spaces2)
-			appendHandler(server, "GET", "/v2/spaces/space-guid-3/user_roles", spaceRoles3)
+			appendHandler(ccServer, "GET", "/v2/spaces/space-guid-2/user_roles", spaceRoles2)
+			appendHandler(ccServer, "GET", "/v2/organizations/org-guid-2/user_roles", orgRoles2)
+			appendHandler(ccServer, "GET", "/v2/organizations/org-guid-2/spaces", spaces2)
+			appendHandler(ccServer, "GET", "/v2/spaces/space-guid-3/user_roles", spaceRoles3)
 
 			tmpDir, err = ioutil.TempDir("", "ccmtest")
 			Expect(err).NotTo(HaveOccurred())
 			configFilePath = path.Join(tmpDir, "config.yml")
 
-			contents := fmt.Sprintf(configTemplate, server.URL(), server.URL())
+			contents := fmt.Sprintf(configTemplate, ccServer.URL(), ccServer.URL(), permServer.Hostname(), permServer.Port())
 			err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -160,7 +177,7 @@ var _ = Describe("CCToPermMigrator", func() {
 
 		Context("when the config flag is not passed", func() {
 			BeforeEach(func() {
-				server.AllowUnhandledRequests = true
+				ccServer.AllowUnhandledRequests = true
 			})
 
 			It("exits with 1", func() {

@@ -13,8 +13,9 @@ type Config struct {
 	Logger LagerConfig `yaml:",inline"`
 	DryRun bool        `yaml:"dry_run"`
 
-	UAA             uaaConfig `yaml:"uaa"`
-	CloudController ccConfig  `yaml:"cloud_controller"`
+	UAA             uaaConfig  `yaml:"uaa"`
+	CloudController ccConfig   `yaml:"cloud_controller"`
+	Perm            permConfig `yaml:"perm"`
 }
 
 type uaaConfig struct {
@@ -27,6 +28,12 @@ type ccConfig struct {
 	ClientID     string   `yaml:"client_id"`
 	ClientSecret string   `yaml:"client_secret"`
 	ClientScopes []string `yaml:"client_scopes"`
+}
+
+type permConfig struct {
+	Hostname string           `yaml:"hostname"`
+	Port     int              `yaml:"port"`
+	CACert   FileOrStringFlag `yaml:"ca_cert"`
 }
 
 func NewConfig(r io.Reader) (*Config, error) {

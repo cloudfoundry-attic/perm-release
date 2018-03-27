@@ -3,7 +3,12 @@ package main
 import (
 	"crypto/tls"
 	"log"
+	"net"
 	"os"
+	"strconv"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"context"
 
@@ -59,11 +64,11 @@ func main() {
 	uaaCACert, err := config.UAA.CACertPath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
 		logger.Error("failed-to-read-uaa-ca-cert", err)
-		panic(err)
+		os.Exit(1)
 	}
 
-	caCertPool := x509.NewCertPool()
-	ok := caCertPool.AppendCertsFromPEM(uaaCACert)
+	uaaCACertPool := x509.NewCertPool()
+	ok := uaaCACertPool.AppendCertsFromPEM(uaaCACert)
 	if !ok {
 		logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"), lager.Data{
 			"path": config.UAA.CACertPath,
@@ -72,14 +77,14 @@ func main() {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			RootCAs: caCertPool,
+			RootCAs: uaaCACertPool,
 		},
 	}
 	sslcli := &http.Client{Transport: tr}
 
 	tokenURL, err := httpx.JoinURL(logger, config.UAA.URL, "/oauth/token")
 	if err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 
 	uaaConfig := &clientcredentials.Config{
@@ -95,6 +100,32 @@ func main() {
 	client := uaaConfig.Client(ctx)
 
 	ccClient := capi.NewClient(config.CloudController.URL, client)
+
+	permCACert, err := config.Perm.CACert.Bytes(cmd.OS, cmd.IOReader)
+	if err != nil {
+		logger.Error("failed-to-read-perm-ca-cert", err)
+		os.Exit(1)
+	}
+
+	if !config.DryRun {
+		permAddr := net.JoinHostPort(config.Perm.Hostname, strconv.Itoa(config.Perm.Port))
+		if len(permCACert) != 0 {
+			permCACertPool := x509.NewCertPool()
+			if ok := permCACertPool.AppendCertsFromPEM(permCACert); !ok {
+				logger.Error("failed-to-add-append-certs-from-pem", errors.New("could not append certs"))
+				os.Exit(1)
+			}
+
+			creds := credentials.NewClientTLSFromCert(permCACertPool, config.Perm.Hostname)
+
+			permConn, err := grpc.Dial(permAddr, grpc.WithTransportCredentials(creds))
+			if err != nil {
+				logger.Error("failed-to-connect-to-perm", err)
+				os.Exit(1)
+			}
+			defer permConn.Close()
+		}
+	}
 
 	migrator.NewMigrator(retriever.NewRetriever(ccClient), &reporter.Reporter{}).
 		Migrate(logger, progressLogger, os.Stderr, config.DryRun)
