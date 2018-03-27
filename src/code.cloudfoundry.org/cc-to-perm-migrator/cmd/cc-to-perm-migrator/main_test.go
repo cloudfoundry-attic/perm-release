@@ -116,6 +116,7 @@ var _ = Describe("CCToPermMigrator", func() {
 			err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
 			Expect(err).NotTo(HaveOccurred())
 
+			numAssignments = 0
 			for _, resource := range orgRoles1Page1.Resources {
 				for i := 0; i < len(resource.Entity.Roles); i++ {
 					numAssignments++

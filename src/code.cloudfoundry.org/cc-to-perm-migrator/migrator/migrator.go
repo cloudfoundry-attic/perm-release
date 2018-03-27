@@ -33,7 +33,7 @@ func NewMigrator(retriever Retriever, reporter Reporter) *Migrator {
 	}
 }
 
-func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writer io.Writer) {
+func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writer io.Writer, dryRun bool) {
 	orgChan := make(chan models.Organization)
 	spaceChan := make(chan models.Space)
 	errChan := make(chan error)
