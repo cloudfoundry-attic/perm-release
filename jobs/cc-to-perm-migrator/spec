@@ -3,7 +3,7 @@ name: cc-to-perm-migrator
 
 templates:
   uaa-ca.crt: config/certs/uaa-ca.crt
-  perm-ca.crt: config/certs/perm-ca.crt
+  perm-ca.crt.erb: config/certs/perm-ca.crt
   cc-to-perm-migrator.yml: config/cc-to-perm-migrator.yml
   run: bin/run
 
