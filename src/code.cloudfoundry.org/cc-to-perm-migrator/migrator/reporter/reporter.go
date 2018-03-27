@@ -65,7 +65,7 @@ func (e *errorSummary) addPerTypeError(entity, errorMessage string) {
 	if _, ok := e.perType[entity]; !ok {
 		e.perType[entity] = make(map[string]int)
 	}
-	e.perType[entity][errorMessage] += 1
+	e.perType[entity][errorMessage]++
 }
 
 func countNumAssignments(orgs []models.Organization, spaces []models.Space) int {
@@ -101,7 +101,7 @@ func computeErrors(errs []error) errorSummary {
 		case *models.ErrorEvent:
 			summary.addPerTypeError(errorEvent.EntityType, errorEvent.Error())
 		default:
-			summary.other[errorItem.Error()] += 1
+			summary.other[errorItem.Error()]++
 		}
 	}
 	return summary

@@ -10,11 +10,13 @@ import (
 )
 
 //go:generate counterfeiter . Retriever
+
 type Retriever interface {
 	FetchResources(logger lager.Logger, progressLogger *log.Logger, orgs chan<- models.Organization, spaces chan<- models.Space, errs chan<- error)
 }
 
 //go:generate counterfeiter . Reporter
+
 type Reporter interface {
 	GenerateReport(w io.Writer, orgs []models.Organization, spaces []models.Space, errs []error)
 }
