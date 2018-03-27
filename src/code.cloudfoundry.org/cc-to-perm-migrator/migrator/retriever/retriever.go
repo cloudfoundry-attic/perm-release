@@ -26,38 +26,49 @@ func NewRetriever(client CAPIClient) *Retriever {
 	}
 }
 
-func (r *Retriever) FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error) {
-	organizations, err := r.client.GetOrgGUIDs(logger)
+func (r *Retriever) FetchResources(logger lager.Logger, progress *log.Logger, orgs chan<- models.Organization, spaces chan<- models.Space, errs chan<- error) {
+	orgGUIDs, err := r.client.GetOrgGUIDs(logger)
 	if err != nil {
 		errs <- err
 	}
-	progress.Printf("Fetched %d org GUIDs", len(organizations))
-	for orgIndex, organization := range organizations {
-		progress.Printf("Processing org %s [%d/%d]", organization, orgIndex+1, len(organizations))
-		orgAssignments, err := r.client.GetOrgRoleAssignments(logger, organization)
+
+	progress.Printf("Fetched %d org GUIDs", len(orgGUIDs))
+
+	for orgIndex, orgGUID := range orgGUIDs {
+		progress.Printf("Processing org %s [%d/%d]", orgGUID, orgIndex+1, len(orgGUIDs))
+		orgAssignments, err := r.client.GetOrgRoleAssignments(logger, orgGUID)
 		if err != nil {
 			errs <- err
 		}
-		progress.Printf("%s: Fetched %d org role assignments. Migrating...", organization, len(orgAssignments))
+		progress.Printf("%s: Fetched %d org role assignments. Migrating...", orgGUID, len(orgAssignments))
 
-		for _, assignment := range orgAssignments {
-			assignments <- assignment
+		orgs <- models.Organization{
+			GUID:        orgGUID,
+			Assignments: orgAssignments,
 		}
 
-		spaces, err := r.client.GetSpaceGUIDs(logger, organization)
+		spaceGUIDs, err := r.client.GetSpaceGUIDs(logger, orgGUID)
+
 		if err != nil {
 			errs <- err
 		}
-		progress.Printf("%s: Fetched %d spaces. Migrating...", organization, len(orgAssignments))
-		for _, space := range spaces {
-			spaceAssignments, err := r.client.GetSpaceRoleAssignments(logger, space)
+		progress.Printf("%s: Fetched %d spaces. Migrating...", orgGUID, len(spaceGUIDs))
+
+		for spaceIndex, spaceGUID := range spaceGUIDs {
+			progress.Printf("Processing space %s for org %s [%d/%d]", spaceGUID, orgGUID, spaceIndex+1, len(spaceGUIDs))
+
+			spaceAssignments, err := r.client.GetSpaceRoleAssignments(logger, spaceGUID)
 			if err != nil {
 				errs <- err
 			}
+			progress.Printf("%s/%s: Fetched %d space role assignments. Migrating...", orgGUID, spaceGUID, len(spaceAssignments))
 
-			for _, assignment := range spaceAssignments {
-				assignments <- assignment
+			spaces <- models.Space{
+				GUID:        spaceGUID,
+				OrgGUID:     orgGUID,
+				Assignments: spaceAssignments,
 			}
+
 		}
 	}
 	progress.Printf("Done.")

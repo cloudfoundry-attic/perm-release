@@ -118,9 +118,8 @@ var _ = Describe("Client", func() {
 
 				for _, resource := range expectedResources {
 					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
-						UserGUID:     resource.Metadata.GUID,
-						ResourceGUID: orgGUID,
-						Roles:        resource.Entity.Roles,
+						UserGUID: resource.Metadata.GUID,
+						Roles:    resource.Entity.Roles,
 					}))
 				}
 			})
@@ -179,9 +178,8 @@ var _ = Describe("Client", func() {
 
 				for _, resource := range expectedResources {
 					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
-						UserGUID:     resource.Metadata.GUID,
-						ResourceGUID: orgGUID,
-						Roles:        resource.Entity.Roles,
+						UserGUID: resource.Metadata.GUID,
+						Roles:    resource.Entity.Roles,
 					}))
 				}
 
@@ -296,9 +294,8 @@ var _ = Describe("Client", func() {
 
 				for _, resource := range expectedResources {
 					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
-						UserGUID:     resource.Metadata.GUID,
-						ResourceGUID: spaceGUID,
-						Roles:        resource.Entity.Roles,
+						UserGUID: resource.Metadata.GUID,
+						Roles:    resource.Entity.Roles,
 					}))
 				}
 			})
@@ -353,9 +350,8 @@ var _ = Describe("Client", func() {
 
 				for _, resource := range expectedResources {
 					Expect(roleAssignments).To(ContainElement(models.RoleAssignment{
-						UserGUID:     resource.Metadata.GUID,
-						ResourceGUID: spaceGUID,
-						Roles:        resource.Entity.Roles,
+						UserGUID: resource.Metadata.GUID,
+						Roles:    resource.Entity.Roles,
 					}))
 				}
 

@@ -45,26 +45,51 @@ var _ = ginkgo.Describe("Migrator", func() {
 	})
 
 	ginkgo.It("retrieves and reports on the role assignments", func() {
-		expectedAssignments := []models.RoleAssignment{
+		expectedOrgAssignments := []models.RoleAssignment{
 			{
-				ResourceGUID: "resource-guid",
-				UserGUID:     "user-guid",
-				Roles:        []string{"org_auditor"},
+				UserGUID: "user-guid",
+				Roles:    []string{"org_auditor"},
 			},
 			{
-				ResourceGUID: "resource-guid-2",
-				UserGUID:     "user-guid",
-				Roles:        []string{"org_user"},
+				UserGUID: "user-guid",
+				Roles:    []string{"org_user"},
 			},
 		}
+		expectedOrgs := []models.Organization{
+			{
+				GUID:        "org-guid",
+				Assignments: expectedOrgAssignments,
+			},
+		}
+
+		expectedSpaceAssignments := []models.RoleAssignment{
+			{
+				UserGUID: "user-guid",
+				Roles:    []string{"space_developer"},
+			},
+			{
+				UserGUID: "user-guid",
+				Roles:    []string{"space_manager"},
+			},
+		}
+		expectedSpaces := []models.Space{
+			{
+				GUID:        "space-guid",
+				Assignments: expectedSpaceAssignments,
+			},
+		}
+
 		expectedErrs := []error{
 			errors.New("retrieve-error"),
 			errors.New("retrieve-error2"),
 		}
 
-		retriever.FetchRoleAssignmentsStub = func(logger lager.Logger, progressLogger *log.Logger, assignmentChan chan<- models.RoleAssignment, errChan chan<- error) {
-			for _, assignment := range expectedAssignments {
-				assignmentChan <- assignment
+		retriever.FetchResourcesStub = func(logger lager.Logger, progressLogger *log.Logger, orgsChan chan<- models.Organization, spacesChan chan<- models.Space, errChan chan<- error) {
+			for _, org := range expectedOrgs {
+				orgsChan <- org
+			}
+			for _, space := range expectedSpaces {
+				spacesChan <- space
 			}
 			for _, err := range expectedErrs {
 				errChan <- err
@@ -78,7 +103,7 @@ var _ = ginkgo.Describe("Migrator", func() {
 
 		Expect(buf).To(Equal(buffer))
 
-		Expect(numAssignments).To(Equal(len(expectedAssignments)))
+		Expect(numAssignments).To(Equal(len(expectedOrgAssignments) + len(expectedSpaceAssignments)))
 
 		Expect(errs).To(HaveLen(len(expectedErrs)))
 		for _, err := range expectedErrs {

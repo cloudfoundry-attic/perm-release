@@ -10,7 +10,7 @@ import (
 
 //go:generate counterfeiter . Retriever
 type Retriever interface {
-	FetchRoleAssignments(logger lager.Logger, progressLogger *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error)
+	FetchResources(logger lager.Logger, progressLogger *log.Logger, orgs chan<- models.Organization, spaces chan<- models.Space, errs chan<- error)
 }
 
 //go:generate counterfeiter . Reporter
@@ -31,7 +31,8 @@ func NewMigrator(retriever Retriever, reporter Reporter) *Migrator {
 }
 
 func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writer io.Writer) {
-	assignmentChan := make(chan models.RoleAssignment)
+	orgChan := make(chan models.Organization)
+	spaceChan := make(chan models.Space)
 	errChan := make(chan error)
 
 	var (
@@ -40,18 +41,30 @@ func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writ
 		wg    sync.WaitGroup
 	)
 
-	wg.Add(2)
+	wg.Add(3)
 
 	go func() {
-		defer close(assignmentChan)
+		defer close(orgChan)
+		defer close(spaceChan)
 		defer close(errChan)
-		m.retriever.FetchRoleAssignments(logger, progressLogger, assignmentChan, errChan)
+		m.retriever.FetchResources(logger, progressLogger, orgChan, spaceChan, errChan)
 	}()
 
 	go func() {
 		defer wg.Done()
-		for range assignmentChan {
-			count++
+		for org := range orgChan {
+			for range org.Assignments {
+				count++
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for space := range spaceChan {
+			for range space.Assignments {
+				count++
+			}
 		}
 	}()
 

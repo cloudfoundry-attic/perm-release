@@ -11,50 +11,52 @@ import (
 )
 
 type FakeRetriever struct {
-	FetchRoleAssignmentsStub        func(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error)
-	fetchRoleAssignmentsMutex       sync.RWMutex
-	fetchRoleAssignmentsArgsForCall []struct {
-		logger      lager.Logger
-		progress    *log.Logger
-		assignments chan<- models.RoleAssignment
-		errs        chan<- error
+	FetchResourcesStub        func(logger lager.Logger, progressLogger *log.Logger, orgs chan<- models.Organization, spaces chan<- models.Space, errs chan<- error)
+	fetchResourcesMutex       sync.RWMutex
+	fetchResourcesArgsForCall []struct {
+		logger         lager.Logger
+		progressLogger *log.Logger
+		orgs           chan<- models.Organization
+		spaces         chan<- models.Space
+		errs           chan<- error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeRetriever) FetchRoleAssignments(logger lager.Logger, progress *log.Logger, assignments chan<- models.RoleAssignment, errs chan<- error) {
-	fake.fetchRoleAssignmentsMutex.Lock()
-	fake.fetchRoleAssignmentsArgsForCall = append(fake.fetchRoleAssignmentsArgsForCall, struct {
-		logger      lager.Logger
-		progress    *log.Logger
-		assignments chan<- models.RoleAssignment
-		errs        chan<- error
-	}{logger, progress, assignments, errs})
-	fake.recordInvocation("FetchRoleAssignments", []interface{}{logger, progress, assignments, errs})
-	fake.fetchRoleAssignmentsMutex.Unlock()
-	if fake.FetchRoleAssignmentsStub != nil {
-		fake.FetchRoleAssignmentsStub(logger, progress, assignments, errs)
+func (fake *FakeRetriever) FetchResources(logger lager.Logger, progressLogger *log.Logger, orgs chan<- models.Organization, spaces chan<- models.Space, errs chan<- error) {
+	fake.fetchResourcesMutex.Lock()
+	fake.fetchResourcesArgsForCall = append(fake.fetchResourcesArgsForCall, struct {
+		logger         lager.Logger
+		progressLogger *log.Logger
+		orgs           chan<- models.Organization
+		spaces         chan<- models.Space
+		errs           chan<- error
+	}{logger, progressLogger, orgs, spaces, errs})
+	fake.recordInvocation("FetchResources", []interface{}{logger, progressLogger, orgs, spaces, errs})
+	fake.fetchResourcesMutex.Unlock()
+	if fake.FetchResourcesStub != nil {
+		fake.FetchResourcesStub(logger, progressLogger, orgs, spaces, errs)
 	}
 }
 
-func (fake *FakeRetriever) FetchRoleAssignmentsCallCount() int {
-	fake.fetchRoleAssignmentsMutex.RLock()
-	defer fake.fetchRoleAssignmentsMutex.RUnlock()
-	return len(fake.fetchRoleAssignmentsArgsForCall)
+func (fake *FakeRetriever) FetchResourcesCallCount() int {
+	fake.fetchResourcesMutex.RLock()
+	defer fake.fetchResourcesMutex.RUnlock()
+	return len(fake.fetchResourcesArgsForCall)
 }
 
-func (fake *FakeRetriever) FetchRoleAssignmentsArgsForCall(i int) (lager.Logger, *log.Logger, chan<- models.RoleAssignment, chan<- error) {
-	fake.fetchRoleAssignmentsMutex.RLock()
-	defer fake.fetchRoleAssignmentsMutex.RUnlock()
-	return fake.fetchRoleAssignmentsArgsForCall[i].logger, fake.fetchRoleAssignmentsArgsForCall[i].progress, fake.fetchRoleAssignmentsArgsForCall[i].assignments, fake.fetchRoleAssignmentsArgsForCall[i].errs
+func (fake *FakeRetriever) FetchResourcesArgsForCall(i int) (lager.Logger, *log.Logger, chan<- models.Organization, chan<- models.Space, chan<- error) {
+	fake.fetchResourcesMutex.RLock()
+	defer fake.fetchResourcesMutex.RUnlock()
+	return fake.fetchResourcesArgsForCall[i].logger, fake.fetchResourcesArgsForCall[i].progressLogger, fake.fetchResourcesArgsForCall[i].orgs, fake.fetchResourcesArgsForCall[i].spaces, fake.fetchResourcesArgsForCall[i].errs
 }
 
 func (fake *FakeRetriever) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.fetchRoleAssignmentsMutex.RLock()
-	defer fake.fetchRoleAssignmentsMutex.RUnlock()
+	fake.fetchResourcesMutex.RLock()
+	defer fake.fetchResourcesMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

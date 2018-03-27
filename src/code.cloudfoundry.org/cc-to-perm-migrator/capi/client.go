@@ -96,9 +96,8 @@ func (c *Client) GetOrgRoleAssignments(logger lager.Logger, orgGUID string) ([]m
 		}
 		for _, role := range listOrgRolesResponse.Resources {
 			orgRoles = append(orgRoles, models.RoleAssignment{
-				UserGUID:     role.Metadata.GUID,
-				ResourceGUID: orgGUID,
-				Roles:        role.Entity.Roles,
+				UserGUID: role.Metadata.GUID,
+				Roles:    role.Entity.Roles,
 			})
 		}
 
@@ -129,9 +128,8 @@ func (c *Client) GetSpaceRoleAssignments(logger lager.Logger, spaceGUID string) 
 		}
 		for _, role := range listSpaceRolesResponse.Resources {
 			spaceRoles = append(spaceRoles, models.RoleAssignment{
-				UserGUID:     role.Metadata.GUID,
-				ResourceGUID: spaceGUID,
-				Roles:        role.Entity.Roles,
+				UserGUID: role.Metadata.GUID,
+				Roles:    role.Entity.Roles,
 			})
 		}
 
