@@ -3,8 +3,9 @@ package reporter_test
 import (
 	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"errors"
+
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
@@ -52,12 +53,48 @@ var _ = ginkgo.Describe("Reporter", func() {
 	})
 
 	ginkgo.Describe("#GenerateReport", func() {
-		ginkgo.It("reports stuff", func() {
-			numAssignments := 10
-			subject.GenerateReport(buffer, numAssignments, errs)
+		ginkgo.It("reports on the number of assignments and errors encountered", func() {
+			orgs := []models.Organization{
+				{
+					GUID: "org-guid-1",
+					Assignments: []models.RoleAssignment{
+						{
+							UserGUID: "user-guid-1",
+							Roles:    []string{"org_auditor", "org_manager"},
+						},
+						{
+							UserGUID: "user-guid-2",
+							Roles:    []string{"org_auditor"},
+						},
+					},
+				},
+				{
+					GUID: "org-guid-2",
+					Assignments: []models.RoleAssignment{
+						{
+							UserGUID: "user-guid-1",
+							Roles:    []string{"org_manager"},
+						},
+					},
+				},
+			}
+			spaces := []models.Space{
+				{
+					GUID:    "space-guid-1",
+					OrgGUID: "org-guid-2",
+					Assignments: []models.RoleAssignment{
+						{
+							UserGUID: "user-guid-1",
+							Roles:    []string{"space_auditor", "space_manager"},
+						},
+					},
+				},
+			}
+
+			subject.GenerateReport(buffer, orgs, spaces, errs)
 
 			Expect(buffer).To(Say("Report\n"))
-			Expect(buffer).To(Say("Number of role assignments: 10"))
+			Expect(buffer).To(Say("Number of role assignments: 4"))
 			Expect(buffer).To(Say("Total errors: 10"))
 			Expect(buffer).To(Say("Summary\n"))
 			Expect(buffer).To(Say("For /v2/organizations:"))

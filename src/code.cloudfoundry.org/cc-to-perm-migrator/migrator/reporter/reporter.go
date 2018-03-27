@@ -13,7 +13,9 @@ import (
 
 type Reporter struct{}
 
-func (r *Reporter) GenerateReport(w io.Writer, numAssignments int, errs []error) {
+func (r *Reporter) GenerateReport(w io.Writer, orgs []models.Organization, spaces []models.Space, errs []error) {
+	numAssignments := countNumAssignments(orgs, spaces)
+
 	fmt.Fprint(w, "Report\n==========================================\n")
 	fmt.Fprintf(w, "Number of role assignments: %d\n", numAssignments)
 	fmt.Fprintf(w, "Total errors: %d\n\n", len(errs))
@@ -64,6 +66,20 @@ func (e *errorSummary) addPerTypeError(entity, errorMessage string) {
 		e.perType[entity] = make(map[string]int)
 	}
 	e.perType[entity][errorMessage] += 1
+}
+
+func countNumAssignments(orgs []models.Organization, spaces []models.Space) int {
+	var numAssignments int
+
+	for _, org := range orgs {
+		numAssignments += len(org.Assignments)
+	}
+
+	for _, space := range spaces {
+		numAssignments += len(space.Assignments)
+	}
+
+	return numAssignments
 }
 
 func computeErrors(errs []error) errorSummary {

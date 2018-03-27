@@ -1,11 +1,12 @@
 package migrator
 
 import (
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
-	"code.cloudfoundry.org/lager"
 	"io"
 	"log"
 	"sync"
+
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
+	"code.cloudfoundry.org/lager"
 )
 
 //go:generate counterfeiter . Retriever
@@ -15,7 +16,7 @@ type Retriever interface {
 
 //go:generate counterfeiter . Reporter
 type Reporter interface {
-	GenerateReport(w io.Writer, numAssignments int, errs []error)
+	GenerateReport(w io.Writer, orgs []models.Organization, spaces []models.Space, errs []error)
 }
 
 type Migrator struct {
@@ -36,9 +37,10 @@ func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writ
 	errChan := make(chan error)
 
 	var (
-		count int
-		errs  []error
-		wg    sync.WaitGroup
+		orgs   []models.Organization
+		spaces []models.Space
+		errs   []error
+		wg     sync.WaitGroup
 	)
 
 	wg.Add(3)
@@ -53,18 +55,14 @@ func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writ
 	go func() {
 		defer wg.Done()
 		for org := range orgChan {
-			for range org.Assignments {
-				count++
-			}
+			orgs = append(orgs, org)
 		}
 	}()
 
 	go func() {
 		defer wg.Done()
 		for space := range spaceChan {
-			for range space.Assignments {
-				count++
-			}
+			spaces = append(spaces, space)
 		}
 	}()
 
@@ -77,5 +75,5 @@ func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writ
 
 	wg.Wait()
 
-	m.reporter.GenerateReport(writer, count, errs)
+	m.reporter.GenerateReport(writer, orgs, spaces, errs)
 }

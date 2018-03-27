@@ -3,15 +3,16 @@ package migrator_test
 import (
 	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator"
 
+	"errors"
+	"log"
+
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/migratorfakes"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"errors"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
-	"log"
 )
 
 var _ = ginkgo.Describe("Migrator", func() {
@@ -99,11 +100,19 @@ var _ = ginkgo.Describe("Migrator", func() {
 		subject.Migrate(logger, progressLogger, buffer)
 
 		Expect(reporter.GenerateReportCallCount()).To(Equal(1))
-		buf, numAssignments, errs := reporter.GenerateReportArgsForCall(0)
+		buf, orgs, spaces, errs := reporter.GenerateReportArgsForCall(0)
 
 		Expect(buf).To(Equal(buffer))
 
-		Expect(numAssignments).To(Equal(len(expectedOrgAssignments) + len(expectedSpaceAssignments)))
+		Expect(orgs).To(HaveLen(len(expectedOrgs)))
+		for _, org := range expectedOrgs {
+			Expect(orgs).To(ContainElement(org))
+		}
+
+		Expect(spaces).To(HaveLen(len(expectedSpaces)))
+		for _, space := range expectedSpaces {
+			Expect(spaces).To(ContainElement(space))
+		}
 
 		Expect(errs).To(HaveLen(len(expectedErrs)))
 		for _, err := range expectedErrs {

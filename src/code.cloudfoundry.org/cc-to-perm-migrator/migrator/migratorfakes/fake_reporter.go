@@ -6,21 +6,33 @@ import (
 	"sync"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 )
 
 type FakeReporter struct {
-	GenerateReportStub        func(w io.Writer, numAssignments int, errs []error)
+	GenerateReportStub        func(w io.Writer, orgs []models.Organization, spaces []models.Space, errs []error)
 	generateReportMutex       sync.RWMutex
 	generateReportArgsForCall []struct {
-		w              io.Writer
-		numAssignments int
-		errs           []error
+		w      io.Writer
+		orgs   []models.Organization
+		spaces []models.Space
+		errs   []error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeReporter) GenerateReport(w io.Writer, numAssignments int, errs []error) {
+func (fake *FakeReporter) GenerateReport(w io.Writer, orgs []models.Organization, spaces []models.Space, errs []error) {
+	var orgsCopy []models.Organization
+	if orgs != nil {
+		orgsCopy = make([]models.Organization, len(orgs))
+		copy(orgsCopy, orgs)
+	}
+	var spacesCopy []models.Space
+	if spaces != nil {
+		spacesCopy = make([]models.Space, len(spaces))
+		copy(spacesCopy, spaces)
+	}
 	var errsCopy []error
 	if errs != nil {
 		errsCopy = make([]error, len(errs))
@@ -28,14 +40,15 @@ func (fake *FakeReporter) GenerateReport(w io.Writer, numAssignments int, errs [
 	}
 	fake.generateReportMutex.Lock()
 	fake.generateReportArgsForCall = append(fake.generateReportArgsForCall, struct {
-		w              io.Writer
-		numAssignments int
-		errs           []error
-	}{w, numAssignments, errsCopy})
-	fake.recordInvocation("GenerateReport", []interface{}{w, numAssignments, errsCopy})
+		w      io.Writer
+		orgs   []models.Organization
+		spaces []models.Space
+		errs   []error
+	}{w, orgsCopy, spacesCopy, errsCopy})
+	fake.recordInvocation("GenerateReport", []interface{}{w, orgsCopy, spacesCopy, errsCopy})
 	fake.generateReportMutex.Unlock()
 	if fake.GenerateReportStub != nil {
-		fake.GenerateReportStub(w, numAssignments, errs)
+		fake.GenerateReportStub(w, orgs, spaces, errs)
 	}
 }
 
@@ -45,10 +58,10 @@ func (fake *FakeReporter) GenerateReportCallCount() int {
 	return len(fake.generateReportArgsForCall)
 }
 
-func (fake *FakeReporter) GenerateReportArgsForCall(i int) (io.Writer, int, []error) {
+func (fake *FakeReporter) GenerateReportArgsForCall(i int) (io.Writer, []models.Organization, []models.Space, []error) {
 	fake.generateReportMutex.RLock()
 	defer fake.generateReportMutex.RUnlock()
-	return fake.generateReportArgsForCall[i].w, fake.generateReportArgsForCall[i].numAssignments, fake.generateReportArgsForCall[i].errs
+	return fake.generateReportArgsForCall[i].w, fake.generateReportArgsForCall[i].orgs, fake.generateReportArgsForCall[i].spaces, fake.generateReportArgsForCall[i].errs
 }
 
 func (fake *FakeReporter) Invocations() map[string][][]interface{} {
