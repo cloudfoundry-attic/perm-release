@@ -51,6 +51,7 @@ func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writ
 		defer close(orgChan)
 		defer close(spaceChan)
 		defer close(errChan)
+
 		m.retriever.FetchResources(logger, progressLogger, orgChan, spaceChan, errChan)
 	}()
 

@@ -16,7 +16,6 @@ import (
 )
 
 var _ = ginkgo.Describe("Migrator", func() {
-
 	var (
 		retriever *migratorfakes.FakeRetriever
 		reporter  *migratorfakes.FakeReporter
@@ -27,6 +26,13 @@ var _ = ginkgo.Describe("Migrator", func() {
 		buffer *Buffer
 
 		subject *Migrator
+
+		org1         models.Organization
+		org2         models.Organization
+		expectedOrgs []models.Organization
+
+		space1         models.Space
+		expectedSpaces []models.Space
 	)
 
 	ginkgo.BeforeEach(func() {
@@ -39,6 +45,45 @@ var _ = ginkgo.Describe("Migrator", func() {
 		progressLogger = log.New(buffer, "", 0)
 
 		subject = NewMigrator(retriever, reporter)
+
+		org1 = models.Organization{
+			GUID: "org-guid-1",
+			Assignments: []models.RoleAssignment{
+				{
+					UserGUID: "user-guid",
+					Roles:    []string{"org_auditor"},
+				},
+				{
+					UserGUID: "user-guid",
+					Roles:    []string{"org_user"},
+				},
+			},
+		}
+		org2 = models.Organization{
+			GUID: "org-guid-2",
+			Assignments: []models.RoleAssignment{
+				{
+					UserGUID: "user-guid-2",
+					Roles:    []string{"org_manager"},
+				},
+			},
+		}
+		expectedOrgs = []models.Organization{org1, org2}
+
+		space1 = models.Space{
+			GUID: "space-guid",
+			Assignments: []models.RoleAssignment{
+				{
+					UserGUID: "user-guid",
+					Roles:    []string{"space_developer"},
+				},
+				{
+					UserGUID: "user-guid",
+					Roles:    []string{"space_manager"},
+				},
+			},
+		}
+		expectedSpaces = []models.Space{space1}
 	})
 
 	ginkgo.AfterEach(func() {
@@ -46,40 +91,6 @@ var _ = ginkgo.Describe("Migrator", func() {
 	})
 
 	ginkgo.It("retrieves and reports on the role assignments", func() {
-		expectedOrgAssignments := []models.RoleAssignment{
-			{
-				UserGUID: "user-guid",
-				Roles:    []string{"org_auditor"},
-			},
-			{
-				UserGUID: "user-guid",
-				Roles:    []string{"org_user"},
-			},
-		}
-		expectedOrgs := []models.Organization{
-			{
-				GUID:        "org-guid",
-				Assignments: expectedOrgAssignments,
-			},
-		}
-
-		expectedSpaceAssignments := []models.RoleAssignment{
-			{
-				UserGUID: "user-guid",
-				Roles:    []string{"space_developer"},
-			},
-			{
-				UserGUID: "user-guid",
-				Roles:    []string{"space_manager"},
-			},
-		}
-		expectedSpaces := []models.Space{
-			{
-				GUID:        "space-guid",
-				Assignments: expectedSpaceAssignments,
-			},
-		}
-
 		expectedErrs := []error{
 			errors.New("retrieve-error"),
 			errors.New("retrieve-error2"),
