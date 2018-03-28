@@ -26,7 +26,7 @@ const configTemplate = `log_level: info
 
 uaa:
   url: %s
-  ca_cert_path: /var/vcap/jobs/cc-to-perm-migrator/config/certs/uaa-ca.crt
+  ca_cert_path: %s
 
 cloud_controller:
   url: %s
@@ -38,6 +38,27 @@ perm:
   hostname: %s
   port: %d
 `
+
+const ca = `-----BEGIN CERTIFICATE-----
+MIIDMTCCAhmgAwIBAgIUR7aIygXu6VhofEraEgca2J4p5HcwDQYJKoZIhvcNAQEL
+BQAwETEPMA0GA1UEAxMGVGVzdENBMB4XDTE4MDMyODE5MjEwOVoXDTE5MDMyODE5
+MjEwOVowETEPMA0GA1UEAxMGVGVzdENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEAu/1tGXsIurUcm1lUhXqmtXcw+GnRpyPiK7I9OQo+8A486xAy5n/W
+s82CBau7IT3ZoOeBlI+OdHGjuA1ZiQ0KL8xBTbtqJ2nTh2HFjhp+4BqPjCeYWgev
+J2DbIV1PdTAWs4HsdHGbEQWOupxnR+2mtYeGWSnyfGweMpXMW+EYKLinRDGt8wVB
+kRpJ/LzL26VGeDkAi3Qofqj9EtrZ7z0/F+OhuMpDdBti2jehoz6t6BRvioW+tQ9i
+lk5XBUSYE/pkoI2ZBbVKkRvlhO5GyIE0nOZ3KlsGwJghpx94aKfowsEq6H5+Jp8T
+lelQcTobfxOMZ4SQhXBqh2P9uvpHZCe0qQIDAQABo4GAMH4wHQYDVR0OBBYEFMXF
+QyNEQw6DDCwacyECtdCKs5umMEwGA1UdIwRFMEOAFMXFQyNEQw6DDCwacyECtdCK
+s5umoRWkEzARMQ8wDQYDVQQDEwZUZXN0Q0GCFEe2iMoF7ulYaHxK2hIHGtieKeR3
+MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBABSVepMJKKj1DNL1
+/hy/S+oyC+rKr9Yi+0MXTJDVMA2WwVDn+76BH2KHOGleT+UnkesUy8Yj8+zSBDs5
+d6GPStye64HPkrmURfB7IvOqRV9Pg1efeP28vXuXtsp9OKSsf6CGuP4daumExt+t
+wzYLM7/KyXUHNbEb4dvd5zi6JQGxBvpAInRKrMioj+rz9z8sizBokZPWS4jlm1YT
+0rXiZwoZHDBK/PWtVp8WittYjZ2Whe873rhkJl9gFkOf5S0UWYJgSFFoCC647lD7
+hGnHthGDF1mb/w+/sQJ/PwjOUFKgH8chzCby4US28yCiZoe4AbgI+6ksBQVj4Zve
+MEl+WMg=
+-----END CERTIFICATE-----`
 
 var _ = Describe("CCToPermMigrator", func() {
 	var (
@@ -143,7 +164,12 @@ var _ = Describe("CCToPermMigrator", func() {
 			Expect(err).NotTo(HaveOccurred())
 			configFilePath = path.Join(tmpDir, "config.yml")
 
-			contents := fmt.Sprintf(configTemplate, ccServer.URL(), ccServer.URL(), permServer.Hostname(), permServer.Port())
+			uaaCAPath := path.Join(tmpDir, "uaa-ca.cert")
+			err = ioutil.WriteFile(uaaCAPath, []byte(ca), 0600)
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), permServer.Hostname(), permServer.Port())
+
 			err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -187,6 +213,32 @@ var _ = Describe("CCToPermMigrator", func() {
 
 		AfterEach(func() {
 			os.RemoveAll(tmpDir)
+		})
+
+		Context("when the UAA certificate is unusable", func() {
+			BeforeEach(func() {
+				ccServer.AllowUnhandledRequests = true
+			})
+
+			It("fails fast when the cert is invalid", func() {
+				uaaCAPath := path.Join(tmpDir, "uaa-ca.cert")
+				err = ioutil.WriteFile(uaaCAPath, []byte(`invalid`), 0600)
+				Expect(err).NotTo(HaveOccurred())
+				contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), permServer.Hostname(), permServer.Port())
+				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
+
+				Expect(err).NotTo(HaveOccurred())
+				session := RunCommand("--config-file-path", configFilePath)
+				Eventually(session).Should(gexec.Exit(1))
+			})
+
+			It("fails fast when the cert cannot be read", func() {
+				contents := fmt.Sprintf(configTemplate, ccServer.URL(), tmpDir, ccServer.URL(), permServer.Hostname(), permServer.Port())
+				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
+				Expect(err).NotTo(HaveOccurred())
+				session := RunCommand("--config-file-path", configFilePath)
+				Eventually(session).Should(gexec.Exit(1))
+			})
 		})
 
 		Context("when the config flag is not passed", func() {

@@ -66,6 +66,7 @@ func main() {
 	uaaCACert, err := config.UAA.CACertPath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
 		logger.Error("failed-to-read-uaa-ca-cert", err)
+		os.Exit(1)
 	}
 
 	uaaCACertPool := x509.NewCertPool()
@@ -74,6 +75,7 @@ func main() {
 		logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"), lager.Data{
 			"path": config.UAA.CACertPath,
 		})
+		os.Exit(1)
 	}
 
 	tr := &http.Transport{
