@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"context"
 	"net/http"
 	"os"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 
+	"code.cloudfoundry.org/perm-go"
 	"code.cloudfoundry.org/perm-go/perm-gofakes"
 	"github.com/onsi/gomega/ghttp"
 )
@@ -90,6 +92,18 @@ var _ = Describe("CCToPermMigrator", func() {
 		orgRoles2 = createOrgRolesResponse([]string{"test-user-1"}, "", []string{"billing_manager"})
 		spaces2 = createSpacesResponse([]string{"space-guid-3"}, "")
 		spaceRoles3 = createSpaceRolesResponse([]string{"test-user-1"}, "", []string{"space_auditor"})
+
+		roleServiceServer.CreateRoleStub = func(ctx context.Context, req *protos.CreateRoleRequest) (*protos.CreateRoleResponse, error) {
+			return &protos.CreateRoleResponse{
+				Role: &protos.Role{
+					Name: req.GetName(),
+				},
+			}, nil
+		}
+
+		roleServiceServer.AssignRoleStub = func(ctx context.Context, req *protos.AssignRoleRequest) (*protos.AssignRoleResponse, error) {
+			return &protos.AssignRoleResponse{}, nil
+		}
 	})
 
 	AfterEach(func() {

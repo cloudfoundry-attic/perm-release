@@ -24,9 +24,11 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/cmd"
 	"code.cloudfoundry.org/cc-to-perm-migrator/httpx"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/populator"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/perm-go"
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -64,7 +66,6 @@ func main() {
 	uaaCACert, err := config.UAA.CACertPath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
 		logger.Error("failed-to-read-uaa-ca-cert", err)
-		os.Exit(1)
 	}
 
 	uaaCACertPool := x509.NewCertPool()
@@ -107,26 +108,33 @@ func main() {
 		os.Exit(1)
 	}
 
-	if !config.DryRun {
-		permAddr := net.JoinHostPort(config.Perm.Hostname, strconv.Itoa(config.Perm.Port))
-		if len(permCACert) != 0 {
-			permCACertPool := x509.NewCertPool()
-			if ok := permCACertPool.AppendCertsFromPEM(permCACert); !ok {
-				logger.Error("failed-to-add-append-certs-from-pem", errors.New("could not append certs"))
-				os.Exit(1)
-			}
+	var dialOptions []grpc.DialOption
 
-			creds := credentials.NewClientTLSFromCert(permCACertPool, config.Perm.Hostname)
-
-			permConn, err := grpc.Dial(permAddr, grpc.WithTransportCredentials(creds))
-			if err != nil {
-				logger.Error("failed-to-connect-to-perm", err)
-				os.Exit(1)
-			}
-			defer permConn.Close()
+	if len(permCACert) != 0 {
+		permCACertPool := x509.NewCertPool()
+		if ok := permCACertPool.AppendCertsFromPEM(permCACert); !ok {
+			logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"))
+			os.Exit(1)
 		}
+
+		creds := credentials.NewClientTLSFromCert(permCACertPool, config.Perm.Hostname)
+		dialOptions = append(dialOptions, grpc.WithTransportCredentials(creds))
+	} else {
+		dialOptions = append(dialOptions, grpc.WithInsecure())
 	}
 
-	migrator.NewMigrator(retriever.NewRetriever(ccClient), &reporter.Reporter{}).
+	permAddr := net.JoinHostPort(config.Perm.Hostname, strconv.Itoa(config.Perm.Port))
+	permConn, err := grpc.Dial(permAddr, dialOptions...)
+	if err != nil {
+		logger.Error("failed-to-connect-to-perm", err)
+		os.Exit(1)
+	}
+	defer permConn.Close()
+
+	roleServiceClient := protos.NewRoleServiceClient(permConn)
+
+	pop := populator.NewPopulator(roleServiceClient)
+
+	migrator.NewMigrator(retriever.NewRetriever(ccClient), pop, &reporter.Reporter{}, uaaConfig.TokenURL).
 		Migrate(logger, progressLogger, os.Stderr, config.DryRun)
 }

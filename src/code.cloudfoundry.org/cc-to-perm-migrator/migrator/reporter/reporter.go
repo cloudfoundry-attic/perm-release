@@ -51,7 +51,7 @@ func (r *Reporter) GenerateReport(w io.Writer, orgs []models.Organization, space
 		sort.Strings(otherMessageKeys)
 		for _, messageKey := range otherMessageKeys {
 			messageCount := errorSummary.other[messageKey]
-			fmt.Fprintf(w, "- %3d %s", messageCount, messageKey)
+			fmt.Fprintf(w, "- %3d %s\n", messageCount, messageKey)
 		}
 	}
 }
