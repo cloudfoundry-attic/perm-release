@@ -21,7 +21,7 @@ properties:
 
   dry_run:
     description: Calculate the number of assignments in the Cloud Controller but do not attempt to migrate them to Perm. Note that this may still be time-consuming.
-    default: false
+    default: true
 
   uaa.url:
     description: The public HTTPS url of the UAA.
