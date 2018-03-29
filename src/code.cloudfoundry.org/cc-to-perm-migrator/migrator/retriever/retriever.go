@@ -5,6 +5,7 @@ import (
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/lager"
+	"fmt"
 )
 
 //go:generate counterfeiter . CAPIClient
@@ -35,12 +36,12 @@ func (r *Retriever) FetchResources(logger lager.Logger, progress *log.Logger, or
 	progress.Printf("Fetched %d org GUIDs", len(orgGUIDs))
 
 	for orgIndex, orgGUID := range orgGUIDs {
-		progress.Printf("Processing org %s [%d/%d]", orgGUID, orgIndex+1, len(orgGUIDs))
+		orgLogPrefix := fmt.Sprintf("[org:%s %d/%d]", orgGUID, orgIndex+1, len(orgGUIDs))
 		orgAssignments, err := r.client.GetOrgRoleAssignments(logger, orgGUID)
 		if err != nil {
 			errs <- err
 		}
-		progress.Printf("%s: Fetched %d org role assignments. Migrating...", orgGUID, len(orgAssignments))
+		progress.Printf("%s Fetched %d org role assignments.", orgLogPrefix, len(orgAssignments))
 
 		orgs <- models.Organization{
 			GUID:        orgGUID,
@@ -52,23 +53,21 @@ func (r *Retriever) FetchResources(logger lager.Logger, progress *log.Logger, or
 		if err != nil {
 			errs <- err
 		}
-		progress.Printf("%s: Fetched %d spaces. Migrating...", orgGUID, len(spaceGUIDs))
 
 		for spaceIndex, spaceGUID := range spaceGUIDs {
-			progress.Printf("Processing space %s for org %s [%d/%d]", spaceGUID, orgGUID, spaceIndex+1, len(spaceGUIDs))
+			orgSpaceLogPrefix := fmt.Sprintf("%s [space:%s %d/%d]", orgLogPrefix, spaceGUID, spaceIndex+1, len(spaceGUIDs))
 
 			spaceAssignments, err := r.client.GetSpaceRoleAssignments(logger, spaceGUID)
 			if err != nil {
 				errs <- err
 			}
-			progress.Printf("%s/%s: Fetched %d space role assignments. Migrating...", orgGUID, spaceGUID, len(spaceAssignments))
+			progress.Printf("%s Fetched %d space role assignments.", orgSpaceLogPrefix, len(spaceAssignments))
 
 			spaces <- models.Space{
 				GUID:        spaceGUID,
 				OrgGUID:     orgGUID,
 				Assignments: spaceAssignments,
 			}
-
 		}
 	}
 	progress.Printf("Done.")

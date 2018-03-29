@@ -113,12 +113,8 @@ var _ = Describe("Retriever", func() {
 				<-orgs
 
 				Eventually(progressLog).Should(gbytes.Say("Fetched 2 org GUIDs"))
-				Eventually(progressLog).Should(gbytes.Say("Processing org org-guid-1 \\[1/2\\]"))
-				Eventually(progressLog).Should(gbytes.Say("org-guid-1: Fetched 2 org role assignments. Migrating..."))
-				Eventually(progressLog).Should(gbytes.Say("org-guid-1: Fetched 0 spaces. Migrating..."))
-				Eventually(progressLog).Should(gbytes.Say("Processing org org-guid-2 \\[2/2\\]"))
-				Eventually(progressLog).Should(gbytes.Say("org-guid-2: Fetched 1 org role assignments. Migrating..."))
-				Eventually(progressLog).Should(gbytes.Say("org-guid-2: Fetched 0 spaces. Migrating..."))
+				Eventually(progressLog).Should(gbytes.Say("\\[org:org-guid-1 1/2\\] Fetched 2 org role assignments."))
+				Eventually(progressLog).Should(gbytes.Say("\\[org:org-guid-2 2/2\\] Fetched 1 org role assignments."))
 				Eventually(progressLog).Should(gbytes.Say("Done."))
 
 				close(done)
