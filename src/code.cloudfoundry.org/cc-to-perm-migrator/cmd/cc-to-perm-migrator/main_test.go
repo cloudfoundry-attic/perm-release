@@ -33,6 +33,7 @@ cloud_controller:
   client_id: perm-migrator
   client_secret: secret
   client_scopes: ["cloud_controller.admin_read_only"]
+  ca_cert_path: %s
 
 perm:
   hostname: %s
@@ -136,7 +137,7 @@ var _ = Describe("CCToPermMigrator", func() {
 		var configFilePath string
 		var tmpDir string
 		var err error
-
+		var uaaCAPath, ccCAPath string
 		BeforeEach(func() {
 			//These handlers are appended in the order in which they are called.
 			//If adding more handlers, make sure they are placed correctly in the set of calls.
@@ -164,11 +165,15 @@ var _ = Describe("CCToPermMigrator", func() {
 			Expect(err).NotTo(HaveOccurred())
 			configFilePath = path.Join(tmpDir, "config.yml")
 
-			uaaCAPath := path.Join(tmpDir, "uaa-ca.cert")
+			uaaCAPath = path.Join(tmpDir, "uaa-ca.cert")
 			err = ioutil.WriteFile(uaaCAPath, []byte(ca), 0600)
 			Expect(err).NotTo(HaveOccurred())
 
-			contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), permServer.Hostname(), permServer.Port())
+			ccCAPath = path.Join(tmpDir, "cc-ca.cert")
+			err = ioutil.WriteFile(ccCAPath, []byte(ca), 0600)
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), ccCAPath, permServer.Hostname(), permServer.Port())
 
 			err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
 			Expect(err).NotTo(HaveOccurred())
@@ -215,7 +220,7 @@ var _ = Describe("CCToPermMigrator", func() {
 			os.RemoveAll(tmpDir)
 		})
 
-		Context("when the UAA certificate is unusable", func() {
+		Context("when the UAA CA certificate is unusable", func() {
 			BeforeEach(func() {
 				ccServer.AllowUnhandledRequests = true
 			})
@@ -224,7 +229,7 @@ var _ = Describe("CCToPermMigrator", func() {
 				uaaCAPath := path.Join(tmpDir, "uaa-ca.cert")
 				err = ioutil.WriteFile(uaaCAPath, []byte(`invalid`), 0600)
 				Expect(err).NotTo(HaveOccurred())
-				contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), permServer.Hostname(), permServer.Port())
+				contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), ccCAPath, permServer.Hostname(), permServer.Port())
 				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
 
 				Expect(err).NotTo(HaveOccurred())
@@ -233,11 +238,47 @@ var _ = Describe("CCToPermMigrator", func() {
 			})
 
 			It("fails fast when the cert cannot be read", func() {
-				contents := fmt.Sprintf(configTemplate, ccServer.URL(), tmpDir, ccServer.URL(), permServer.Hostname(), permServer.Port())
+				contents := fmt.Sprintf(configTemplate, ccServer.URL(), tmpDir, ccServer.URL(), ccCAPath, permServer.Hostname(), permServer.Port())
 				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
 				Expect(err).NotTo(HaveOccurred())
 				session := RunCommand("--config-file-path", configFilePath)
 				Eventually(session).Should(gexec.Exit(1))
+			})
+		})
+
+		Context("when the CloudController's CA certificate is unusable", func() {
+			BeforeEach(func() {
+				ccServer.AllowUnhandledRequests = true
+			})
+
+			It("fails fast when the cert is invalid", func() {
+				ccCAPath := path.Join(tmpDir, "cc-ca.cert")
+				err = ioutil.WriteFile(ccCAPath, []byte(`invalid`), 0600)
+				Expect(err).NotTo(HaveOccurred())
+				contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), ccCAPath, permServer.Hostname(), permServer.Port())
+				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
+
+				Expect(err).NotTo(HaveOccurred())
+				session := RunCommand("--config-file-path", configFilePath)
+				Eventually(session).Should(gexec.Exit(1))
+			})
+
+			It("fails fast when the cert cannot be read", func() {
+				contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), tmpDir, permServer.Hostname(), permServer.Port())
+				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
+				Expect(err).NotTo(HaveOccurred())
+				session := RunCommand("--config-file-path", configFilePath)
+				Eventually(session).Should(gexec.Exit(1))
+			})
+
+			It("doesn't fail when the no CA certs for CC are supplied", func() {
+				err = ioutil.WriteFile(ccCAPath, []byte(``), 0600)
+				Expect(err).NotTo(HaveOccurred())
+				contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), ccCAPath, permServer.Hostname(), permServer.Port())
+				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)
+				Expect(err).NotTo(HaveOccurred())
+				session := RunCommand("--config-file-path", configFilePath)
+				Eventually(session).Should(gexec.Exit(0))
 			})
 		})
 

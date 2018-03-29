@@ -24,10 +24,11 @@ type uaaConfig struct {
 }
 
 type ccConfig struct {
-	URL          string   `yaml:"url"`
-	ClientID     string   `yaml:"client_id"`
-	ClientSecret string   `yaml:"client_secret"`
-	ClientScopes []string `yaml:"client_scopes"`
+	URL          string           `yaml:"url"`
+	ClientID     string           `yaml:"client_id"`
+	ClientSecret string           `yaml:"client_secret"`
+	ClientScopes []string         `yaml:"client_scopes"`
+	CACertPath   FileOrStringFlag `yaml:"ca_cert_path"`
 }
 
 type permConfig struct {

@@ -69,8 +69,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	uaaCACertPool := x509.NewCertPool()
-	ok := uaaCACertPool.AppendCertsFromPEM(uaaCACert)
+	ccCACert, err := config.CloudController.CACertPath.Bytes(cmd.OS, cmd.IOReader)
+	if err != nil {
+		logger.Error("failed-to-read-cc-ca-cert", err)
+		os.Exit(1)
+	}
+
+	caCertPool := x509.NewCertPool()
+
+	ok := caCertPool.AppendCertsFromPEM(uaaCACert)
 	if !ok {
 		logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"), lager.Data{
 			"path": config.UAA.CACertPath,
@@ -78,9 +85,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	if len(ccCACert) > 0 {
+		ok = caCertPool.AppendCertsFromPEM(ccCACert)
+		if !ok {
+			logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"), lager.Data{
+				"path": config.CloudController.CACertPath,
+			})
+			os.Exit(1)
+		}
+	}
+
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			RootCAs: uaaCACertPool,
+			RootCAs: caCertPool,
 		},
 	}
 	sslcli := &http.Client{Transport: tr}
