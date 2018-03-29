@@ -3,6 +3,7 @@ name: cc-to-perm-migrator
 
 templates:
   uaa-ca.crt: config/certs/uaa-ca.crt
+  ca-ca.crt: config/certs/ca-ca.crt
   perm-ca.crt.erb: config/certs/perm-ca.crt
   cc-to-perm-migrator.yml: config/cc-to-perm-migrator.yml
   run: bin/run
@@ -43,6 +44,10 @@ properties:
     description: The scopes to request for the UAA client used to connect to the Cloud Controller API.
     example:
     - cloud_controller.admin_read_only
+
+  cloud_controller.ca_certs:
+    description: An array of certificate authorities being used by CC. Allows multiple in case of rotation.
+    default: []
 
   perm.hostname:
     description: Hostname used to resolve the address of Perm

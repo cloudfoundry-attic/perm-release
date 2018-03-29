@@ -10,6 +10,7 @@ cloud_controller:
   client_id: <%= p('cloud_controller.client_id') %>
   client_secret: <%= p('cloud_controller.client_secret') %>
   client_scopes: <%= p('cloud_controller.client_scopes') %>
+  ca_cert_path: /var/vcap/jobs/cc-to-perm-migrator/config/certs/cc-ca.crt
 
 perm:
   hostname: <%= p('perm.hostname') %>

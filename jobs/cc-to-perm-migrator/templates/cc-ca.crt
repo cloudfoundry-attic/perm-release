@@ -1,0 +1,3 @@
+<% p("cloud_controller.ca_certs", []).each do |ca| %>
+<%= ca %>
+<% end %>
