@@ -272,7 +272,7 @@ var _ = Describe("CCToPermMigrator", func() {
 			})
 
 			It("doesn't fail when the no CA certs for CC are supplied", func() {
-				err = ioutil.WriteFile(ccCAPath, []byte(``), 0600)
+				err = ioutil.WriteFile(ccCAPath, []byte("\n"), 0600)
 				Expect(err).NotTo(HaveOccurred())
 				contents := fmt.Sprintf(configTemplate, ccServer.URL(), uaaCAPath, ccServer.URL(), ccCAPath, permServer.Hostname(), permServer.Port())
 				err = ioutil.WriteFile(configFilePath, []byte(contents), 0600)

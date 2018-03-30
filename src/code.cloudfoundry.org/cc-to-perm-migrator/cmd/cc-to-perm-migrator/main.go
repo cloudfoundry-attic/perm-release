@@ -85,7 +85,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(ccCACert) > 0 {
+	if isNotEmpty(ccCACert) {
 		ok = caCertPool.AppendCertsFromPEM(ccCACert)
 		if !ok {
 			logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"), lager.Data{
@@ -100,7 +100,7 @@ func main() {
 			RootCAs: caCertPool,
 		},
 	}
-	sslcli := &http.Client{Transport: tr}
+	tlsClient := &http.Client{Transport: tr}
 
 	tokenURL, err := httpx.JoinURL(logger, config.UAA.URL, "/oauth/token")
 	if err != nil {
@@ -114,7 +114,7 @@ func main() {
 		Scopes:       config.CloudController.ClientScopes,
 	}
 
-	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, sslcli)
+	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, tlsClient)
 
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL.String())
 	client := uaaConfig.Client(ctx)
@@ -129,7 +129,7 @@ func main() {
 
 	var dialOptions []grpc.DialOption
 
-	if len(permCACert) != 0 {
+	if isNotEmpty(permCACert) {
 		permCACertPool := x509.NewCertPool()
 		if ok := permCACertPool.AppendCertsFromPEM(permCACert); !ok {
 			logger.Error("failed-to-append-certs-from-pem", errors.New("could not append certs"))
@@ -156,4 +156,9 @@ func main() {
 
 	migrator.NewMigrator(retriever.NewRetriever(ccClient), pop, &reporter.Reporter{}, uaaConfig.TokenURL).
 		Migrate(logger, progressLogger, os.Stderr, config.DryRun)
+}
+
+func isNotEmpty(cert []byte) bool {
+	trimmedCA := bytes.Trim(cert, "\n ")
+	return len(trimmedCA) > 0
 }
