@@ -32,9 +32,9 @@ type ccConfig struct {
 }
 
 type permConfig struct {
-	Hostname string           `yaml:"hostname"`
-	Port     int              `yaml:"port"`
-	CACert   FileOrStringFlag `yaml:"ca_cert"`
+	Hostname   string           `yaml:"hostname"`
+	Port       int              `yaml:"port"`
+	CACertPath FileOrStringFlag `yaml:"ca_cert_path"`
 }
 
 func NewConfig(r io.Reader) (*Config, error) {

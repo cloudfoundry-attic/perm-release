@@ -121,7 +121,7 @@ func main() {
 
 	ccClient := capi.NewClient(config.CloudController.URL, client)
 
-	permCACert, err := config.Perm.CACert.Bytes(cmd.OS, cmd.IOReader)
+	permCACert, err := config.Perm.CACertPath.Bytes(cmd.OS, cmd.IOReader)
 	if err != nil {
 		logger.Error("failed-to-read-perm-ca-cert", err)
 		os.Exit(1)
