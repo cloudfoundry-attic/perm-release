@@ -16,3 +16,12 @@ perm:
   hostname: <%= p('perm.hostname') %>
   port: <%= link('perm').p('listen_port') %>
   ca_cert_path: /var/vcap/jobs/cc-to-perm-migrator/config/certs/perm-ca.crt
+
+sql:
+  db:
+    driver: <%= p('sql.db.driver') %>
+    host: <%= p('sql.db.host') %>
+    port: <%= p('sql.db.port') %>
+    schema: <%= p('sql.db.schema') %>
+    username: <%= p('sql.db.username') %>
+    password: <%= p('sql.db.password') %>
