@@ -2,35 +2,14 @@
 
 set -eu
 
-LOG_DIR=/var/vcap/sys/log/cc-to-perm-migrator
+JOB_NAME=cc-to-perm-migrator
+LOG_DIR=/var/vcap/sys/log/${JOB_NAME}
 
 mkdir -p "$LOG_DIR"
 chown -R vcap:vcap "$LOG_DIR"
 
-exec 2> >(tee -a "${LOG_DIR}/cc-to-perm-migrator.stderr.log")
-exec > >(tee -a "${LOG_DIR}/cc-to-perm-migrator.stdout.log")
-
-if [[ "<%= p('dry_run') %>" != "true" ]]; then
-  /var/vcap/packages/perm/bin/perm migrate down \
-    --all \
-    --log-level <%= p('log_level') %> \
-    --sql-db-driver <%= p('sql.db.driver') %> \
-    --sql-db-host <%= p('sql.db.host') %> \
-    --sql-db-port <%= p('sql.db.port') %> \
-    --sql-db-schema <%= p('sql.db.schema') %> \
-    --sql-db-username <%= p('sql.db.username') %> \
-    --sql-db-password <%= p('sql.db.password') %>
-
-
-  /var/vcap/packages/perm/bin/perm migrate up \
-    --log-level <%= p('log_level') %> \
-    --sql-db-driver <%= p('sql.db.driver') %> \
-    --sql-db-host <%= p('sql.db.host') %> \
-    --sql-db-port <%= p('sql.db.port') %> \
-    --sql-db-schema <%= p('sql.db.schema') %> \
-    --sql-db-username <%= p('sql.db.username') %> \
-    --sql-db-password <%= p('sql.db.password') %>
-fi
+exec 2> >(tee -a "${LOG_DIR}/${JOB_NAME}.stderr.log")
+exec > >(tee -a "${LOG_DIR}/${JOB_NAME}.stdout.log")
 
 /var/vcap/packages/cc-to-perm-migrator/bin/cc-to-perm-migrator \
-  --config-file-path=/var/vcap/jobs/cc-to-perm-migrator/config/cc-to-perm-migrator.yml
+  --config-file-path=/var/vcap/jobs/${JOB_NAME}/config/cc-to-perm-migrator.yml
