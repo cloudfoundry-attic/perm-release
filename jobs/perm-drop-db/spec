@@ -1,8 +1,8 @@
 ---
-name: perm-reset-tables
+name: perm-drop-db
 
 templates:
-  perm-reset-tables.erb: bin/perm-reset-tables
+  perm-drop-db.erb: bin/run
 
 packages:
 - perm

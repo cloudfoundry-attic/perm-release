@@ -2,11 +2,12 @@
 
 set -eu
 
-ERRAND_NAME=perm-reset-tables
-exec 2> >(tee -a "${LOG_DIR}/${ERRAND_NAME}.stderr.log")
-exec > >(tee -a "${LOG_DIR}/${ERRAND_NAME}.stdout.log")
+JOB_NAME=perm-drop-db
+LOG_DIR="/var/vcap/sys/log/${JOB_NAME}"
 
-LOG_DIR="/var/vcap/sys/log/${ERRAND_NAME}"
+exec 2> >(tee -a "${LOG_DIR}/${JOB_NAME}.stderr.log")
+exec > >(tee -a "${LOG_DIR}/${JOB_NAME}.stdout.log")
+
 
 MIGRATOR_OPTS="
   --log-level <%= p('log_level') %>
