@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -eu
+
+ERRAND_NAME=perm-reset-tables
+exec 2> >(tee -a "${LOG_DIR}/${ERRAND_NAME}.stderr.log")
+exec > >(tee -a "${LOG_DIR}/${ERRAND_NAME}.stdout.log")
+
+LOG_DIR="/var/vcap/sys/log/${ERRAND_NAME}"
+
+MIGRATOR_OPTS="
+  --log-level <%= p('log_level') %>
+  --sql-db-driver <%= p('sql.db.driver') %>
+  --sql-db-host <%= p('sql.db.host') %>
+  --sql-db-port <%= p('sql.db.port') %>
+  --sql-db-schema <%= p('sql.db.schema') %>
+  --sql-db-username <%= p('sql.db.username') %>
+  --sql-db-password <%= p('sql.db.password') %>
+"
+
+mkdir -p "$LOG_DIR"
+chown -R vcap:vcap "$LOG_DIR"
+
+/var/vcap/packages/perm/bin/perm migrate down \
+  --all \
+  ${MIGRATOR_OPTS}
+
+/var/vcap/packages/perm/bin/perm migrate up \
+  ${MIGRATOR_OPTS}

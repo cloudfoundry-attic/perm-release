@@ -1,0 +1,29 @@
+---
+name: perm-reset-tables
+
+templates:
+  perm-reset-tables.erb: bin/perm-reset-tables
+
+packages:
+- perm
+
+consumes:
+- name: perm
+  type: perm
+
+properties:
+  log_level:
+    description: "The log level for the errand."
+    default: info
+  sql.db.driver:
+    description: "Database driver to use for SQL backend (e.g. mysql, postgres)"
+  sql.db.host:
+    description: "Host for SQL backend"
+  sql.db.port:
+    description: "Port for SQL backend"
+  sql.db.schema:
+    description: "Database name to use for connecting to SQL backend"
+  sql.db.username:
+    description: "Username to use for connecting to SQL backend"
+  sql.db.password:
+    description: "Password to use for connecting to SQL backend"
