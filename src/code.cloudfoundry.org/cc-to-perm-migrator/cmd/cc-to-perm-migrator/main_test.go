@@ -11,14 +11,14 @@ import (
 	"path"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi/capimodels"
+	permgofakes "code.cloudfoundry.org/perm/protos/gen/genfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 
-	"code.cloudfoundry.org/perm-go"
-	"code.cloudfoundry.org/perm-go/perm-gofakes"
+	"code.cloudfoundry.org/perm/protos/gen"
 	"github.com/onsi/gomega/ghttp"
 )
 

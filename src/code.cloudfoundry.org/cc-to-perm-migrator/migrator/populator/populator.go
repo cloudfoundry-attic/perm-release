@@ -7,7 +7,7 @@ import (
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/models"
 	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/perm-go"
+	"code.cloudfoundry.org/perm/protos/gen"
 )
 
 const (
@@ -41,7 +41,7 @@ func (p *Populator) PopulateOrganization(logger lager.Logger, org models.Organiz
 			Name: makeOrgRoleName(role, org.GUID),
 			Permissions: []*protos.Permission{
 				{
-					Name:            fmt.Sprintf("org.%s", role),
+					Action:          fmt.Sprintf("org.%s", role),
 					ResourcePattern: org.GUID,
 				},
 			},
@@ -54,8 +54,8 @@ func (p *Populator) PopulateOrganization(logger lager.Logger, org models.Organiz
 
 	for _, assignment := range org.Assignments {
 		actor := &protos.Actor{
-			ID:     assignment.UserGUID,
-			Issuer: namespace,
+			ID:        assignment.UserGUID,
+			Namespace: namespace,
 		}
 
 		for _, role := range assignment.Roles {
@@ -83,7 +83,7 @@ func (p *Populator) PopulateSpace(logger lager.Logger, space models.Space, names
 			Name: makeSpaceRoleName(role, space.GUID),
 			Permissions: []*protos.Permission{
 				{
-					Name:            fmt.Sprintf("space.%s", role),
+					Action:          fmt.Sprintf("space.%s", role),
 					ResourcePattern: space.GUID,
 				},
 			},
@@ -96,8 +96,8 @@ func (p *Populator) PopulateSpace(logger lager.Logger, space models.Space, names
 
 	for _, assignment := range space.Assignments {
 		actor := &protos.Actor{
-			ID:     assignment.UserGUID,
-			Issuer: namespace,
+			ID:        assignment.UserGUID,
+			Namespace: namespace,
 		}
 
 		for _, role := range assignment.Roles {

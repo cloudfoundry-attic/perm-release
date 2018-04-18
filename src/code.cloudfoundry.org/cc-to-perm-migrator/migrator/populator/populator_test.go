@@ -9,8 +9,8 @@ import (
 	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator/populator"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/perm-go"
-	permgofakes "code.cloudfoundry.org/perm-go/perm-gofakes"
+	"code.cloudfoundry.org/perm/protos/gen"
+	permgofakes "code.cloudfoundry.org/perm/protos/gen/genfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -236,7 +236,7 @@ func populatesOrg(injector func() (*Populator, *permgofakes.FakeRoleServiceClien
 				Name: fmt.Sprintf("org-%s-%s", role, org.GUID),
 				Permissions: []*protos.Permission{
 					{
-						Name:            fmt.Sprintf("org.%s", role),
+						Action:          fmt.Sprintf("org.%s", role),
 						ResourcePattern: org.GUID,
 					},
 				},
@@ -273,8 +273,8 @@ func populatesOrg(injector func() (*Populator, *permgofakes.FakeRoleServiceClien
 
 				req := &protos.AssignRoleRequest{
 					Actor: &protos.Actor{
-						ID:     assignment.UserGUID,
-						Issuer: namespace,
+						ID:        assignment.UserGUID,
+						Namespace: namespace,
 					},
 					RoleName: fmt.Sprintf("org-%s-%s", role, org.GUID),
 				}
@@ -313,7 +313,7 @@ func populatesSpace(injector func() (*Populator, *permgofakes.FakeRoleServiceCli
 				Name: fmt.Sprintf("space-%s-%s", role, space.GUID),
 				Permissions: []*protos.Permission{
 					{
-						Name:            fmt.Sprintf("space.%s", role),
+						Action:          fmt.Sprintf("space.%s", role),
 						ResourcePattern: space.GUID,
 					},
 				},
@@ -350,8 +350,8 @@ func populatesSpace(injector func() (*Populator, *permgofakes.FakeRoleServiceCli
 
 				req := &protos.AssignRoleRequest{
 					Actor: &protos.Actor{
-						ID:     assignment.UserGUID,
-						Issuer: namespace,
+						ID:        assignment.UserGUID,
+						Namespace: namespace,
 					},
 					RoleName: fmt.Sprintf("space-%s-%s", role, space.GUID),
 				}
