@@ -23,17 +23,12 @@ properties:
   perm.ca_certs:
     description: "An array of certificate authorities being used by Perm. Allows multiple in case of rotation."
     default: []
-  perm.admin_probe_interval:
-    description: "Frequency with which an admin probe is issued"
+
+  probe.frequency:
+    description: "Frequency with which the probe is issued"
     default: 30s
-  perm.admin_probe_timeout:
-    description: "Time after which query probe is considered to have failed"
-    default: 100ms
-  perm.query_probe_interval:
-    description: "Frequency with which a query probe is issued"
-    default: 5s
-  perm.query_probe_timeout:
-    description: "Time after which query probe is considered to have failed"
+  probe.timeout:
+    description: "Time after which the probe is considered to have failed"
     default: 100ms
 
   statsd.hostname:
