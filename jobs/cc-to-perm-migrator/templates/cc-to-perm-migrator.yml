@@ -2,11 +2,11 @@ log_level: <%= p('log_level') %>
 dry_run: <%= p('dry_run') %>
 
 uaa:
-  url: <%= p('uaa.url') %>
+  url: https://<%= p('uaa.hostname') %>:<%= p('uaa.port') %>
   ca_cert_path: /var/vcap/jobs/cc-to-perm-migrator/config/certs/uaa-ca.crt
 
 cloud_controller:
-  url: <%= p('cloud_controller.url') %>
+  url: https://<%= p('cloud_controller.hostname') %>:<%= p('cloud_controller.port') %>
   client_id: <%= p('cloud_controller.client_id') %>
   client_secret: <%= p('cloud_controller.client_secret') %>
   client_scopes: <%= p('cloud_controller.client_scopes') %>
