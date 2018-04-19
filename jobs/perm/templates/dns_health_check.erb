@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LISTEN_PORT="<%= p("listen_port") %>"
+LISTEN_PORT="<%= p("port") %>"
 
 # https://www.consul.io/docs/agent/checks.html#check-scripts
 if ! lsof -i ":${LISTEN_PORT}" -s TCP:LISTEN; then

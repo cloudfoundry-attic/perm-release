@@ -8,7 +8,7 @@ processes:
     - --perm-hostname
     - <%= p('perm.hostname') %>
     - --perm-port
-    - <%= link('perm').p('listen_port') %>
+    - <%= link('perm').p('port') %>
     - --perm-ca-certificate
     - /var/vcap/jobs/perm-monitor/config/certs/perm_ca.crt
     - --statsd-hostname

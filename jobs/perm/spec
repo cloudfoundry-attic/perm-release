@@ -16,14 +16,19 @@ provides:
 - name: perm
   type: perm
   properties:
-  - listen_port
+  - hostname
+  - port
+  - listen_port  # DEPRECATED
 
 properties:
-  listen_hostname:
-    description: Hostname on which to listen for gRPC traffic
-    default: 0.0.0.0
-  listen_port:
+  hostname:
+    description: Hostname on which the PERM service resides
+    default: perm.service.cf.internal
+  port:
     description: Port on which to listen for gRPC traffic
+    default: 6283
+  listen_port:
+    description: DEPRECATED
     default: 6283
   log_level:
     description: The log level for the Perm server.
@@ -31,7 +36,7 @@ properties:
   audit_file_path:
     description: The path that the audit logs will output to.
     default: /var/vcap/sys/log/perm/audit.log
-  server.max_connection_idle:
+  max_connection_idle_time:
     description: The amount of time before an idle connection will be closed with a GoAway.
     default: 10s
   tls:

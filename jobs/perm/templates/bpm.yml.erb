@@ -5,11 +5,11 @@ processes:
     args:
     - serve
     - --listen-hostname
-    - <%= p('listen_hostname') %>
+    - 0.0.0.0
     - --listen-port
-    - <%= p('listen_port') %>
+    - <%= p('port') %>
     - --max-connection-idle
-    - <%= p('server.max_connection_idle') %>
+    - <%= p('max_connection_idle_time') %>
     - --log-level
     - <%= p('log_level') %>
     - --tls-certificate

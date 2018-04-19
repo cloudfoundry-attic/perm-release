@@ -14,5 +14,5 @@ cloud_controller:
 
 perm:
   hostname: <%= p('perm.hostname') %>
-  port: <%= link('perm').p('listen_port') %>
+  port: <%= link('perm').p('port') %>
   ca_cert_path: /var/vcap/jobs/cc-to-perm-migrator/config/certs/perm-ca.crt
