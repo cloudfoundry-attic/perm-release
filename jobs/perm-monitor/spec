@@ -27,9 +27,12 @@ properties:
   probe.frequency:
     description: "Frequency with which the probe is issued"
     default: 30s
-  probe.timeout:
-    description: "Time after which the probe is considered to have failed"
+  probe.request_duration
+    description: "Acceptable duration for an individual request"
     default: 100ms
+  probe.timeout:
+    description: "Time after which the probe will cancel a full run"
+    default: 10s
 
   statsd.hostname:
     description: "Hostname used to connect to StatsD server"

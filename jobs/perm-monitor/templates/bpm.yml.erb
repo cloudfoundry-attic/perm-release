@@ -17,6 +17,8 @@ processes:
     - <%= p('statsd.port') %>
     - --frequency
     - <%= p('probe.frequency') %>
+    - --request-duration
+    - <%= p('probe.request_duration') %>
     - --timeout
     - <%= p('probe.timeout') %>
 
