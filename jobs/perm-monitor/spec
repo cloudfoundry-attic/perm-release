@@ -27,7 +27,7 @@ properties:
   probe.frequency:
     description: "Frequency with which the probe is issued"
     default: 30s
-  probe.request_duration
+  probe.request_duration:
     description: "Acceptable duration for an individual request"
     default: 100ms
   probe.timeout:
