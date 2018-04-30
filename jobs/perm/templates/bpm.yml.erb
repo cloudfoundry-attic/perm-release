@@ -16,23 +16,23 @@ processes:
     - /var/vcap/jobs/perm/config/certs/tls.crt
     - --tls-key
     - /var/vcap/jobs/perm/config/certs/tls.key
-    - --sql-db-driver
+    - --db-driver
     - <%= p('sql.db.driver') %>
-    - --sql-db-host
+    - --db-host
     - <%= p('sql.db.host') %>
-    - --sql-db-port
+    - --db-port
     - <%= p('sql.db.port') %>
-    - --sql-db-schema
+    - --db-schema
     - <%= p('sql.db.schema') %>
-    - --sql-db-username
+    - --db-username
     - <%= p('sql.db.username') %>
-    - --sql-db-password
+    - --db-password
     - <%= p('sql.db.password') %>
-    - --sql-tls-required
+    - --db-tls-required
     - <%= p('sql.tls.required') %>
-    - --sql-tls-root-ca
+    - --db-tls-root-ca
     - /var/vcap/jobs/perm/config/certs/sql_tls_ca.crt
-    - --sql-tuning-connection-max-lifetime
+    - --db-tuning-connection-max-lifetime
     - <%= p('sql.tuning.connection_max_lifetime') %>
     - --audit-file-path
     - <%= p('audit_file_path') %>

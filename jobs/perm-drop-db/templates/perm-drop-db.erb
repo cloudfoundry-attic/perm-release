@@ -11,12 +11,12 @@ exec > >(tee -a "${LOG_DIR}/${JOB_NAME}.stdout.log")
 
 MIGRATOR_OPTS="
   --log-level <%= p('log_level') %>
-  --sql-db-driver <%= p('sql.db.driver') %>
-  --sql-db-host <%= p('sql.db.host') %>
-  --sql-db-port <%= p('sql.db.port') %>
-  --sql-db-schema <%= p('sql.db.schema') %>
-  --sql-db-username <%= p('sql.db.username') %>
-  --sql-db-password <%= p('sql.db.password') %>
+  --db-driver <%= p('sql.db.driver') %>
+  --db-host <%= p('sql.db.host') %>
+  --db-port <%= p('sql.db.port') %>
+  --db-schema <%= p('sql.db.schema') %>
+  --db-username <%= p('sql.db.username') %>
+  --db-password <%= p('sql.db.password') %>
 "
 
 mkdir -p "$LOG_DIR"
