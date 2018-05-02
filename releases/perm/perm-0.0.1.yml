@@ -1,0 +1,49 @@
+name: perm
+version: 0.0.1
+commit_hash: 2e892b9
+uncommitted_changes: true
+jobs:
+- name: cc-to-perm-migrator
+  version: bf4be8f9fc1d1e1410b2a76f498104787031b09d
+  fingerprint: bf4be8f9fc1d1e1410b2a76f498104787031b09d
+  sha1: 939eb94c66f3efaf17269aaf3909a43986f4816f
+- name: perm
+  version: c21481e33ae835e40a2763c507b476520201c243
+  fingerprint: c21481e33ae835e40a2763c507b476520201c243
+  sha1: a1c59100b10107a5e983243e32d72c9c5306fee0
+- name: perm-drop-db
+  version: 4f95a75d25797d4caac8f779c5d7c4676faf3393
+  fingerprint: 4f95a75d25797d4caac8f779c5d7c4676faf3393
+  sha1: 913ae38eec69276a08d8355bf89a1158efeb5bc1
+- name: perm-monitor
+  version: 4f6942f1d3de994f3b68027c41e2649ae36652bf
+  fingerprint: 4f6942f1d3de994f3b68027c41e2649ae36652bf
+  sha1: 43cf04bc9703fc505448ec059dbc682b4c765781
+packages:
+- name: cc-to-perm-migrator
+  version: 18d5f971d2cd1744001066a04e27110306f2abad
+  fingerprint: 18d5f971d2cd1744001066a04e27110306f2abad
+  sha1: 7397f91d21653e11360f432084eb2e82bce4708c
+  dependencies:
+  - golang-1.9-linux
+- name: golang-1.9-linux
+  version: 8d6c67abda8684ce454f0bc74050a213456573ff
+  fingerprint: 8d6c67abda8684ce454f0bc74050a213456573ff
+  sha1: e9dd8e92accad2091d9f19d6ffabc8e019e58f6b
+  dependencies: []
+- name: perm
+  version: f5b0cb72582454c27ae5d5f3c5eb416340f857fb
+  fingerprint: f5b0cb72582454c27ae5d5f3c5eb416340f857fb
+  sha1: 5d1b938ae4c09a4917ec9da4a12827e621a81584
+  dependencies:
+  - golang-1.9-linux
+- name: perm-monitor
+  version: bd3e535850314d592d017d264c8a8cef124efc03
+  fingerprint: bd3e535850314d592d017d264c8a8cef124efc03
+  sha1: 83de22c9e29bb7aeee7480ccb1cf45cbe933e2e2
+  dependencies:
+  - golang-1.9-linux
+license:
+  version: 901c89a29b378926d5285d72d6d5e018ded23c0e
+  fingerprint: 901c89a29b378926d5285d72d6d5e018ded23c0e
+  sha1: 51455ef0c9434a8e9549559ccdd45ec7de1e034f
