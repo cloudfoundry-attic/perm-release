@@ -122,3 +122,6 @@ tags
 blobs
 dev_releases
 private.yml
+
+.bosh
+.gitconfig
