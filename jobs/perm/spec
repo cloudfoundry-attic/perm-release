@@ -33,9 +33,9 @@ properties:
   log_level:
     description: The log level for the Perm server.
     default: info
-  log_audit_events:
-    description: Enable logging of audit events to /var/vcap/sys/log/perm/audit.log
-    default: true
+  audit_file_path:
+    description: The path that the audit logs will output to.
+    default: /var/vcap/sys/log/perm/audit.log
   max_connection_idle_time:
     description: The amount of time before an idle connection will be closed with a GoAway.
     default: 10s
