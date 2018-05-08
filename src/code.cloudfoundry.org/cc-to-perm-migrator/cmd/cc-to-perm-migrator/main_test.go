@@ -328,8 +328,10 @@ var _ = Describe("CCToPermMigrator", func() {
 
 				Eventually(session).Should(gexec.Exit(0))
 
+				Eventually(session.Err).Should(gbytes.Say("DRY-RUN; ROLE ASSIGNMENTS WILL NOT BE MIGRATED"))
 				Eventually(session.Err).Should(gbytes.Say("Number of role assignments: %d", numAssignments))
 				Eventually(session.Err).Should(gbytes.Say("Total errors: 0"))
+				Eventually(session.Err).Should(gbytes.Say("DRY-RUN; ROLE ASSIGNMENTS WERE NOT MIGRATED"))
 			})
 		})
 	})

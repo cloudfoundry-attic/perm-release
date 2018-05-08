@@ -58,6 +58,17 @@ func (m *Migrator) Migrate(logger lager.Logger, progressLogger *log.Logger, writ
 		wg                sync.WaitGroup
 	)
 
+	if dryRun {
+		progressLogger.Print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+		progressLogger.Print("@  DRY-RUN; ROLE ASSIGNMENTS WILL NOT BE MIGRATED  @")
+		progressLogger.Print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+		defer func() {
+			progressLogger.Print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+			progressLogger.Print("@  DRY-RUN; ROLE ASSIGNMENTS WERE NOT MIGRATED  @")
+			progressLogger.Print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+		}()
+	}
+
 	wg.Add(3)
 
 	go func() {
