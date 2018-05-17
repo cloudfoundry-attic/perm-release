@@ -78,3 +78,8 @@ properties:
   sql.tuning.connection_max_lifetime:
     description: Limit the lifetime in milliseconds of a SQL connection. If set <= 0, the connection may live forever.
     default: 0
+
+  uaa.hostname:
+    description: The public hostname of the UAA.
+  uaa.port:
+    description: The TLS-enabled port of the UAA.
