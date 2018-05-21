@@ -79,6 +79,10 @@ properties:
     description: Limit the lifetime in milliseconds of a SQL connection. If set <= 0, the connection may live forever.
     default: 0
 
+  feature_flags.auth:
+    description: Require auth to the perm service
+    default: false
+
   uaa.hostname:
     description: The public hostname of the UAA.
   uaa.port:
