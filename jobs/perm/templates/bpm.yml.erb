@@ -40,8 +40,11 @@ processes:
     - <%= p('uaa.hostname') %>
     - --uaa-port
     - <%= p('uaa.port') %>
+    <% if_p('feature_flags.auth') do |auth| %>
+      <% if auth %>
     - --require-auth
-    - <%= p('feature_flags.auth') %>
+      <% end %>
+    <% end %>
 
     limits:
       memory: 256M
