@@ -8,6 +8,7 @@ templates:
   tls.crt.erb: config/certs/tls.crt
   tls.key.erb: config/certs/tls.key
   sql_tls_ca.crt.erb: config/certs/sql_tls_ca.crt
+  uaa_ca.crt.erb: config/certs/uaa_ca.crt
 
 packages:
 - perm
@@ -87,3 +88,6 @@ properties:
     description: The public hostname of the UAA.
   uaa.port:
     description: The TLS-enabled port of the UAA.
+  uaa.tls.ca_certs:
+    description: An array of CA certificate(s) for TLS connection to the OAuth2 server. Allows multiple in case of rotation.
+    default: []

@@ -38,6 +38,8 @@ processes:
     - <%= p('log_audit_events') ? "/var/vcap/sys/log/perm/audit.log" : "/dev/null" %>
     - --oauth2-url
     - https://<%= p('uaa.hostname') %>:<%= p('uaa.port') %>
+    - --oauth2-certificate-authority
+    - /var/vcap/jobs/perm/config/certs/uaa_ca.crt
     <% if_p('feature_flags.auth') do |auth| %>
       <% if auth %>
     - --require-auth
