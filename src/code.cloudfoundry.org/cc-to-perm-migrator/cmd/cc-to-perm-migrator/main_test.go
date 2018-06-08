@@ -11,6 +11,7 @@ import (
 	"path"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi/capimodels"
+	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	permgofakes "code.cloudfoundry.org/perm/protos/gen/genfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -141,6 +142,7 @@ var _ = Describe("CCToPermMigrator", func() {
 		BeforeEach(func() {
 			//These handlers are appended in the order in which they are called.
 			//If adding more handlers, make sure they are placed correctly in the set of calls.
+			appendHandler(ccServer, "GET", fmt.Sprintf("/oauth/token%s", retriever.OpenIDConfigurationEndpoint), new(interface{}))
 			appendHandler(ccServer, "POST", "/oauth/token", tokenJSON{
 				AccessToken:  "cool",
 				TokenType:    "whatever",
@@ -217,7 +219,8 @@ var _ = Describe("CCToPermMigrator", func() {
 		})
 
 		AfterEach(func() {
-			os.RemoveAll(tmpDir)
+			err := os.RemoveAll(tmpDir)
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		Context("when the UAA CA certificate is unusable", func() {
@@ -289,6 +292,23 @@ var _ = Describe("CCToPermMigrator", func() {
 
 			It("exits with 1", func() {
 				session := RunCommand()
+				Eventually(session).Should(gexec.Exit(1))
+			})
+		})
+
+		Context("when getting the issuer from the OIDC provider fails", func() {
+			BeforeEach(func() {
+				ccServer.SetHandler(0,
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("/oauth/token%s", retriever.OpenIDConfigurationEndpoint)),
+						ghttp.RespondWithJSONEncoded(http.StatusNotFound, `{}`),
+					),
+				)
+			})
+
+			It("exits with 1", func() {
+				session := RunCommand("--config-file-path", configFilePath)
+				Eventually(session.Out).Should(gbytes.Say("failed-to-get-issuer-from-oidc-provider"))
 				Eventually(session).Should(gexec.Exit(1))
 			})
 		})

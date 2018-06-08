@@ -152,9 +152,15 @@ func main() {
 
 	roleServiceClient := protos.NewRoleServiceClient(permConn)
 
+	oidcIssuer, err := retriever.GetOIDCIssuer(tlsClient, tokenURL.String())
+	if err != nil {
+		logger.Error("failed-to-get-issuer-from-oidc-provider", err)
+		os.Exit(1)
+	}
+
 	pop := populator.NewPopulator(roleServiceClient)
 
-	migrator.NewMigrator(retriever.NewRetriever(ccClient), pop, &reporter.Reporter{}, uaaConfig.TokenURL).
+	migrator.NewMigrator(retriever.NewRetriever(ccClient), pop, &reporter.Reporter{}, oidcIssuer).
 		Migrate(logger, progressLogger, os.Stderr, config.DryRun)
 }
 
