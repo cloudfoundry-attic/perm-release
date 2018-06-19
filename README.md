@@ -8,7 +8,7 @@ NOTE: remove `bosh-lite.yml` and `disable-consul-bosh-lite.yml` to deploy to a r
 
 ### Using `cf-mysql-release`
 ```
-bosh -d cf deploy cf-deployment.yml \
+bosh -d cf deploy cf-deployment/cf-deployment.yml \
   -v system_domain=$SYSTEM_DOMAIN \
   --vars-store deployment-vars.yml \
   -o cf-deployment/operations/experimental/enable-bpm.yml \
@@ -25,7 +25,7 @@ bosh -d cf deploy cf-deployment.yml \
 
 ### Using `pxc-release`
 ```
-bosh -d cf deploy cf-deployment.yml \
+bosh -d cf deploy cf-deployment/cf-deployment.yml \
   -v system_domain=$SYSTEM_DOMAIN \
   --vars-store deployment-vars.yml \
   -o cf-deployment/operations/experimental/enable-bpm.yml \
