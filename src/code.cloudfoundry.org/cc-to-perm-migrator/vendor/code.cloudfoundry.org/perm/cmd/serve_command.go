@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
+	"net/http"
 
 	"strconv"
 
@@ -18,19 +20,25 @@ import (
 	"code.cloudfoundry.org/perm/pkg/api"
 	"code.cloudfoundry.org/perm/pkg/api/db"
 	"code.cloudfoundry.org/perm/pkg/api/logging"
+	"code.cloudfoundry.org/perm/pkg/cryptox"
 	"code.cloudfoundry.org/perm/pkg/ioutilx"
+	"code.cloudfoundry.org/perm/pkg/permauth"
 	"code.cloudfoundry.org/perm/pkg/sqlx"
+	oidc "github.com/coreos/go-oidc"
 )
 
 type ServeCommand struct {
 	Logger            flags.LagerFlag
-	Hostname          string        `long:"listen-hostname" description:"Hostname on which to listen for gRPC traffic" default:"0.0.0.0"`
-	Port              int           `long:"listen-port" description:"Port on which to listen for gRPC traffic" default:"6283"`
-	MaxConnectionIdle time.Duration `long:"max-connection-idle" description:"The amount of time before an idle connection will be closed with a GoAway." default:"10s"`
-	TLSCertificate    string        `long:"tls-certificate" description:"File path of TLS certificate" required:"true"`
-	TLSKey            string        `long:"tls-key" description:"File path of TLS private key" required:"true"`
-	SQL               flags.SQLFlag `group:"SQL" namespace:"sql"`
-	AuditFilePath     string        `long:"audit-file-path" default:""`
+	Hostname          string               `long:"listen-hostname" description:"Hostname on which to listen for gRPC traffic" default:"0.0.0.0"`
+	Port              int                  `long:"listen-port" description:"Port on which to listen for gRPC traffic" default:"6283"`
+	MaxConnectionIdle time.Duration        `long:"max-connection-idle" description:"The amount of time before an idle connection will be closed with a GoAway." default:"10s"`
+	TLSCertificate    string               `long:"tls-certificate" description:"File path of TLS certificate" required:"true"`
+	TLSKey            string               `long:"tls-key" description:"File path of TLS private key" required:"true"`
+	DB                flags.DBFlag         `group:"DB" namespace:"db"`
+	AuditFilePath     string               `long:"audit-file-path" default:""`
+	OAuth2URL         string               `long:"oauth2-url" description:"URL of the OAuth2 provider (only required if '--required-auth' is provided)"`
+	OAuth2CA          ioutilx.FileOrString `long:"oauth2-certificate-authority" description:"the certificate authority of the OAuth2 provider (only required if '--required-auth' is provided)"`
+	RequireAuth       bool                 `long:"require-auth" description:"Require auth"`
 }
 
 func (cmd ServeCommand) Execute([]string) error {
@@ -66,24 +74,6 @@ func (cmd ServeCommand) Execute([]string) error {
 		Certificates: []tls.Certificate{cert},
 	}
 
-	conn, err := cmd.SQL.Connect(context.Background(), logger)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	migrationLogger := logger.Session("verify-migrations")
-	err = sqlx.VerifyAppliedMigrations(
-		context.Background(),
-		migrationLogger,
-		conn,
-		db.MigrationsTableName,
-		db.Migrations,
-	)
-	if err != nil {
-		return err
-	}
-
 	maxConnectionIdle := cmd.MaxConnectionIdle
 	serverOpts := []api.ServerOption{
 		api.WithLogger(logger.Session("grpc-serve")),
@@ -92,7 +82,58 @@ func (cmd ServeCommand) Execute([]string) error {
 		api.WithMaxConnectionIdle(maxConnectionIdle),
 	}
 
-	server := api.NewServer(conn, serverOpts...)
+	if !cmd.DB.IsInMemory() {
+		conn, err := cmd.DB.Connect(context.Background(), logger)
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+
+		migrationLogger := logger.Session("verify-migrations")
+		if err := sqlx.VerifyAppliedMigrations(
+			context.Background(),
+			migrationLogger,
+			conn,
+			db.MigrationsTableName,
+			db.Migrations,
+		); err != nil {
+			return err
+		}
+
+		serverOpts = append(serverOpts, api.WithDBConn(conn))
+	}
+
+	if cmd.RequireAuth {
+		oauthCA, err := cmd.OAuth2CA.Bytes(ioutilx.OS, ioutilx.IOReader)
+		if err != nil {
+			return err
+		}
+
+		oauthCAPool, err := cryptox.NewCertPool(oauthCA)
+		if err != nil {
+			return err
+		}
+
+		tlsClient := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					RootCAs: oauthCAPool,
+				},
+			},
+		}
+		oidcContext := oidc.ClientContext(context.Background(), tlsClient)
+		oidcIssuer, err := permauth.GetOIDCIssuer(tlsClient, fmt.Sprintf("%s/oauth/token", cmd.OAuth2URL))
+		if err != nil {
+			return err
+		}
+		provider, err := oidc.NewProvider(oidcContext, oidcIssuer)
+		if err != nil {
+			return err
+		}
+		serverOpts = append(serverOpts, api.WithOIDCProvider(provider))
+	}
+
+	server := api.NewServer(serverOpts...)
 
 	listenInterface := cmd.Hostname
 	port := cmd.Port

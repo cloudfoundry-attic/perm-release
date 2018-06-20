@@ -14,7 +14,7 @@ import (
 
 	"github.com/onsi/gomega/gexec"
 
-	"code.cloudfoundry.org/perm/protos/gen"
+	"code.cloudfoundry.org/perm/pkg/api/protos"
 )
 
 func TestCcToPermMigrator(t *testing.T) {

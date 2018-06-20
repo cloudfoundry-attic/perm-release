@@ -28,7 +28,7 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/reporter"
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/perm/protos/gen"
+	"code.cloudfoundry.org/perm/pkg/api/protos"
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"

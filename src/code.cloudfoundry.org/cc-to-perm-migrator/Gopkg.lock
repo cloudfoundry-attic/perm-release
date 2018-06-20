@@ -15,10 +15,10 @@
   branch = "master"
   name = "code.cloudfoundry.org/perm"
   packages = [
-    "protos/gen",
-    "protos/gen/genfakes"
+    "pkg/api/protos",
+    "pkg/api/protos/protosfakes"
   ]
-  revision = "879e6c799e3ce8cc470b12a4eba54ec480d1dbc8"
+  revision = "7fcc4cfa4790c7d05555b02347331c751c99d495"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -221,6 +221,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4f45f1d4c3382409c3cb163d3b2af905eb369605821ef718ac56c2b509831fb4"
+  inputs-digest = "caa8627c1fa381849525297af702bcc04625c6b265bce09fd742ea21d95461de"
   solver-name = "gps-cdcl"
   solver-version = 1

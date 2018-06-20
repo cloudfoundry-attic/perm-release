@@ -6,14 +6,11 @@ import (
 
 	"github.com/cactus/go-statsd-client/statsd"
 	flags "github.com/jessevdk/go-flags"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 
 	"code.cloudfoundry.org/lager"
 
+	"crypto/tls"
 	"crypto/x509"
-
-	"context"
 
 	"strconv"
 
@@ -22,7 +19,7 @@ import (
 	cmdflags "code.cloudfoundry.org/perm/cmd/flags"
 	"code.cloudfoundry.org/perm/pkg/ioutilx"
 	"code.cloudfoundry.org/perm/pkg/monitor"
-	"code.cloudfoundry.org/perm/protos/gen"
+	"code.cloudfoundry.org/perm/pkg/perm"
 )
 
 type options struct {
@@ -32,8 +29,9 @@ type options struct {
 
 	Logger cmdflags.LagerFlag
 
-	Interval time.Duration `long:"interval" description:"Frequency with which the probe is issued" default:"5s"`
-	Timeout  time.Duration `long:"timeout" description:"Time after which the probe is considered to have failed" default:"100ms"`
+	Frequency       time.Duration `long:"frequency" description:"Frequency with which the probe is issued" default:"5s"`
+	RequestDuration time.Duration `long:"request-duration" description:"Time after which a request is considered to have failed" default:"100ms"`
+	Timeout         time.Duration `long:"timeout" description:"Time after which the probe will cancel a run" default:"10s"`
 }
 
 type permOptions struct {
@@ -70,7 +68,7 @@ func main() {
 	statsDAddr := net.JoinHostPort(parserOpts.StatsD.Hostname, strconv.Itoa(parserOpts.StatsD.Port))
 	statsDClient, err := statsd.NewBufferedClient(statsDAddr, "", 0, 0)
 	if err != nil {
-		logger.Fatal(failedToConnectToStatsD, err, lager.Data{
+		logger.Error(failedToConnectToStatsD, err, lager.Data{
 			"addr": statsDAddr,
 		})
 		os.Exit(1)
@@ -87,14 +85,14 @@ func main() {
 	for _, certPath := range parserOpts.Perm.CACertificate {
 		caPem, e := certPath.Bytes(ioutilx.InjectableOS{}, ioutilx.InjectableIOReader{})
 		if e != nil {
-			logger.Fatal(failedToReadCertificate, e, lager.Data{
+			logger.Error(failedToReadCertificate, e, lager.Data{
 				"location": certPath,
 			})
 			os.Exit(1)
 		}
 
 		if ok := pool.AppendCertsFromPEM(caPem); !ok {
-			logger.Fatal(failedToAppendCertToPool, e, lager.Data{
+			logger.Error(failedToAppendCertToPool, e, lager.Data{
 				"location": certPath,
 			})
 			os.Exit(1)
@@ -102,28 +100,15 @@ func main() {
 	}
 
 	addr := net.JoinHostPort(parserOpts.Perm.Hostname, strconv.Itoa(parserOpts.Perm.Port))
-	creds := credentials.NewClientTLSFromCert(pool, parserOpts.Perm.Hostname)
-
-	//// Setup GRPC connection
-	g, err := grpc.Dial(addr, grpc.WithTransportCredentials(creds))
+	client, err := perm.Dial(addr, perm.WithTLSConfig(&tls.Config{
+		RootCAs: pool,
+	}))
 	if err != nil {
-		logger.Fatal(failedToGRPCDial, err, lager.Data{
-			"addr": addr,
-		})
-		os.Exit(1)
+		logger.Error(failedToCreatePermClient, err)
 	}
-	defer g.Close()
+	defer client.Close()
 
-	roleServiceClient := protos.NewRoleServiceClient(g)
-	permissionServiceClient := protos.NewPermissionServiceClient(g)
-	//////////////////////
-
-	ctx := context.Background()
-
-	probe := &monitor.Probe{
-		RoleServiceClient:       roleServiceClient,
-		PermissionServiceClient: permissionServiceClient,
-	}
+	probe := monitor.NewProbe(client)
 
 	probeHistogram := monitor.NewThreadSafeHistogram(
 		ProbeHistogramWindow,
@@ -134,5 +119,5 @@ func main() {
 		probeHistogram,
 	}
 
-	RunProbeAtAnInterval(ctx, logger.Session("probe"), probe, statter, parserOpts.Interval, parserOpts.Timeout)
+	RunProbeWithFrequency(logger.Session("probe"), probe, statter, parserOpts.Frequency, parserOpts.RequestDuration, parserOpts.Timeout)
 }

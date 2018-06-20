@@ -9,8 +9,8 @@ import (
 	. "code.cloudfoundry.org/cc-to-perm-migrator/migrator/populator"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/perm/protos/gen"
-	permgofakes "code.cloudfoundry.org/perm/protos/gen/genfakes"
+	"code.cloudfoundry.org/perm/pkg/api/protos"
+	permgofakes "code.cloudfoundry.org/perm/pkg/api/protos/protosfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

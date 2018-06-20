@@ -4,6 +4,7 @@ package cloud_foundry.perm.protos;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "actor.proto";
+import "group.proto";
 import "permission.proto";
 import "role.proto";
 
@@ -14,12 +15,13 @@ option (gogoproto.unmarshaler_all) = true;
 
 service RoleService {
   rpc CreateRole (CreateRoleRequest) returns (CreateRoleResponse);
-  rpc GetRole (GetRoleRequest) returns (GetRoleResponse);
   rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleResponse);
   rpc AssignRole (AssignRoleRequest) returns (AssignRoleResponse);
+  rpc AssignRoleToGroup (AssignRoleToGroupRequest) returns (AssignRoleToGroupResponse);
   rpc UnassignRole (UnassignRoleRequest) returns (UnassignRoleResponse);
+  rpc UnassignRoleFromGroup (UnassignRoleFromGroupRequest) returns (UnassignRoleFromGroupResponse);
   rpc HasRole (HasRoleRequest) returns (HasRoleResponse);
-  rpc ListActorRoles (ListActorRolesRequest) returns (ListActorRolesResponse);
+  rpc HasRoleForGroup (HasRoleForGroupRequest) returns (HasRoleForGroupResponse);
   rpc ListRolePermissions (ListRolePermissionsRequest) returns (ListRolePermissionsResponse);
 }
 
@@ -29,14 +31,6 @@ message CreateRoleRequest {
 }
 
 message CreateRoleResponse {
-  Role role = 1;
-}
-
-message GetRoleRequest {
-  string name = 1;
-}
-
-message GetRoleResponse {
   Role role = 1;
 }
 
@@ -53,6 +47,22 @@ message AssignRoleRequest {
 }
 
 message AssignRoleResponse {
+}
+
+message AssignRoleToGroupRequest {
+  Group group = 1;
+  string role_name = 2;
+}
+
+message AssignRoleToGroupResponse {
+}
+
+message UnassignRoleFromGroupRequest {
+  Group group = 1;
+  string role_name = 2;
+}
+
+message UnassignRoleFromGroupResponse {
 }
 
 message UnassignRoleRequest {
@@ -72,16 +82,13 @@ message HasRoleResponse {
   bool has_role = 1;
 }
 
-message ListActorRolesRequest {
-  reserved 1; // for pagination
-
-  Actor actor = 2;
+message HasRoleForGroupRequest {
+  Group group = 1;
+  string role_name = 2;
 }
 
-message ListActorRolesResponse {
-  reserved 1; // for pagination metadata
-
-  repeated Role roles = 2;
+message HasRoleForGroupResponse {
+  bool has_role = 1;
 }
 
 message ListRolePermissionsRequest {
