@@ -43,8 +43,4 @@
 
 [[constraint]]
   branch = "master"
-  name = "code.cloudfoundry.org/perm-go"
-
-[[constraint]]
-  branch = "master"
   name = "code.cloudfoundry.org/perm"
