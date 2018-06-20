@@ -36,13 +36,13 @@ processes:
     - <%= p('sql.tuning.connection_max_lifetime') %>
     - --audit-file-path
     - <%= p('log_audit_events') ? "/var/vcap/sys/log/perm/audit.log" : "/dev/null" %>
+    <% if_p('feature_flags.auth') do |auth| %>
+      <% if auth %>
+    - --require-auth
     - --oauth2-url
     - https://<%= p('uaa.hostname') %>:<%= p('uaa.port') %>
     - --oauth2-certificate-authority
     - /var/vcap/jobs/perm/config/certs/uaa_ca.crt
-    <% if_p('feature_flags.auth') do |auth| %>
-      <% if auth %>
-    - --require-auth
       <% end %>
     <% end %>
 

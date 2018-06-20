@@ -86,8 +86,10 @@ properties:
 
   uaa.hostname:
     description: The public hostname of the UAA.
+    default: uaa.service.cf.internal
   uaa.port:
     description: The TLS-enabled port of the UAA.
+    default: 8443
   uaa.tls.ca_certs:
     description: An array of CA certificate(s) for TLS connection to the OAuth2 server. Allows multiple in case of rotation.
     default: []
