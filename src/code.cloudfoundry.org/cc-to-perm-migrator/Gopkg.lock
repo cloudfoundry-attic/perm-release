@@ -16,9 +16,17 @@
   name = "code.cloudfoundry.org/perm"
   packages = [
     "pkg/api/protos",
-    "pkg/api/protos/protosfakes"
+    "pkg/api/protos/protosfakes",
+    "pkg/perm",
+    "pkg/permauth"
   ]
   revision = "7fcc4cfa4790c7d05555b02347331c751c99d495"
+
+[[projects]]
+  branch = "v2"
+  name = "github.com/coreos/go-oidc"
+  packages = ["."]
+  revision = "8ae1da518bd4d9d5a5909090a184af30f336436d"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -94,6 +102,24 @@
   ]
   revision = "c893efa28eb45626cdaa76c9f653b62488858837"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pquerna/cachecontrol"
+  packages = [
+    ".",
+    "cacheobject"
+  ]
+  revision = "1555304b9b35fdd2b425bccf1a5613677705e7d0"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = [
+    "ed25519",
+    "ed25519/internal/edwards25519"
+  ]
+  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
 [[projects]]
   branch = "master"
@@ -213,6 +239,16 @@
   version = "v1.10.0"
 
 [[projects]]
+  name = "gopkg.in/square/go-jose.v2"
+  packages = [
+    ".",
+    "cipher",
+    "json"
+  ]
+  revision = "76dd09796242edb5b897103a75df2645c028c960"
+  version = "v2.1.6"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -221,6 +257,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "caa8627c1fa381849525297af702bcc04625c6b265bce09fd742ea21d95461de"
+  inputs-digest = "60bafc34f3e38c9a94e8432ca228149036952b6ac268f91ce3c3cec832bba6fe"
   solver-name = "gps-cdcl"
   solver-version = 1
