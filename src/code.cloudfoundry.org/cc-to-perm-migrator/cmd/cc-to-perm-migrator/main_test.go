@@ -11,7 +11,6 @@ import (
 	"path"
 
 	"code.cloudfoundry.org/cc-to-perm-migrator/capi/capimodels"
-	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	permgofakes "code.cloudfoundry.org/perm/pkg/api/protos/protosfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -23,8 +22,8 @@ import (
 	"github.com/onsi/gomega/ghttp"
 )
 
+const OpenIDConfigurationEndpoint = "/.well-known/openid-configuration"
 const configTemplate = `log_level: info
-
 uaa:
   url: %s
   ca_cert_path: %s
@@ -142,7 +141,7 @@ var _ = Describe("CCToPermMigrator", func() {
 		BeforeEach(func() {
 			//These handlers are appended in the order in which they are called.
 			//If adding more handlers, make sure they are placed correctly in the set of calls.
-			appendHandler(ccServer, "GET", fmt.Sprintf("/oauth/token%s", retriever.OpenIDConfigurationEndpoint), new(interface{}))
+			appendHandler(ccServer, "GET", fmt.Sprintf("/oauth/token%s", OpenIDConfigurationEndpoint), new(interface{}))
 			appendHandler(ccServer, "POST", "/oauth/token", tokenJSON{
 				AccessToken:  "cool",
 				TokenType:    "whatever",
@@ -300,7 +299,7 @@ var _ = Describe("CCToPermMigrator", func() {
 			BeforeEach(func() {
 				ccServer.SetHandler(0,
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("/oauth/token%s", retriever.OpenIDConfigurationEndpoint)),
+						ghttp.VerifyRequest("GET", fmt.Sprintf("/oauth/token%s", OpenIDConfigurationEndpoint)),
 						ghttp.RespondWithJSONEncoded(http.StatusNotFound, `{}`),
 					),
 				)

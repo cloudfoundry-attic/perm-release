@@ -29,6 +29,7 @@ import (
 	"code.cloudfoundry.org/cc-to-perm-migrator/migrator/retriever"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/perm/pkg/api/protos"
+	"code.cloudfoundry.org/perm/pkg/permauth"
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -152,7 +153,7 @@ func main() {
 
 	roleServiceClient := protos.NewRoleServiceClient(permConn)
 
-	oidcIssuer, err := retriever.GetOIDCIssuer(tlsClient, tokenURL.String())
+	oidcIssuer, err := permauth.GetOIDCIssuer(tlsClient, tokenURL.String())
 	if err != nil {
 		logger.Error("failed-to-get-issuer-from-oidc-provider", err)
 		os.Exit(1)
