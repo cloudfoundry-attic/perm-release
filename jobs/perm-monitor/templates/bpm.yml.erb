@@ -21,6 +21,19 @@ processes:
     - <%= p('probe.request_duration') %>
     - --timeout
     - <%= p('probe.timeout') %>
+    <% if_p('auth.required') do |required| %>
+      <% if required %>
+    - --require-auth
+    - --perm-client-id
+    - <%= p('auth.client_id') %>
+    - --perm-client-secret
+    - <%= p('auth.client_secret') %>
+    - --perm-token-url
+    - https://<%= p('auth.hostname') %>:<%= p('auth.port') %>/oauth/token
+    - --perm-ca-certificate
+    - /var/vcap/jobs/perm-monitor/config/certs/uaa_ca.crt
+      <% end %>
+    <% end %>
 
     limits:
       memory: 256M

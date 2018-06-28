@@ -3,6 +3,7 @@ name: perm-monitor
 templates:
   bpm.yml.erb: config/bpm.yml
   perm_ca.crt.erb: config/certs/perm_ca.crt
+  uaa_ca.crt.erb: config/certs/uaa_ca.crt
   perm-monitor: bin/perm-monitor
 
 packages:
@@ -16,6 +17,20 @@ properties:
   log_level:
     description: The log level for the Perm monitor.
     default: info
+
+  auth.required:
+    description: "Whether or not auth is required"
+    default: false
+  auth.client_id:
+    description: "The client ID used to authenticate"
+  auth.client_secret:
+    description: "The client secret used to authenticate"
+  auth.hostname:
+    description: "The hostname of the UAA server that generates tokens for the client"
+  auth.port:
+    description: "The port of the UAA server that generates tokens for the client"
+  auth.ca_cert:
+    description: "The certificate authority used by UAA"
 
   perm.hostname:
     description: "Hostname used to resolve the address of Perm"
