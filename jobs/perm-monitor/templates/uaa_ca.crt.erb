@@ -1,1 +1,5 @@
-<%= p('auth.ca_cert') %>
+<% if_p('auth.required') do |required| %>
+  <% if required %>
+    <%= p('auth.ca_cert') %>
+  <% end %>
+<% end %>
