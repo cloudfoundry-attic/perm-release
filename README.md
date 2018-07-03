@@ -15,10 +15,10 @@ bosh -d cf deploy cf-deployment/cf-deployment.yml \
   -o cf-deployment/operations/experimental/skip-consul-cell-registrations.yml \
   -o cf-deployment/operations/experimental/skip-consul-locks.yml \
   -o cf-deployment/operations/experimental/use-bosh-dns.yml \
+  -o cf-deployment/operations/use-compiled-releases.yml \
   -o cf-deployment/operations/experimental/disable-consul.yml \
   -o cf-deployment/operations/bosh-lite.yml \
   -o cf-deployment/operations/experimental/disable-consul-bosh-lite.yml \
-  -o cf-deployment/operations/use-compiled-releases.yml \
   -o cf-deployment/operations/experimental/enable-mysql-tls.yml \
   -o cf-deployment/operations/experimental/perm-service.yml
 ```
@@ -32,10 +32,10 @@ bosh -d cf deploy cf-deployment/cf-deployment.yml \
   -o cf-deployment/operations/experimental/skip-consul-cell-registrations.yml \
   -o cf-deployment/operations/experimental/skip-consul-locks.yml \
   -o cf-deployment/operations/experimental/use-bosh-dns.yml \
+  -o cf-deployment/operations/use-compiled-releases.yml \
   -o cf-deployment/operations/experimental/disable-consul.yml \
   -o cf-deployment/operations/bosh-lite.yml \
   -o cf-deployment/operations/experimental/disable-consul-bosh-lite.yml \
-  -o cf-deployment/operations/use-compiled-releases.yml \
   -o cf-deployment/operations/experimental/perm-service.yml \
   -o cf-deployment/operations/experimental/use-pxc.yml \
   -o cf-deployment/operations/experimental/perm-service-with-pxc-release.yml
