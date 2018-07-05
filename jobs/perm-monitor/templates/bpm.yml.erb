@@ -23,7 +23,7 @@ processes:
     - <%= p('probe.timeout') %>
     <% if_p('auth.required') do |required| %>
       <% if required %>
-    - --require-auth
+    - --perm-require-auth
     - --perm-client-id
     - <%= p('auth.client_id') %>
     - --perm-client-secret
