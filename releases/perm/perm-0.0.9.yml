@@ -1,0 +1,49 @@
+name: perm
+version: 0.0.9
+commit_hash: 8cb6eac
+uncommitted_changes: false
+jobs:
+- name: cc-to-perm-migrator
+  version: f66591539b015114e1176063491a99f6ea68f3e8c644ff2c2d10d36e0bbba842
+  fingerprint: f66591539b015114e1176063491a99f6ea68f3e8c644ff2c2d10d36e0bbba842
+  sha1: sha256:9e70dc11a5fc372191b027752e368ae8a9006b507a58458034efea49719f3efd
+- name: perm
+  version: 89e677b5af348a30e907d008a42d3b226a3c7e756f74719fab333b5900569e60
+  fingerprint: 89e677b5af348a30e907d008a42d3b226a3c7e756f74719fab333b5900569e60
+  sha1: sha256:93bae96ba9672ce4efa72817fd8d8f358cb0c41b5714405b6b680ab81ec489f6
+- name: perm-drop-db
+  version: 0c52c6cd9ab43ce4985bedde8a560affd91037b674bd1b1bacf2a9fcaede34e6
+  fingerprint: 0c52c6cd9ab43ce4985bedde8a560affd91037b674bd1b1bacf2a9fcaede34e6
+  sha1: sha256:95e3951269088a17d24447d41c8e8d52a4cb85087751ffb459734583c73bf601
+- name: perm-monitor
+  version: eb5c306c65027c8831fac963885b8270fda95067443a112787ab71fc48df160e
+  fingerprint: eb5c306c65027c8831fac963885b8270fda95067443a112787ab71fc48df160e
+  sha1: sha256:7030d0cf6f320c832c7ddfe90a401be9ea8c07b8010438242f67039f29842740
+packages:
+- name: cc-to-perm-migrator
+  version: fecbe57981fe0fa13bc1dd4b8d3cde9333ec1974fad68e1b4155ac9a0872013a
+  fingerprint: fecbe57981fe0fa13bc1dd4b8d3cde9333ec1974fad68e1b4155ac9a0872013a
+  sha1: sha256:94acd25d29e15168a6eee956d65a7d04c6e5955f8d7ea9f687b982b93c6ed38b
+  dependencies:
+  - golang-1.9-linux
+- name: golang-1.9-linux
+  version: 8d6c67abda8684ce454f0bc74050a213456573ff
+  fingerprint: 8d6c67abda8684ce454f0bc74050a213456573ff
+  sha1: e9dd8e92accad2091d9f19d6ffabc8e019e58f6b
+  dependencies: []
+- name: perm
+  version: c33cf3372536cfc1cb9d2984a8781258c55ab5aa178f05ab524d62da0767afce
+  fingerprint: c33cf3372536cfc1cb9d2984a8781258c55ab5aa178f05ab524d62da0767afce
+  sha1: sha256:c7a08dc6d6d53ad01b6950f913528c2a38701ec30a80d0584d8e650c7bed9a30
+  dependencies:
+  - golang-1.9-linux
+- name: perm-monitor
+  version: 3c50c2bafa04f408be33a33a6ed7037766a9233e8b8920a6654a7730b106cb37
+  fingerprint: 3c50c2bafa04f408be33a33a6ed7037766a9233e8b8920a6654a7730b106cb37
+  sha1: sha256:24fa2f0ef2b9b8a4218fd7b9be04088e37088e9c573fbe021bb37d506958d304
+  dependencies:
+  - golang-1.9-linux
+license:
+  version: 0757c712c99c8830ffc146fe523c276739d2e54e0e03209a9428ae80751eb054
+  fingerprint: 0757c712c99c8830ffc146fe523c276739d2e54e0e03209a9428ae80751eb054
+  sha1: sha256:7d396bf3e8f25023d54382e1c78889cb1a1e0337a1d43fbd8bd6bca3f574b8c7
