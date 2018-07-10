@@ -4,6 +4,10 @@ processes:
 
     args:
     - serve
+    - --statsd-hostname
+    - localhost
+    - --statsd-port
+    - 8125
     - --listen-hostname
     - 0.0.0.0
     - --listen-port
