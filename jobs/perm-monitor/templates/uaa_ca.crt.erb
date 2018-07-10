@@ -1,5 +1,3 @@
-<% if_p('auth.required') do |required| %>
-  <% if required %>
-<%= p('auth.ca_cert') %>
-  <% end %>
+<% p("auth.ca_certs", []).each do |ca| %>
+<%= ca %>
 <% end %>

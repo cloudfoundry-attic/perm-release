@@ -15,28 +15,29 @@ consumes:
 
 properties:
   log_level:
-    description: The log level for the Perm monitor.
+    description: Log level for the Perm monitor.
     default: info
 
   auth.required:
-    description: "Whether or not auth is required"
+    description: "Optionally configure the client to authenticate/authorize via OAuth"
     default: false
   auth.client_id:
-    description: "The client ID used to authenticate"
+    description: "Client ID used to authenticate/authorize"
   auth.client_secret:
-    description: "The client secret used to authenticate"
+    description: "Client secret used to authenticate/authorize"
   auth.hostname:
-    description: "The hostname of the UAA server that generates tokens for the client"
+    description: "Hostname of the auth server"
   auth.port:
-    description: "The port of the UAA server that generates tokens for the client"
-  auth.ca_cert:
-    description: "The certificate authority used by UAA"
+    description: "Port of the auth server"
+  auth.ca_certs:
+    description: "A list of certificate authorities used by the auth server, allows multiple in case of rotation"
+    default: []
 
   perm.hostname:
-    description: "Hostname used to resolve the address of Perm"
+    description: "Hostname of the Perm server"
     default: "perm.service.cf.internal"
   perm.ca_certs:
-    description: "An array of certificate authorities being used by Perm. Allows multiple in case of rotation."
+    description: "A list of certificate authorities used by Perm, allows multiple in case of rotation"
     default: []
 
   probe.frequency:
@@ -50,8 +51,8 @@ properties:
     default: 10s
 
   statsd.hostname:
-    description: "Hostname used to connect to StatsD server"
+    description: "Hostname of the StatsD server"
     default: "localhost"
   statsd.port:
-    description: "Port used to connect to StatsD server"
+    description: "Port of the StatsD server"
     default: 8125
