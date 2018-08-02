@@ -41,14 +41,17 @@ properties:
     default: []
 
   probe.frequency:
-    description: "Frequency with which the probe is issued"
-    default: 30s
-  probe.request_duration:
-    description: "Acceptable duration for an individual request"
-    default: 100ms
+    description: "The amount of time between probe runs"
+    default: 5s
   probe.timeout:
-    description: "Time after which the probe will cancel a full run"
+    description: "The amount of time for each API call to complete; if exceeded, the probe will error its current run"
+    default: 1s
+  probe.cleanup_timeout:
+    description: "If a probe run errors, this is the max allowed time for cleanup"
     default: 10s
+  probe.max_latency:
+    description: "If any API call in the current probe run exceeds this value, a latency KPI failure will be recorded"
+    default: 100ms
 
   statsd.hostname:
     description: "Hostname of the StatsD server"

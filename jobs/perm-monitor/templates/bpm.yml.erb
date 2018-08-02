@@ -15,12 +15,14 @@ processes:
     - <%= p('statsd.hostname') %>
     - --statsd-port
     - <%= p('statsd.port') %>
-    - --frequency
+    - --probe-frequency
     - <%= p('probe.frequency') %>
-    - --request-duration
-    - <%= p('probe.request_duration') %>
-    - --timeout
+    - --probe-timeout
     - <%= p('probe.timeout') %>
+    - --probe-cleanup-timeout
+    - <%= p('probe.cleanup_timeout') %>
+    - --probe-max-latency
+    - <%= p('probe.max_latency') %>
     <% if_p('auth.required') do |required| %>
       <% if required %>
     - --perm-require-auth
