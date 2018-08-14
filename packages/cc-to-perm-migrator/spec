@@ -2,7 +2,7 @@
 name: cc-to-perm-migrator
 
 dependencies:
-- golang-1.9-linux
+- golang-1-linux
 
 files:
 - code.cloudfoundry.org/**/*.go

@@ -2,7 +2,8 @@
 
 set -eux
 
-source /var/vcap/packages/golang-1.9-linux/bosh/compile.env
+# shellcheck source=/dev/null
+source /var/vcap/packages/golang-1-linux/bosh/compile.env
 
 mkdir -p "${GOPATH}/src"
 cp -a "${PWD}/code.cloudfoundry.org" "${GOPATH}/src/"
