@@ -1,0 +1,49 @@
+name: perm
+version: 0.0.21
+commit_hash: a121d71
+uncommitted_changes: false
+jobs:
+- name: cc-to-perm-migrator
+  version: f66591539b015114e1176063491a99f6ea68f3e8c644ff2c2d10d36e0bbba842
+  fingerprint: f66591539b015114e1176063491a99f6ea68f3e8c644ff2c2d10d36e0bbba842
+  sha1: sha256:9e70dc11a5fc372191b027752e368ae8a9006b507a58458034efea49719f3efd
+- name: perm
+  version: 42236225460d4d6876a83495783e792390617a20b7909cab6c58557dba3ffd4d
+  fingerprint: 42236225460d4d6876a83495783e792390617a20b7909cab6c58557dba3ffd4d
+  sha1: sha256:5479e7c34ce33a4b29aaf06371d28966a9a1da12636cc0302b305fcc62563dad
+- name: perm-drop-db
+  version: 0c52c6cd9ab43ce4985bedde8a560affd91037b674bd1b1bacf2a9fcaede34e6
+  fingerprint: 0c52c6cd9ab43ce4985bedde8a560affd91037b674bd1b1bacf2a9fcaede34e6
+  sha1: sha256:95e3951269088a17d24447d41c8e8d52a4cb85087751ffb459734583c73bf601
+- name: perm-monitor
+  version: e2bb3174a915e9e0b7ce108ad01a183034306dbbbe1faaeebf7e8f0d447d1df6
+  fingerprint: e2bb3174a915e9e0b7ce108ad01a183034306dbbbe1faaeebf7e8f0d447d1df6
+  sha1: sha256:66efb0fd994608e39a7dd75b4ad07568ac3d6918b142d70e939b4c239c04d7e5
+packages:
+- name: cc-to-perm-migrator
+  version: 3243d4eb5ff64adfb0aece8374f854906ccf3400bd84dc983d2865ca9c0b41a6
+  fingerprint: 3243d4eb5ff64adfb0aece8374f854906ccf3400bd84dc983d2865ca9c0b41a6
+  sha1: sha256:cc5691b55b45824d9e5da437c432e558d0945f72b33cfc2dd4b8f1b3efcbe46d
+  dependencies:
+  - golang-1-linux
+- name: golang-1-linux
+  version: d55c618ac63dfdf4ac457346fb325fb2b04884af
+  fingerprint: d55c618ac63dfdf4ac457346fb325fb2b04884af
+  sha1: a41d085750f5cd6f785d02efe752f3708174224e
+  dependencies: []
+- name: perm
+  version: 4320f0a17fdc265b51b6aac43bc66698690ad40da8caf29543333e5eca27a328
+  fingerprint: 4320f0a17fdc265b51b6aac43bc66698690ad40da8caf29543333e5eca27a328
+  sha1: sha256:dc3fcd57f2f511f09b838aa1976c31dc2d46805c9b6d71c1184643edc8f6cfc3
+  dependencies:
+  - golang-1-linux
+- name: perm-monitor
+  version: 0553f9c32fc1b236b504996f3803b5bdbae71b5dabdf2ff5c781be2520db8d14
+  fingerprint: 0553f9c32fc1b236b504996f3803b5bdbae71b5dabdf2ff5c781be2520db8d14
+  sha1: sha256:ccf02a3d558326167426921b0f0027dc89e8938be4efce4ad6b1d31d6a2328f5
+  dependencies:
+  - golang-1-linux
+license:
+  version: 0757c712c99c8830ffc146fe523c276739d2e54e0e03209a9428ae80751eb054
+  fingerprint: 0757c712c99c8830ffc146fe523c276739d2e54e0e03209a9428ae80751eb054
+  sha1: sha256:7d396bf3e8f25023d54382e1c78889cb1a1e0337a1d43fbd8bd6bca3f574b8c7
