@@ -11,11 +11,11 @@ NOTE: remove `bosh-lite.yml` and `disable-consul-bosh-lite.yml` to deploy to a r
 bosh -d cf deploy cf-deployment/cf-deployment.yml \
   -v system_domain=$SYSTEM_DOMAIN \
   --vars-store deployment-vars.yml \
+  -o cf-deployment/operations/experimental/use-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/enable-bpm.yml \
   -o cf-deployment/operations/experimental/skip-consul-cell-registrations.yml \
   -o cf-deployment/operations/experimental/skip-consul-locks.yml \
-  -o cf-deployment/operations/experimental/use-bosh-dns.yml \
-  -o cf-deployment/operations/use-compiled-releases.yml \
+  -o cf-deployment/operations/use-compiled-releases-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/disable-consul.yml \
   -o cf-deployment/operations/bosh-lite.yml \
   -o cf-deployment/operations/experimental/disable-consul-bosh-lite.yml \
@@ -28,11 +28,11 @@ bosh -d cf deploy cf-deployment/cf-deployment.yml \
 bosh -d cf deploy cf-deployment/cf-deployment.yml \
   -v system_domain=$SYSTEM_DOMAIN \
   --vars-store deployment-vars.yml \
+  -o cf-deployment/operations/experimental/use-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/enable-bpm.yml \
   -o cf-deployment/operations/experimental/skip-consul-cell-registrations.yml \
   -o cf-deployment/operations/experimental/skip-consul-locks.yml \
-  -o cf-deployment/operations/experimental/use-bosh-dns.yml \
-  -o cf-deployment/operations/use-compiled-releases.yml \
+  -o cf-deployment/operations/use-compiled-releases-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/disable-consul.yml \
   -o cf-deployment/operations/bosh-lite.yml \
   -o cf-deployment/operations/experimental/disable-consul-bosh-lite.yml \
