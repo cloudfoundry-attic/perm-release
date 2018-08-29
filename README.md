@@ -13,8 +13,6 @@ bosh -d cf deploy cf-deployment/cf-deployment.yml \
   --vars-store deployment-vars.yml \
   -o cf-deployment/operations/experimental/use-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/enable-bpm.yml \
-  -o cf-deployment/operations/experimental/skip-consul-cell-registrations.yml \
-  -o cf-deployment/operations/experimental/skip-consul-locks.yml \
   -o cf-deployment/operations/use-compiled-releases-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/disable-consul.yml \
   -o cf-deployment/operations/bosh-lite.yml \
@@ -30,8 +28,6 @@ bosh -d cf deploy cf-deployment/cf-deployment.yml \
   --vars-store deployment-vars.yml \
   -o cf-deployment/operations/experimental/use-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/enable-bpm.yml \
-  -o cf-deployment/operations/experimental/skip-consul-cell-registrations.yml \
-  -o cf-deployment/operations/experimental/skip-consul-locks.yml \
   -o cf-deployment/operations/use-compiled-releases-xenial-stemcell.yml \
   -o cf-deployment/operations/experimental/disable-consul.yml \
   -o cf-deployment/operations/bosh-lite.yml \
