@@ -1,0 +1,15 @@
+---
+name: bbr-permlock
+
+description: "This job contain the lock and unlock contracts with backup-and-restore. Lock will stop the perm service and unlock will start the perm service. It needs to be collocated on the perm instances"
+
+templates:
+  backup-pre-lock.sh.erb: bin/bbr/pre-backup-lock
+  backup-post-unlock.sh.erb: bin/bbr/post-backup-unlock
+  restore-pre-lock.sh.erb: bin/bbr/pre-restore-lock
+  restore-post-unlock.sh.erb: bin/bbr/post-restore-unlock
+
+properties:
+  release_level_backup:
+    default: false
+    description: "Use newer bbr scripts which are split by release"

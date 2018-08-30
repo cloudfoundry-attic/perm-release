@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+<% if p('release_level_backup') %>
+set -ex
+
+/var/vcap/bosh/bin/monit stop perm
+# wait for job to stop
+<% else %>
+echo "script deactivated due to release_level_backup being set to FALSE\n"
+<% end %>
