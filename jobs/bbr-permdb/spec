@@ -1,0 +1,26 @@
+---
+name: bbr-permdb
+
+description: "This job will be collocated with the BBR SDK release on the backup-restore instance."
+
+templates:
+  config.json.erb: config/config.json
+  backup.sh.erb: bin/bbr/backup
+  restore.sh.erb: bin/bbr/restore
+
+properties:
+  database.name:
+    description: "Name of the database"
+  database.user:
+    description: "User seeded on the database for my release"
+  database.password:
+    description: "Password seeded on the database for my release"
+  database.host:
+    description: "Host of the database server"
+  database.port:
+    description: "Port of the database server"
+  database.scheme:
+    description: "We support MySQL or Postgres"
+  release_level_backup:
+    default: false
+    description: "Use newer bbr scripts which are split by release"
