@@ -1,0 +1,10 @@
+processes:
+- name: cc-to-perm-migrator
+  executable: /var/vcap/packages/cc-to-perm-migrator/bin/cc-to-perm-migrator
+  args:
+  - --config-file-path
+  - /var/vcap/jobs/cc-to-perm-migrator/config/cc-to-perm-migrator.yml
+  limits:
+    memory: 256M
+    processes: 100
+    open_files: 524

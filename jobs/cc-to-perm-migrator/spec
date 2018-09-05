@@ -2,11 +2,12 @@
 name: cc-to-perm-migrator
 
 templates:
+  bpm.yml.erb: config/bpm.yml
   uaa-ca.crt: config/certs/uaa-ca.crt
   cc-ca.crt: config/certs/cc-ca.crt
   perm-ca.crt.erb: config/certs/perm-ca.crt
-  cc-to-perm-migrator.yml: config/cc-to-perm-migrator.yml
-  run: bin/run
+  cc-to-perm-migrator.yml.erb: config/cc-to-perm-migrator.yml
+  run.sh: bin/run
 
 packages:
 - cc-to-perm-migrator
@@ -27,31 +28,24 @@ properties:
 
   uaa.hostname:
     description: The public hostname of the UAA.
-
   uaa.port:
     description: The TLS-enabled port of the UAA.
-
   uaa.ca_certs:
     description: An array of certificate authorities being used by UAA. Allows multiple in case of rotation.
     default: []
 
   cloud_controller.hostname:
     description: The public address of the Cloud Controller API.
-
   cloud_controller.port:
     description: The TLS-enabled port of the Cloud Controller API.
-
   cloud_controller.client_id:
     description: The ID for the UAA client used to connect to the Cloud Controller API.
-
   cloud_controller.client_secret:
     description: The secret for the UAA client used to connect to the Cloud Controller API
-
   cloud_controller.client_scopes:
     description: The scopes to request for the UAA client used to connect to the Cloud Controller API.
     example:
     - cloud_controller.admin_read_only
-
   cloud_controller.ca_certs:
     description: An array of certificate authorities being used by CC. Allows multiple in case of rotation.
     default: []
