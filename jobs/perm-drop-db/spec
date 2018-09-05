@@ -2,7 +2,8 @@
 name: perm-drop-db
 
 templates:
-  perm-drop-db.erb: bin/run
+  bpm.yml.erb: config/bpm.yml
+  run.sh: bin/run
 
 packages:
 - perm
@@ -15,6 +16,7 @@ properties:
   log_level:
     description: "The log level for the errand."
     default: info
+
   sql.db.driver:
     description: "Database driver to use for SQL backend (e.g. mysql, postgres)"
   sql.db.host:
