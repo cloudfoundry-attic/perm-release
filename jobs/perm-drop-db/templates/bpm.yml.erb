@@ -1,48 +1,6 @@
 processes:
-- name: perm-migrate-down
-  executable: /var/vcap/packages/perm/bin/perm
-  args:
-  - migrate
-  - down
-  - --all
-  - --log-level
-  - <%= p('log_level') %>
-  - --db-driver
-  - <%= p('sql.db.driver') %>
-  - --db-host
-  - <%= p('sql.db.host') %>
-  - --db-port
-  - <%= p('sql.db.port') %>
-  - --db-schema
-  - <%= p('sql.db.schema') %>
-  - --db-username
-  - <%= p('sql.db.username') %>
-  - --db-password
-  - <%= p('sql.db.password') %>
-  limits:
-    memory: 256M
-    processes: 100
-    open_files: 524
-
-- name: perm-migrate-up
-  executable: /var/vcap/packages/perm/bin/perm
-  args:
-  - migrate
-  - up
-  - --log-level
-  - <%= p('log_level') %>
-  - --db-driver
-  - <%= p('sql.db.driver') %>
-  - --db-host
-  - <%= p('sql.db.host') %>
-  - --db-port
-  - <%= p('sql.db.port') %>
-  - --db-schema
-  - <%= p('sql.db.schema') %>
-  - --db-username
-  - <%= p('sql.db.username') %>
-  - --db-password
-  - <%= p('sql.db.password') %>
+- name: perm-drop-db
+  executable: /var/vcap/jobs/perm-drop-db/bin/perm-drop-db
   limits:
     memory: 256M
     processes: 100

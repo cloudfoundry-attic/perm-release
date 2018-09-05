@@ -3,6 +3,7 @@ name: perm-drop-db
 
 templates:
   bpm.yml.erb: config/bpm.yml
+  perm-drop-db.sh.erb: bin/perm-drop-db
   run.sh: bin/run
 
 packages:

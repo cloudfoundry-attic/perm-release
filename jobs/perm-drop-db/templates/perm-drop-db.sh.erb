@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -eu
+
+MIGRATOR_OPTS="
+  --log-level <%= p('log_level') %>
+  --db-driver <%= p('sql.db.driver') %>
+  --db-host <%= p('sql.db.host') %>
+  --db-port <%= p('sql.db.port') %>
+  --db-schema <%= p('sql.db.schema') %>
+  --db-username <%= p('sql.db.username') %>
+  --db-password <%= p('sql.db.password') %>
+"
+
+/var/vcap/packages/perm/bin/perm migrate down \
+  --all \
+  ${MIGRATOR_OPTS}
+
+/var/vcap/packages/perm/bin/perm migrate up \
+  ${MIGRATOR_OPTS}
