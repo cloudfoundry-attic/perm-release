@@ -4,19 +4,19 @@ processes:
 
     args:
     - serve
-    - --statsd-hostname
+    - --statsd-host
     - localhost
     - --statsd-port
     - 8125
-    - --listen-hostname
+    - --host
     - 0.0.0.0
-    - --listen-port
+    - --port
     - <%= p('port') %>
     - --max-connection-idle
     - <%= p('max_connection_idle_time') %>
     - --log-level
     - <%= p('log_level') %>
-    - --tls-certificate
+    - --tls-cert
     - /var/vcap/jobs/perm/config/certs/tls.crt
     - --tls-key
     - /var/vcap/jobs/perm/config/certs/tls.key
@@ -45,7 +45,7 @@ processes:
     - --require-auth
     - --oauth2-url
     - https://<%= p('uaa.hostname') %>:<%= p('uaa.port') %>
-    - --oauth2-certificate-authority
+    - --oauth2-ca
     - /var/vcap/jobs/perm/config/certs/uaa_ca.crt
       <% end %>
     <% end %>
