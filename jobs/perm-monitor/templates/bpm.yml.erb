@@ -9,8 +9,8 @@ processes:
     - <%= p('perm.hostname') %>
     - --perm-port
     - <%= link('perm').p('port') %>
-    - --perm-ca-certificate
-    - /var/vcap/jobs/perm-monitor/config/certs/perm_ca.crt
+    - --perm-tls-ca
+    - /var/vcap/jobs/perm-monitor/config/certs/ca.crt
     - --statsd-host
     - <%= p('statsd.hostname') %>
     - --statsd-port
@@ -32,8 +32,6 @@ processes:
     - <%= p('auth.client_secret') %>
     - --perm-token-url
     - https://<%= p('auth.hostname') %>:<%= p('auth.port') %>/oauth/token
-    - --perm-oauth2-ca
-    - /var/vcap/jobs/perm-monitor/config/certs/uaa_ca.crt
       <% end %>
     <% end %>
 
