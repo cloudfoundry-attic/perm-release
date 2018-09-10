@@ -77,7 +77,8 @@ properties:
     default: []
 
   sql.tuning.connection_max_lifetime:
-    description: Limit the lifetime in milliseconds of a SQL connection. If set <= 0, the connection may live forever.
+    description: Limit the lifetime of a SQL connection. If set <= 0, the connection may live forever.
+    example: 10s
     default: 0
 
   feature_flags.auth:
